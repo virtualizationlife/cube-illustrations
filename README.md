@@ -84,14 +84,21 @@ export const Scene = () => (
 )
 ```
 
-`SevenCubesScene` starts from a random scatter. On every cycle it generates a new connected
-seven-cell island, creates a random cube queue, and moves only one cube at a time. A turn covers
-one, two, or three cells before the next cube gets its turn.
+`MovingGridScene` occasionally lets a randomly selected encounter follow the main cube for a few
+steps. `FlippingCubeScene` mixes its regular rotations with short rapid face sequences.
+`CenteredCubeScene` remains fixed while translucent groups of one to three slow cubes enter from
+random sides, with some changing direction once before they leave.
+
+`SevenCubesScene` starts from a random scatter. Six cubes gather first; a random late arrival then
+causes the group to reorganize into a connected seven-cell island. A turn covers one, two, or three
+cells before the next cube gets its turn. `VllCubeScene` rises one cell while rotating and replaces
+letters only on the faces hidden from the camera after each turn.
 
 `StructureMorphScene` continuously rearranges sixteen cubes into a random non-repeating form from
-its built-in shape set. `ContinuousQueueScene` advances an evenly spaced queue and brings each
-departing cube back through a faded side entrance as a new arrival. `CrossingFlowsScene` sends
-random cubes across a 10-by-10 grid from both sides; head-on cubes yield through a neighboring lane.
+its built-in shape set, spreading each movement from a random seed cube. `ContinuousQueueScene`
+advances its elements one by one while an early arrival waits beside the occupied tail.
+`CrossingFlowsScene` sends random cubes across a 10-by-10 grid from both sides; head-on cubes yield
+individually, while dense traffic temporarily alternates priority between entire directions.
 
 `LearnedDetourScene` repeatedly adapts when a changing barrier blocks its learned route.
 `MemoryReplayScene` reconstructs a completed journey with moving translucent echoes.

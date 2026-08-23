@@ -8,7 +8,7 @@ The scenes below are listed in the order in which they appear on the illustratio
 
 The main cube remains fixed at the center while the grid moves beneath it in random cardinal directions, creating the impression that the cube is traveling through the world.
 
-Occasionally, another cube appears ahead. It begins invisible and gradually becomes visible as the main cube approaches. The movement pauses briefly when the two cubes meet. As the main cube continues its journey and moves away, the encountered cube fades out and is eventually removed.
+Occasionally, another cube appears ahead. It begins invisible and gradually becomes visible as the main cube approaches. The movement pauses briefly when the two cubes meet. Most encountered cubes remain behind and fade away, but a randomly selected encounter may move behind the main cube and follow it for two, three, or four steps before separating.
 
 **Abstract meaning:** A single entity remains at the center of attention as it moves through the world and encounters other entities along the way.
 
@@ -16,7 +16,7 @@ Occasionally, another cube appears ahead. It begins invisible and gradually beco
 
 **Tags:** `form`, `transformation`
 
-The cube floats one grid cell above the surface and periodically rotates to a new, randomly selected face. It holds each orientation for approximately two seconds, and each rotation takes one second.
+The cube floats one grid cell above the surface and periodically rotates to a new, randomly selected face. Most rotations retain the original one-second movement and two-second hold. Occasionally, the cube rapidly cycles through three to five different faces before stopping on one of them.
 
 When the pointer hovers over the cube, it smoothly grows to 120% of its normal size. It returns to its original size when the pointer leaves.
 
@@ -46,7 +46,7 @@ There is no movement animation in this scene. It is a static composition represe
 
 **Tags:** `identity`, `focus`
 
-A single cube is positioned precisely at the center of the grid and viewed from a 45-degree azimuth. It does not move and serves as the primary, self-contained object of the scene.
+A primary cube remains motionless at the exact center of the grid. At random intervals, a group of one, two, or three translucent cubes enters independently from randomly selected sides of the grid. They move slowly in steps of one, two, or three cells. Most continue across the scene, while some make a single random 90-degree turn and leave through a different side.
 
 **Abstract meaning:** One primary entity stands at the center of attention and represents the foundation of the entire system.
 
@@ -54,9 +54,9 @@ A single cube is positioned precisely at the center of the grid and viewed from 
 
 **Tags:** `relation`, `organization`
 
-Seven cubes begin scattered across a large grid. After a short pause, they move toward the center one at a time and assemble into a compact, connected group.
+Seven cubes begin scattered across a large grid. After a short pause, six randomly selected cubes move toward the center one at a time and assemble into a compact, connected group. The remaining cube arrives late and waits beside them. The existing group then rearranges itself to include the late arrival in a new seven-cube form.
 
-During each turn, a cube travels between one and three grid cells. Collision-safe pathfinding prevents cubes from occupying or crossing the same cell. Once the group has formed, it remains together briefly. The cubes then move one at a time back to their original scattered positions.
+During each turn, a cube travels between one and three grid cells. Collision-safe pathfinding prevents cubes from occupying or crossing the same cell. Once the complete group has formed, it remains together briefly. The cubes then move one at a time back to their original scattered positions.
 
 The cycle repeats continuously, and a new connected group shape is generated for every gathering phase.
 
@@ -66,7 +66,7 @@ The cycle repeats continuously, and a new connected group shape is generated for
 
 **Tags:** `identity`, `symbol`
 
-A static cube sits at the center of the grid with `V`, `L`, and `L` displayed on its three visible faces. Its behavior matches the centered main cube, but it functions as a symbol, logo, or identity-bearing object.
+A cube begins at the center with `V`, `L`, and `L` displayed on its three visible faces. For every rotation, it smoothly rises by one grid cell and settles back onto the grid. After landing, only the three faces hidden from the camera receive new distinct random letters; the visible letters remain unchanged until those faces later turn away.
 
 **Abstract meaning:** An entity becomes the bearer of a distinct identity, idea, or brand.
 
@@ -74,7 +74,7 @@ A static cube sits at the center of the grid with `V`, `L`, and `L` displayed on
 
 **Tags:** `form`, `reconfiguration`
 
-Sixteen equal-sized cubes repeatedly rearrange into a randomly selected form. The available forms include a solid square, a hollow frame, two parallel lines, four separate blocks, and a zigzag. The next form is always different from the current one, and the cubes move between cells without colliding.
+Sixteen equal-sized cubes repeatedly rearrange into a randomly selected form. The available forms include a solid square, a hollow frame, two parallel lines, four separate blocks, and a zigzag. A random cube initiates every transformation, after which nearby cubes move in spatial order like a chain reaction. The next form is always different from the current one, and the cubes move between cells without colliding.
 
 **Abstract meaning:** A system can preserve all of its parts while reorganizing its internal structure for different purposes.
 
@@ -82,7 +82,7 @@ Sixteen equal-sized cubes repeatedly rearrange into a randomly selected form. Th
 
 **Tags:** `continuity`, `renewal`
 
-Six evenly spaced cubes form a queue that runs diagonally toward the lower-left area of the frame. The queue advances by two grid cells, preserving one empty cell between neighboring cubes. The leading cube leaves through the faded edge, reappears invisibly at one side, and approaches the newly opened position at the back of the queue as if it were a new cube joining the process.
+Six evenly spaced cubes form a queue that runs diagonally toward the lower-left area of the frame. The leading cube leaves through the faded edge and then reappears translucently beside the still-occupied tail as an early arrival. While it waits, every element in the queue advances by two grid cells, one at a time, preserving one empty cell between neighbors. Only after the last element has moved does the waiting cube enter the newly opened tail position.
 
 **Abstract meaning:** A continuously moving process makes room for new participants without stopping to accept them.
 
@@ -90,13 +90,13 @@ Six evenly spaced cubes form a queue that runs diagonally toward the lower-left 
 
 **Tags:** `relation`, `coordination`
 
-Cubes appear at random intervals in the fully transparent zones on the left and right edges of a 10-by-10 grid. They become visible as they enter, travel toward the opposite side, and fade out when leaving. When two cubes meet head-on, one temporarily moves into a neighboring lane, allows the other to pass, and then returns to its original route.
+Cubes appear at random intervals in the fully transparent zones on the left and right edges of a 10-by-10 grid. They become visible as they enter, travel toward the opposite side, and fade out when leaving. Individual head-on conflicts are resolved by a temporary neighboring lane. When traffic becomes dense, one entire direction receives priority for several movements while the opposing flow waits or yields; the priority direction alternates the next time congestion occurs.
 
 **Abstract meaning:** Independent flows can share the same space when the system resolves conflicts and coordinates priority.
 
 ## Movement Notes
 
-In the movement-based scenes, cubes slide between grid cells without rotating. The grid itself moves in `MovingGridScene`, keeping the main cube visually fixed in the viewport. `FlippingCubeScene` is the only scene in which the cube actively changes its orientation.
+In the movement-based scenes, cubes slide between grid cells without rotating. The grid itself moves in `MovingGridScene`, keeping the main cube visually fixed in the viewport. `FlippingCubeScene` and `VllCubeScene` actively change cube orientation.
 
 ## Additional Scenes
 
