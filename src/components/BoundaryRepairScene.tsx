@@ -9,6 +9,8 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { getRandomItem } from '../scenes/sceneRandom'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
@@ -47,8 +49,7 @@ const createBoundaryAnimation = (runtime: GridSceneRuntime): BoundaryAnimationCo
     const play = async (): Promise<void> => {
         await delay.wait(REPAIRED_HOLD_DURATION_S)
         while (!cancelled) {
-            const breachedIndex =
-                BREACHABLE_INDICES[Math.floor(Math.random() * BREACHABLE_INDICES.length)]
+            const breachedIndex = getRandomItem(BREACHABLE_INDICES)
             if (breachedIndex === undefined) return
             const breachedPosition = BOUNDARY_POSITIONS[breachedIndex]
             if (breachedPosition === undefined) return
@@ -133,7 +134,7 @@ const createBoundaryAnimation = (runtime: GridSceneRuntime): BoundaryAnimationCo
         }
     }
 
-    void play()
+    void startSceneAnimation('Boundary Repair', play)
     return {
         dispose: () => {
             cancelled = true
@@ -172,11 +173,10 @@ export const BoundaryRepairScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 13,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 7,
+        gridCellCount: 17,
+        gridFadeInnerRadiusCells: 2.5,
+        gridFadeOuterRadiusCells: 9,
         cameraAzimuthDeg: 45,
-        cameraElevationDeg: 55,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

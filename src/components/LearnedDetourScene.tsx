@@ -8,6 +8,7 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
@@ -164,7 +165,7 @@ const createDetourAnimation = (runtime: GridSceneRuntime): DetourAnimationContro
         }
     }
 
-    void play()
+    void startSceneAnimation('Learned Detour', play)
     return {
         dispose: () => {
             cancelled = true
@@ -196,9 +197,9 @@ export const LearnedDetourScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 13,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 6,
+        gridCellCount: 17,
+        gridFadeInnerRadiusCells: 2.5,
+        gridFadeOuterRadiusCells: 9,
         cameraAzimuthDeg: 25,
         viewOffsetY: 0,
         hoverCells: 0,

@@ -8,13 +8,14 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
 const GRID_CELL_SIZE = 0.04
-const GRID_CELL_COUNT = 17
+const GRID_CELL_COUNT = 21
 const QUEUE_COLUMN = 0
 const QUEUE_TAIL_ROW = -4
 const QUEUE_HEAD_EXIT_ROW = 8
@@ -128,7 +129,7 @@ const createQueueAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Continuous Queue', play)
     return {
         dispose: () => {
             cancelled = true
@@ -163,10 +164,9 @@ export const ContinuousQueueScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
-        gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 9,
+        gridFadeInnerRadiusCells: 3,
+        gridFadeOuterRadiusCells: 11,
         cameraAzimuthDeg: 45,
-        cameraElevationDeg: 25,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

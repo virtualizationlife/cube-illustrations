@@ -9,13 +9,15 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { getRandomItem, shuffle } from '../scenes/sceneRandom'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
 const GRID_CELL_SIZE = 0.027
-const GRID_CELL_COUNT = 19
+const GRID_CELL_COUNT = 23
 const GRID_RADIUS = 7
 const ISLAND_RADIUS = 2
 const MOVE_DURATION_PER_CELL_S = 0.22
@@ -50,17 +52,6 @@ interface LayoutAnimationController {
     readonly dispose: () => void
 }
 
-const shuffle = <Item,>(items: readonly Item[]): Item[] => {
-    const shuffled = [...items]
-    for (let index = shuffled.length - 1; index > 0; index -= 1) {
-        const randomIndex = Math.floor(Math.random() * (index + 1))
-        const current = shuffled[index]
-        shuffled[index] = shuffled[randomIndex]
-        shuffled[randomIndex] = current
-    }
-    return shuffled
-}
-
 const createRandomIsland = (
     cubeCount: number = CUBE_IDS.length
 ): readonly GridCoordinate[] => {
@@ -68,9 +59,9 @@ const createRandomIsland = (
     const occupiedCells = new Set([getGridCellKey(positions[0])])
 
     while (positions.length < cubeCount) {
-        const anchor = positions[Math.floor(Math.random() * positions.length)]
-        const direction =
-            CARDINAL_DIRECTIONS[Math.floor(Math.random() * CARDINAL_DIRECTIONS.length)]
+        const anchor = getRandomItem(positions)
+        const direction = getRandomItem(CARDINAL_DIRECTIONS)
+        if (anchor === undefined || direction === undefined) continue
         const candidate = {
             column: anchor.column + direction.column,
             row: anchor.row + direction.row,
@@ -187,7 +178,7 @@ const createLayoutAnimation = (
                 const path = findGridPath(source, target, blockedCells)
                 if (path === null || path.length === 0) continue
                 const requestedStep =
-                    MOVE_STEP_LENGTHS[Math.floor(Math.random() * MOVE_STEP_LENGTHS.length)]
+                    getRandomItem(MOVE_STEP_LENGTHS) ?? 1
                 const stepLength = Math.min(requestedStep, path.length)
                 const destination = path[stepLength - 1]
                 if (destination === undefined) continue
@@ -208,7 +199,7 @@ const createLayoutAnimation = (
         await delay.wait(SCATTERED_HOLD_DURATION_S)
 
         while (!cancelled) {
-            const lateCube = layout[Math.floor(Math.random() * layout.length)]
+            const lateCube = getRandomItem(layout)
             if (lateCube === undefined) return
             const earlyCubes = layout.filter((cube) => cube.id !== lateCube.id)
             const provisionalIsland = createRandomIsland(earlyCubes.length)
@@ -242,7 +233,7 @@ const createLayoutAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Forming a Group', play)
 
     return {
         dispose: () => {
@@ -284,10 +275,9 @@ export const SevenCubesScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
-        gridFadeInnerRadiusCells: 6,
-        gridFadeOuterRadiusCells: 10,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 12,
         cameraAzimuthDeg: 45,
-        cameraElevationDeg: 50,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

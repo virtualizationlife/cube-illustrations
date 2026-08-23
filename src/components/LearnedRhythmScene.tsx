@@ -12,6 +12,7 @@ import {
     createScenePresentation,
     type ScenePresentationController,
 } from '../scenes/scenePresentation'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -42,8 +43,8 @@ const createLearnedRhythmAnimation = (runtime: GridSceneRuntime): LearnedRhythmC
     const presentation = createScenePresentation({
         zoom: 1,
         gridOpacity: 0.58,
-        gridFadeInnerRadiusCells: 3.5,
-        gridFadeOuterRadiusCells: 5.5,
+        gridFadeInnerRadiusCells: 2,
+        gridFadeOuterRadiusCells: 8,
     })
 
     const enterCube = async (
@@ -91,8 +92,8 @@ const createLearnedRhythmAnimation = (runtime: GridSceneRuntime): LearnedRhythmC
         presentation.setTarget({
             zoom: 1.22,
             gridOpacity: 0.72,
-            gridFadeInnerRadiusCells: 2.5,
-            gridFadeOuterRadiusCells: 4.5,
+            gridFadeInnerRadiusCells: 1.5,
+            gridFadeOuterRadiusCells: 8,
         })
         await Promise.all([
             enterCube(MAIN_CUBE_ID, MAIN_ENTRY, MAIN_START),
@@ -125,8 +126,8 @@ const createLearnedRhythmAnimation = (runtime: GridSceneRuntime): LearnedRhythmC
         presentation.setTarget({
             zoom: 0.9,
             gridOpacity: 0.48,
-            gridFadeInnerRadiusCells: 4.5,
-            gridFadeOuterRadiusCells: 6,
+            gridFadeInnerRadiusCells: 2.5,
+            gridFadeOuterRadiusCells: 8,
         })
         await enterCube(MAIN_CUBE_ID, MAIN_ENTRY, MAIN_START)
         for (let pass = 0; pass < observedPassCount; pass += 1) {
@@ -156,7 +157,7 @@ const createLearnedRhythmAnimation = (runtime: GridSceneRuntime): LearnedRhythmC
         }
     }
 
-    void play()
+    void startSceneAnimation('Learned Rhythm', play)
     return {
         presentation,
         dispose: () => {
@@ -202,10 +203,10 @@ export const LearnedRhythmScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 11,
+        gridCellCount: 15,
         gridOpacity: 0.58,
-        gridFadeInnerRadiusCells: 3.5,
-        gridFadeOuterRadiusCells: 5.5,
+        gridFadeInnerRadiusCells: 2,
+        gridFadeOuterRadiusCells: 8,
         cameraAzimuthDeg: 0,
         viewOffsetY: 0,
         hoverCells: 0,

@@ -6,6 +6,8 @@ import {
     type GridSceneRuntime,
 } from './gridSceneRuntime'
 import { createCancellableDelay } from './createCancellableDelay'
+import { getRandomItem } from './sceneRandom'
+import { startSceneAnimation } from './startSceneAnimation'
 
 const CARDINAL_DIRECTIONS: readonly GridCoordinate[] = [
     { column: 1, row: 0 },
@@ -227,10 +229,7 @@ export const createGridSceneAnimation = ({
                     column: Math.sign(columnDistance),
                     row: Math.sign(rowDistance),
                 }
-                const requestedStep =
-                    randomWalk.stepLengths[
-                        Math.floor(Math.random() * randomWalk.stepLengths.length)
-                    ] ?? 1
+                const requestedStep = getRandomItem(randomWalk.stepLengths) ?? 1
                 const stepLength = Math.max(
                     1,
                     Math.min(requestedStep, remainingDistance - randomWalk.encounterDistance)
@@ -271,7 +270,7 @@ export const createGridSceneAnimation = ({
             }
             return true
         })
-        const movement = availableOptions[Math.floor(Math.random() * availableOptions.length)]
+        const movement = getRandomItem(availableOptions)
         if (movement === undefined) return source
         previousDirection = movement.direction
         return movement.destination
@@ -349,12 +348,8 @@ export const createGridSceneAnimation = ({
                 companionStepCounts.length > 0 &&
                 Math.random() < companionChance
             ) {
-                const selectedCubeId =
-                    nearbyCubeIds[Math.floor(Math.random() * nearbyCubeIds.length)]
-                const stepCount =
-                    companionStepCounts[
-                        Math.floor(Math.random() * companionStepCounts.length)
-                    ]
+                const selectedCubeId = getRandomItem(nearbyCubeIds)
+                const stepCount = getRandomItem(companionStepCounts)
                 if (selectedCubeId !== undefined && stepCount !== undefined) {
                     companionCubeId = selectedCubeId
                     companionStepsRemaining = Math.max(1, stepCount)
@@ -373,9 +368,9 @@ export const createGridSceneAnimation = ({
     }
 
     if (randomWalk === undefined) {
-        void playRoute()
+        void startSceneAnimation('Grid Path Route', playRoute)
     } else {
-        void playRandomWalk()
+        void startSceneAnimation('Grid Random Walk', playRandomWalk)
     }
 
     return {

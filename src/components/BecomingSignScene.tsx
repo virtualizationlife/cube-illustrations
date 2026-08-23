@@ -12,6 +12,13 @@ import {
     createScenePresentation,
     type ScenePresentationController,
 } from '../scenes/scenePresentation'
+import { getDifferentRandomIndex } from '../scenes/sceneRandom'
+import {
+    SIGN_SYMBOLS,
+    rotateSignSymbol,
+    type SignDirection,
+} from '../scenes/signSymbols'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -31,20 +38,6 @@ const SCATTER_POSITIONS: readonly GridCoordinate[] = [
     { column: -3, row: 5 },
     { column: 3, row: 5 },
 ]
-const RIGHT_ARROW: readonly GridCoordinate[] = [
-    { column: -2, row: 0 },
-    { column: -1, row: 0 },
-    { column: 0, row: 0 },
-    { column: 1, row: 0 },
-    { column: 2, row: 0 },
-    { column: 1, row: -2 },
-    { column: 2, row: -1 },
-    { column: 2, row: 1 },
-    { column: 1, row: 2 },
-]
-
-type SignDirection = 'right' | 'left' | 'up' | 'down'
-
 interface SignDirectionDefinition {
     readonly direction: SignDirection
     readonly entry: GridCoordinate
@@ -84,20 +77,6 @@ const DIRECTIONS: readonly SignDirectionDefinition[] = [
     },
 ]
 
-const rotateArrow = (direction: SignDirection): readonly GridCoordinate[] =>
-    RIGHT_ARROW.map(({ column, row }) => {
-        switch (direction) {
-            case 'right':
-                return { column, row }
-            case 'left':
-                return { column: -column, row: -row }
-            case 'up':
-                return { column: -row, row: column }
-            case 'down':
-                return { column: row, row: -column }
-        }
-    })
-
 interface BecomingSignController {
     readonly presentation: ScenePresentationController
     readonly dispose: () => void
@@ -109,12 +88,13 @@ const createBecomingSignAnimation = (
 ): BecomingSignController => {
     let cancelled = false
     let previousDirectionIndex = -1
+    let previousSymbolIndex = -1
     const delay = createCancellableDelay()
     const presentation = createScenePresentation({
         zoom: 1.12,
         gridOpacity: 0.42,
-        gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 10,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 12,
     })
 
     const moveSignCubes = async (positions: readonly GridCoordinate[]): Promise<void> => {
@@ -166,13 +146,21 @@ const createBecomingSignAnimation = (
     const play = async (): Promise<void> => {
         await delay.wait(0.8)
         while (!cancelled) {
-            let directionIndex = previousDirectionIndex
-            while (directionIndex === previousDirectionIndex) {
-                directionIndex = Math.floor(Math.random() * DIRECTIONS.length)
-            }
+            const directionIndex = getDifferentRandomIndex(
+                DIRECTIONS.length,
+                previousDirectionIndex
+            )
             previousDirectionIndex = directionIndex
             const definition = DIRECTIONS[directionIndex]
             if (definition === undefined) return
+
+            const symbolIndex = getDifferentRandomIndex(
+                SIGN_SYMBOLS.length,
+                previousSymbolIndex
+            )
+            previousSymbolIndex = symbolIndex
+            const symbol = SIGN_SYMBOLS[symbolIndex]
+            if (symbol === undefined) return
 
             await enterMainCube(definition)
             if (cancelled) return
@@ -181,18 +169,20 @@ const createBecomingSignAnimation = (
             presentation.setTarget({
                 zoom: 0.76,
                 gridOpacity: 0.66,
-                gridFadeInnerRadiusCells: 7,
-                gridFadeOuterRadiusCells: 10,
+                gridFadeInnerRadiusCells: 5.5,
+                gridFadeOuterRadiusCells: 12,
             })
-            await moveSignCubes(rotateArrow(definition.direction))
+            await moveSignCubes(
+                rotateSignSymbol(symbol.positions, definition.direction)
+            )
             if (cancelled) return
             await delay.wait(1)
 
             presentation.setTarget({
                 zoom: 1,
                 gridOpacity: 0.5,
-                gridFadeInnerRadiusCells: 5.5,
-                gridFadeOuterRadiusCells: 9,
+                gridFadeInnerRadiusCells: 4.5,
+                gridFadeOuterRadiusCells: 12,
             })
             await followSign(definition)
             if (cancelled) return
@@ -201,15 +191,15 @@ const createBecomingSignAnimation = (
             presentation.setTarget({
                 zoom: 1.12,
                 gridOpacity: 0.42,
-                gridFadeInnerRadiusCells: 5,
-                gridFadeOuterRadiusCells: 10,
+                gridFadeInnerRadiusCells: 4,
+                gridFadeOuterRadiusCells: 12,
             })
             await moveSignCubes(SCATTER_POSITIONS)
             if (!cancelled) await delay.wait(0.7)
         }
     }
 
-    void play()
+    void startSceneAnimation('Becoming a Sign', play)
     return {
         presentation,
         dispose: () => {
@@ -219,7 +209,7 @@ const createBecomingSignAnimation = (
     }
 }
 
-/** A random-looking group becomes an arrow whose meaning guides the main cube. */
+/** A random-looking group becomes one of many symbols that guides the main cube. */
 export const BecomingSignScene = ({
     faceLabels,
     cubeCornerRadius,
@@ -253,12 +243,11 @@ export const BecomingSignScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 19,
+        gridCellCount: 23,
         gridOpacity: 0.42,
-        gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 10,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 12,
         cameraAzimuthDeg: 0,
-        cameraElevationDeg: 65,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

@@ -8,6 +8,7 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
@@ -122,7 +123,7 @@ const createMemoryAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Memory Replay', play)
     return {
         dispose: () => {
             cancelled = true
@@ -150,9 +151,9 @@ export const MemoryReplayScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 11,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 6.5,
+        gridCellCount: 15,
+        gridFadeInnerRadiusCells: 2,
+        gridFadeOuterRadiusCells: 8,
         cameraAzimuthDeg: 35,
         viewOffsetY: 0,
         hoverCells: 0,

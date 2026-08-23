@@ -8,6 +8,7 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
@@ -125,7 +126,7 @@ const createPairAnimation = (runtime: GridSceneRuntime): PairAnimationController
         }
     }
 
-    void play()
+    void startSceneAnimation('Reuniting Pair', play)
     return {
         dispose: () => {
             cancelled = true
@@ -156,7 +157,7 @@ export const ReunitingPairScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 11,
+        gridCellCount: 15,
         cameraAzimuthDeg: 20,
         viewOffsetY: 0,
         hoverCells: 0,

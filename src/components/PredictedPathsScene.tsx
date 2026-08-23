@@ -12,6 +12,7 @@ import {
     createScenePresentation,
     type ScenePresentationController,
 } from '../scenes/scenePresentation'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -116,8 +117,8 @@ const createPredictedPathsAnimation = (
     const presentation = createScenePresentation({
         zoom: 1,
         gridOpacity: 0.55,
-        gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 10,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 12,
     })
 
     const movePrediction = async (id: string, route: readonly GridCoordinate[]): Promise<void> => {
@@ -170,8 +171,8 @@ const createPredictedPathsAnimation = (
         presentation.setTarget({
             zoom: 0.8,
             gridOpacity: 0.72,
-            gridFadeInnerRadiusCells: 7,
-            gridFadeOuterRadiusCells: 10,
+            gridFadeInnerRadiusCells: 5,
+            gridFadeOuterRadiusCells: 12,
         })
         await delay.wait(0.7)
 
@@ -215,8 +216,8 @@ const createPredictedPathsAnimation = (
         presentation.setTarget({
             zoom: 1.08,
             gridOpacity: 0.48,
-            gridFadeInnerRadiusCells: 4.5,
-            gridFadeOuterRadiusCells: 8,
+            gridFadeInnerRadiusCells: 3.5,
+            gridFadeOuterRadiusCells: 12,
         })
         await delay.wait(0.45)
 
@@ -268,7 +269,7 @@ const createPredictedPathsAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Predicted Paths', play)
     return {
         presentation,
         dispose: () => {
@@ -306,12 +307,11 @@ export const PredictedPathsScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 19,
+        gridCellCount: 23,
         gridOpacity: 0.55,
-        gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 10,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 12,
         cameraAzimuthDeg: 15,
-        cameraElevationDeg: 50,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

@@ -8,6 +8,8 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { getDifferentRandomIndex } from '../scenes/sceneRandom'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
@@ -103,10 +105,10 @@ const createPreferenceAnimation = (runtime: GridSceneRuntime): PreferenceAnimati
             if (cancelled) return
             await delay.wait(1.15)
 
-            let nextStartIndex = previousStartIndex
-            while (nextStartIndex === previousStartIndex) {
-                nextStartIndex = Math.floor(Math.random() * START_POSITIONS.length)
-            }
+            const nextStartIndex = getDifferentRandomIndex(
+                START_POSITIONS.length,
+                previousStartIndex
+            )
             const nextStart = START_POSITIONS[nextStartIndex]
             if (nextStart === undefined) return
             await runtime.moveCubeTo(MAIN_CUBE_ID, nextStart, {
@@ -121,7 +123,7 @@ const createPreferenceAnimation = (runtime: GridSceneRuntime): PreferenceAnimati
         }
     }
 
-    void play()
+    void startSceneAnimation('Preference Choice', play)
     return {
         dispose: () => {
             cancelled = true
@@ -159,7 +161,7 @@ export const PreferenceChoiceScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 13,
+        gridCellCount: 17,
         cameraAzimuthDeg: 0,
         viewOffsetY: 0,
         hoverCells: 0,

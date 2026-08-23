@@ -10,12 +10,17 @@ import {
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
 import {
+    getDifferentRandomIndex,
+    getRandomItem,
+} from '../scenes/sceneRandom'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
+import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
 const GRID_CELL_SIZE = 0.035
-const GRID_CELL_COUNT = 15
+const GRID_CELL_COUNT = 19
 const SHAPE_HOLD_DURATION_S = 1.6
 const MOVE_DURATION_PER_CELL_S = 0.09
 const MOVE_PAUSE_DURATION_S = 0.035
@@ -189,11 +194,10 @@ const moveToShape = async (
         const target = assignments.get(cubeId)
         return source !== undefined && target !== undefined && !isSameGridCell(source, target)
     })
-    const seedCubeId =
-        pendingCubeIds[Math.floor(Math.random() * pendingCubeIds.length)]
+    const seedCubeId = getRandomItem(pendingCubeIds)
     const seedPosition =
         seedCubeId === undefined ? undefined : runtime.getCubePosition(seedCubeId)
-    if (seedPosition !== undefined) {
+    if (seedCubeId !== undefined && seedPosition !== undefined) {
         pendingCubeIds.sort((leftId, rightId) => {
             const leftPosition = runtime.getCubePosition(leftId)
             const rightPosition = runtime.getCubePosition(rightId)
@@ -262,10 +266,10 @@ const createStructureAnimation = (runtime: GridSceneRuntime): StructureAnimation
     const play = async (): Promise<void> => {
         await delay.wait(SHAPE_HOLD_DURATION_S)
         while (!cancelled) {
-            let nextShapeIndex = currentShapeIndex
-            while (nextShapeIndex === currentShapeIndex) {
-                nextShapeIndex = Math.floor(Math.random() * STRUCTURE_SHAPES.length)
-            }
+            const nextShapeIndex = getDifferentRandomIndex(
+                STRUCTURE_SHAPES.length,
+                currentShapeIndex
+            )
             const nextShape = STRUCTURE_SHAPES[nextShapeIndex]
             if (nextShape === undefined) return
             await moveToShape(
@@ -279,7 +283,7 @@ const createStructureAnimation = (runtime: GridSceneRuntime): StructureAnimation
         }
     }
 
-    void play()
+    void startSceneAnimation('Structure Morph', play)
     return {
         dispose: () => {
             cancelled = true
@@ -317,10 +321,9 @@ export const StructureMorphScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
-        gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 8,
+        gridFadeInnerRadiusCells: 3,
+        gridFadeOuterRadiusCells: 10,
         cameraAzimuthDeg: 45,
-        cameraElevationDeg: 60,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

@@ -4,7 +4,7 @@ import { FaceFlipCubeScene } from '../scenes/FaceFlipCubeScene'
 import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
 
 const GRID_CELL_SIZE = 0.13
-const GRID_CELL_COUNT = 3
+const GRID_CELL_COUNT = 11
 
 /** A cube that flips between faces and grows smoothly on hover. */
 export const FlippingCubeScene = ({
@@ -16,7 +16,7 @@ export const FlippingCubeScene = ({
         cubeCornerRadius={cubeCornerRadius}
         gridCellSize={GRID_CELL_SIZE}
         gridCellCount={GRID_CELL_COUNT}
-        cameraAzimuthDeg={45}
+        cameraAzimuthDeg={40}
         viewOffsetY={-GRID_CELL_SIZE}
         hoverCells={1}
         mainCubeFaceLabels={faceLabels}

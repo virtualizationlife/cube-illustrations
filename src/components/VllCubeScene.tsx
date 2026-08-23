@@ -6,6 +6,7 @@ import {
     type GridCubeFace,
     type GridCubeFaceLabels,
 } from '../scenes/cubeFaceLabels'
+import { getRandomIndex } from '../scenes/sceneRandom'
 
 const GRID_CELL_SIZE = 0.1
 const LETTERS = Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -43,7 +44,7 @@ export const VllCubeScene = ({
             )
 
             for (const face of hiddenFaces) {
-                const index = Math.floor(Math.random() * availableLetters.length)
+                const index = getRandomIndex(availableLetters.length)
                 const [letter] = availableLetters.splice(index, 1)
                 nextLabels[face] = letter ?? 'A'
             }
@@ -58,7 +59,7 @@ export const VllCubeScene = ({
             cubeSize={GRID_CELL_SIZE}
             cubeCornerRadius={cubeCornerRadius}
             gridCellSize={GRID_CELL_SIZE}
-            gridCellCount={5}
+            gridCellCount={9}
             cameraAzimuthDeg={45}
             viewOffsetY={0}
             hoverCells={0}

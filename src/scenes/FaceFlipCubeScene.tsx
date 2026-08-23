@@ -9,6 +9,7 @@ import {
     type GridCubeFaceLabelInput,
 } from './cubeFaceLabels'
 import { MAIN_CUBE_ID, type GridSceneCubeEntry } from './gridSceneRuntime'
+import { getRandomIndex } from './sceneRandom'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -202,7 +203,7 @@ export const FaceFlipCubeScene = ({
 
         let next = faceIndexRef.current
         while (next === faceIndexRef.current) {
-            next = Math.floor(Math.random() * FACE_NORMALS.length)
+            next = getRandomIndex(FACE_NORMALS.length)
         }
         faceIndexRef.current = next
 

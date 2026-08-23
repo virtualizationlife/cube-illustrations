@@ -9,6 +9,8 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
+import { shuffle } from '../scenes/sceneRandom'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -16,7 +18,7 @@ import {
 } from '../scenes/useSimpleCubeScene'
 
 const GRID_CELL_SIZE = 0.045
-const GRID_CELL_COUNT = 10
+const GRID_CELL_COUNT = 14
 const ENTRY_COLUMN = 6
 const FULL_OPACITY_COLUMN = 4
 const LANE_MIN_ROW = -4
@@ -41,17 +43,6 @@ interface FlowCube {
 interface FlowAnimationController {
     readonly update: () => void
     readonly dispose: () => void
-}
-
-const shuffle = <Item,>(items: readonly Item[]): Item[] => {
-    const shuffled = [...items]
-    for (let index = shuffled.length - 1; index > 0; index -= 1) {
-        const randomIndex = Math.floor(Math.random() * (index + 1))
-        const current = shuffled[index]
-        shuffled[index] = shuffled[randomIndex]
-        shuffled[randomIndex] = current
-    }
-    return shuffled
 }
 
 const getEntryPosition = (direction: FlowDirection, row: number): GridCoordinate => ({
@@ -310,7 +301,7 @@ const createFlowAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Crossing Flows', play)
     return {
         update: () => {
             for (const cube of cubes.values()) {
@@ -356,10 +347,9 @@ export const CrossingFlowsScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 6.5,
+        gridFadeInnerRadiusCells: 2,
+        gridFadeOuterRadiusCells: 7,
         cameraAzimuthDeg: 0,
-        cameraElevationDeg: 55,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

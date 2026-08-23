@@ -12,6 +12,7 @@ import {
     createScenePresentation,
     type ScenePresentationController,
 } from '../scenes/scenePresentation'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -61,8 +62,8 @@ const createValenceFieldAnimation = (
     const presentation = createScenePresentation({
         zoom: 0.98,
         gridOpacity: 0.5,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 6,
+        gridFadeInnerRadiusCells: 2.5,
+        gridFadeOuterRadiusCells: 9,
     })
 
     const addGroup = (
@@ -106,8 +107,8 @@ const createValenceFieldAnimation = (
         presentation.setTarget({
             zoom: 1.16,
             gridOpacity: 0.62,
-            gridFadeInnerRadiusCells: 2.5,
-            gridFadeOuterRadiusCells: 4.8,
+            gridFadeInnerRadiusCells: 1.5,
+            gridFadeOuterRadiusCells: 9,
         })
         const orbit: readonly GridCoordinate[] = [
             { column: anchor - direction * 2, row: 0 },
@@ -136,8 +137,8 @@ const createValenceFieldAnimation = (
         presentation.setTarget({
             zoom: 0.84,
             gridOpacity: 0.36,
-            gridFadeInnerRadiusCells: 5,
-            gridFadeOuterRadiusCells: 7,
+            gridFadeInnerRadiusCells: 3,
+            gridFadeOuterRadiusCells: 9,
         })
         await runtime.moveCubeTo(
             MAIN_CUBE_ID,
@@ -169,7 +170,7 @@ const createValenceFieldAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Valence Field', play)
     return {
         presentation,
         dispose: () => {
@@ -218,10 +219,10 @@ export const ValenceFieldScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 13,
+        gridCellCount: 17,
         gridOpacity: 0.5,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 6,
+        gridFadeInnerRadiusCells: 2.5,
+        gridFadeOuterRadiusCells: 9,
         cameraAzimuthDeg: 0,
         viewOffsetY: 0,
         hoverCells: 0,

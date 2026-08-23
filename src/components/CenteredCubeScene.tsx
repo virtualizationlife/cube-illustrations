@@ -4,6 +4,8 @@ import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
 import type { CubeFaceLabelsProps, GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
 import { createCancellableDelay } from '../scenes/createCancellableDelay'
 import type { GridCoordinate, GridSceneRuntime } from '../scenes/gridSceneRuntime'
+import { shuffle } from '../scenes/sceneRandom'
+import { startSceneAnimation } from '../scenes/startSceneAnimation'
 import {
     useSimpleCubeScene,
     type SimpleCubeSetupContext,
@@ -27,17 +29,6 @@ interface EntryPlan {
 
 interface PassingCubeAnimation {
     readonly dispose: () => void
-}
-
-const shuffle = <Item,>(items: readonly Item[]): Item[] => {
-    const shuffled = [...items]
-    for (let index = shuffled.length - 1; index > 0; index -= 1) {
-        const randomIndex = Math.floor(Math.random() * (index + 1))
-        const current = shuffled[index]
-        shuffled[index] = shuffled[randomIndex]
-        shuffled[randomIndex] = current
-    }
-    return shuffled
 }
 
 const createEntryPlans = (): EntryPlan[] =>
@@ -182,7 +173,7 @@ const createPassingCubeAnimation = (
         }
     }
 
-    void play()
+    void startSceneAnimation('Main Cube', play)
     return {
         dispose: () => {
             cancelled = true
@@ -208,11 +199,10 @@ export const CenteredCubeScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 11,
-        gridFadeInnerRadiusCells: 3,
-        gridFadeOuterRadiusCells: 6,
+        gridCellCount: 15,
+        gridFadeInnerRadiusCells: 2,
+        gridFadeOuterRadiusCells: 8,
         cameraAzimuthDeg: 45,
-        cameraElevationDeg: 30,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

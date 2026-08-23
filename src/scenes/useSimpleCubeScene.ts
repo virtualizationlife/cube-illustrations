@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type RefObject } from 'react'
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 import type { GridCubeFaceLabelInput } from './cubeFaceLabels'
+import { getWideGridFadeRadii } from './gridFade'
 import {
     bindGridCubeHover,
     type GridCubeHoverController,
@@ -105,6 +106,11 @@ export const useSimpleCubeScene = ({
 }: UseSimpleCubeSceneOptions): SimpleCubeSceneHandle => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [status, setStatus] = useState<CubeRendererStatus>('loading')
+    const defaultGridFadeRadii = getWideGridFadeRadii(gridCellCount)
+    const resolvedGridFadeOuterRadiusCells =
+        gridFadeOuterRadiusCells ?? defaultGridFadeRadii.outerRadiusCells
+    const resolvedGridFadeInnerRadiusCells =
+        gridFadeInnerRadiusCells ?? defaultGridFadeRadii.innerRadiusCells
     const onFrameRef = useRef(onFrame)
     const onSetupRef = useRef(onSetup)
     const onCubeHoverChangeRef = useRef(onCubeHoverChange)
@@ -148,8 +154,8 @@ export const useSimpleCubeScene = ({
                 gridCellSize,
                 gridCellCount,
                 gridOpacity,
-                gridFadeInnerRadiusCells,
-                gridFadeOuterRadiusCells,
+                gridFadeInnerRadiusCells: resolvedGridFadeInnerRadiusCells,
+                gridFadeOuterRadiusCells: resolvedGridFadeOuterRadiusCells,
                 mainCubeSize: cubeSize,
                 mainCubeHoverCells: hoverCells,
                 cubeCornerRadius,
@@ -273,8 +279,8 @@ export const useSimpleCubeScene = ({
         gridCellSize,
         gridCellCount,
         gridOpacity,
-        gridFadeInnerRadiusCells,
-        gridFadeOuterRadiusCells,
+        resolvedGridFadeInnerRadiusCells,
+        resolvedGridFadeOuterRadiusCells,
         enableCubeHover,
         cameraAzimuthDeg,
         cameraElevationDeg,
