@@ -1,8 +1,14 @@
 .cube_illustrations__page {
     box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(
+            min(var(--cube-illustrations-scene-min-size, 220px), 100%),
+            var(--cube-illustrations-scene-size, 260px)
+        )
+    );
+    align-content: center;
     justify-content: center;
     min-height: 100dvh;
     padding: var(--cube-illustrations-page-padding, 24px);
@@ -15,14 +21,20 @@
     position: relative;
     flex-shrink: 0;
     width: var(--cube-illustrations-scene-size, 260px);
-    height: var(--cube-illustrations-scene-size, 260px);
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
     border: var(--cube-illustrations-border, 0);
 }
 
 .cube_illustrations__labeled_scene {
     box-sizing: border-box;
-    flex-shrink: 0;
-    width: var(--cube-illustrations-scene-size, 260px);
+    min-width: 0;
+    width: 100%;
+}
+
+.cube_illustrations__labeled_scene > .cube_illustrations__slot {
+    width: 100%;
 }
 
 .cube_illustrations__scene_label {
@@ -39,6 +51,7 @@
     line-height: 1;
     text-align: center;
     text-transform: lowercase;
+    overflow-wrap: break-word;
 }
 
 .cube_illustrations__scene_tags {
@@ -55,14 +68,17 @@
     line-height: 1.2;
     text-align: center;
     text-transform: lowercase;
+    overflow-wrap: break-word;
 }
 
 .cube_illustrations__canvas {
     display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     opacity: 0;
-    touch-action: none;
+    touch-action: pan-y;
     transition: opacity 0.4s ease-out;
 }
 
@@ -81,4 +97,18 @@
     font-size: var(--cube-illustrations-fallback-font-size, 14px);
     text-align: center;
     pointer-events: none;
+}
+
+/* Phones: always two columns that divide the available width, never a fixed
+   track that can overflow a 360px viewport. */
+@media (max-width: 520px) {
+    .cube_illustrations__page {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: var(--cube-illustrations-page-padding, 12px);
+        gap: var(--cube-illustrations-gap, 16px 8px);
+    }
+
+    .cube_illustrations__scene_label {
+        line-height: 1.2;
+    }
 }
