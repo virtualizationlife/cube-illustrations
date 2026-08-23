@@ -18,6 +18,7 @@
     "scripts": {
         "demo": "vite --config vite.demo.config.ts",
         "build": "vite build && tsc -p tsconfig.build.json",
+        "prepare": "npm run build",
         "check": "tsc -p tsconfig.json --noEmit && npm run build",
         "test": "vitest run",
         "pack:check": "npm pack --dry-run"
