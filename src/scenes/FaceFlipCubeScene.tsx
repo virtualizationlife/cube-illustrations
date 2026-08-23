@@ -65,6 +65,7 @@ export interface FaceFlipCubeSceneProps {
     readonly gridCellSize: number
     readonly gridCellCount: number
     readonly cameraAzimuthDeg: number
+    readonly cameraElevationDeg?: number
     readonly viewOffsetY: number
     readonly hoverCells: number
     readonly mainCubeFaceLabels?: GridCubeFaceLabelInput
@@ -82,6 +83,7 @@ export const FaceFlipCubeScene = ({
     gridCellSize,
     gridCellCount,
     cameraAzimuthDeg,
+    cameraElevationDeg,
     viewOffsetY,
     hoverCells,
     mainCubeFaceLabels,
@@ -224,6 +226,7 @@ export const FaceFlipCubeScene = ({
         gridCellSize,
         gridCellCount,
         cameraAzimuthDeg,
+        cameraElevationDeg,
         viewOffsetY,
         hoverCells,
         mainCubeFaceLabels,

@@ -22,9 +22,9 @@ export type CubeRendererStatus = 'loading' | 'ready' | 'unsupported'
 
 export const ILLUSTRATION_VIEWPORT = 300
 
-/** Camera distance from look-at; elevation is 35° to the horizon. */
+/** Camera distance from look-at; elevation defaults to 35° above the horizon. */
 const CAMERA_DISTANCE = 1.05
-const CAMERA_ELEVATION = (35 * Math.PI) / 180
+const DEFAULT_CAMERA_ELEVATION_DEG = 35
 
 export interface SimpleCubeFrameContext {
     readonly mesh: Object3D
@@ -59,6 +59,8 @@ export interface IllustrationSceneSizeProps {
     readonly gridFadeOuterRadiusCells?: number
     /** Horizontal camera angle in degrees (0 = +Z, 90 = +X). */
     readonly cameraAzimuthDeg: number
+    /** Vertical camera angle above the horizon in degrees. Defaults to 35. */
+    readonly cameraElevationDeg?: number
     /**
      * Vertical shift of the whole picture in world units.
      * 0 = look at the cube center; negative = look lower (cube sits higher in frame).
@@ -92,6 +94,7 @@ export const useSimpleCubeScene = ({
     gridFadeInnerRadiusCells,
     gridFadeOuterRadiusCells,
     cameraAzimuthDeg,
+    cameraElevationDeg = DEFAULT_CAMERA_ELEVATION_DEG,
     viewOffsetY,
     hoverCells,
     mainCubeFaceLabels,
@@ -117,6 +120,7 @@ export const useSimpleCubeScene = ({
         const cubeCenterY = hoverCells * gridCellSize + cubeSize / 2 + gridCellSize * 0.02
         const lookAtY = cubeCenterY + viewOffsetY
         const cameraAzimuth = (cameraAzimuthDeg * Math.PI) / 180
+        const cameraElevation = (cameraElevationDeg * Math.PI) / 180
 
         let disposed = false
         let renderer: WebGpuRenderer | null = null
@@ -130,10 +134,10 @@ export const useSimpleCubeScene = ({
 
             const scene = new THREE.Scene()
             const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100)
-            const horizontal = CAMERA_DISTANCE * Math.cos(CAMERA_ELEVATION)
+            const horizontal = CAMERA_DISTANCE * Math.cos(cameraElevation)
             camera.position.set(
                 horizontal * Math.sin(cameraAzimuth),
-                lookAtY + CAMERA_DISTANCE * Math.sin(CAMERA_ELEVATION),
+                lookAtY + CAMERA_DISTANCE * Math.sin(cameraElevation),
                 horizontal * Math.cos(cameraAzimuth)
             )
             camera.lookAt(0, lookAtY, 0)
@@ -273,6 +277,7 @@ export const useSimpleCubeScene = ({
         gridFadeOuterRadiusCells,
         enableCubeHover,
         cameraAzimuthDeg,
+        cameraElevationDeg,
         viewOffsetY,
         hoverCells,
         mainCubeFaceLabels,

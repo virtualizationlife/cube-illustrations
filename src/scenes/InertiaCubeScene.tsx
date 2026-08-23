@@ -21,6 +21,7 @@ export interface InertiaCubeSceneProps {
     readonly gridCellSize: number
     readonly gridCellCount: number
     readonly cameraAzimuthDeg: number
+    readonly cameraElevationDeg?: number
     readonly viewOffsetY: number
     readonly hoverCells: number
     readonly enableInertia?: boolean
@@ -33,6 +34,7 @@ export const InertiaCubeScene = ({
     gridCellSize,
     gridCellCount,
     cameraAzimuthDeg,
+    cameraElevationDeg,
     viewOffsetY,
     hoverCells,
     enableInertia = true,
@@ -156,6 +158,7 @@ export const InertiaCubeScene = ({
         gridCellSize,
         gridCellCount,
         cameraAzimuthDeg,
+        cameraElevationDeg,
         viewOffsetY,
         hoverCells,
         mainCubeFaceLabels,

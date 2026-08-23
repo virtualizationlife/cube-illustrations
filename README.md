@@ -159,6 +159,12 @@ when no safe route exists.
 The lower-level scene components and grid animation/runtime APIs remain public exports for custom
 compositions.
 
+## Camera angle
+
+Lower-level scenes accept `cameraAzimuthDeg` for rotation around the grid and the optional
+`cameraElevationDeg` for the angle above the horizon. Elevation defaults to `35` degrees when it is
+not specified.
+
 ## Styling
 
 Override these custom properties on a parent element or `:root`:
