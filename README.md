@@ -39,8 +39,10 @@ import {
     BoundaryRepairScene,
     BecomingSignScene,
     CenteredCubeScene,
+    CollectiveCurrentScene,
     ContinuousQueueScene,
     CrossingFlowsScene,
+    DynamicBalanceScene,
     EncounterCubeScene,
     FlippingCubeScene,
     LearnedDetourScene,
@@ -48,10 +50,13 @@ import {
     MemoryReplayScene,
     MovingGridScene,
     MovingBridgeScene,
+    PhaseChangeScene,
     PredictedPathsScene,
     PreferenceChoiceScene,
     ReunitingPairScene,
     SevenCubesScene,
+    SharedLoadScene,
+    SignalRelayScene,
     StructureMorphScene,
     ThreeCubesScene,
     VllCubeScene,
@@ -80,6 +85,11 @@ export const Scene = () => (
         <ValenceFieldScene />
         <MovingBridgeScene />
         <BecomingSignScene />
+        <SignalRelayScene />
+        <CollectiveCurrentScene />
+        <SharedLoadScene />
+        <PhaseChangeScene />
+        <DynamicBalanceScene />
     </>
 )
 ```
@@ -111,6 +121,12 @@ cube's changing crossing rhythm. `ValenceFieldScene` approaches one form and avo
 they swap sides. `MovingBridgeScene` recycles rear supports ahead of a centered traveler.
 `BecomingSignScene` turns a random scatter into one of twelve non-repeating symbols that guides the
 main cube.
+
+`SignalRelayScene` passes a visible impulse through a renewing chain. `CollectiveCurrentScene`
+alternates between independent movement and locally aligned flow. `SharedLoadScene` moves finite
+supports around a raised traveler one at a time. `PhaseChangeScene` repeatedly crystallizes a
+scatter and melts it again. `DynamicBalanceScene` maintains a compact group through continual
+arrival, departure, and redistribution.
 
 ## Face labels
 

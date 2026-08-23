@@ -1,23 +1,36 @@
 import type { JSX } from 'react'
 
 import { CenteredCubeScene } from './components/CenteredCubeScene'
+import { CollectiveCurrentScene } from './components/CollectiveCurrentScene'
 import { BoundaryRepairScene } from './components/BoundaryRepairScene'
 import { BecomingSignScene } from './components/BecomingSignScene'
 import { ContinuousQueueScene } from './components/ContinuousQueueScene'
 import { CrossingFlowsScene } from './components/CrossingFlowsScene'
+import { CorridorDanceScene } from './components/CorridorDanceScene'
+import { DynamicBalanceScene } from './components/DynamicBalanceScene'
+import { DominoRingScene } from './components/DominoRingScene'
 import { EncounterCubeScene } from './components/EncounterCubeScene'
 import { FlippingCubeScene } from './components/FlippingCubeScene'
+import { GuardChangeScene } from './components/GuardChangeScene'
 import { MovingGridScene } from './components/MovingGridScene'
 import { LearnedDetourScene } from './components/LearnedDetourScene'
 import { LearnedRhythmScene } from './components/LearnedRhythmScene'
 import { MemoryReplayScene } from './components/MemoryReplayScene'
+import { MetronomePairScene } from './components/MetronomePairScene'
 import { MovingBridgeScene } from './components/MovingBridgeScene'
+import { PhaseChangeScene } from './components/PhaseChangeScene'
+import { PolarityScene } from './components/PolarityScene'
 import { PredictedPathsScene } from './components/PredictedPathsScene'
 import { PreferenceChoiceScene } from './components/PreferenceChoiceScene'
+import { RememberedThresholdScene } from './components/RememberedThresholdScene'
 import { ReunitingPairScene } from './components/ReunitingPairScene'
 import { SevenCubesScene } from './components/SevenCubesScene'
+import { SharedLoadScene } from './components/SharedLoadScene'
+import { SignalRelayScene } from './components/SignalRelayScene'
 import { StructureMorphScene } from './components/StructureMorphScene'
 import { ThreeCubesScene } from './components/ThreeCubesScene'
+import { ThinningClockScene } from './components/ThinningClockScene'
+import { TrailingShadowScene } from './components/TrailingShadowScene'
 import { ValenceFieldScene } from './components/ValenceFieldScene'
 import { VllCubeScene } from './components/VllCubeScene'
 
@@ -96,6 +109,45 @@ export const IllustrationsPage = (): JSX.Element => (
         </LabeledScene>
         <LabeledScene label='Becoming a Sign' tags='meaning, symbol'>
             <BecomingSignScene />
+        </LabeledScene>
+        <LabeledScene label='Signal Relay' tags='communication, continuity'>
+            <SignalRelayScene />
+        </LabeledScene>
+        <LabeledScene label='Collective Current' tags='coordination, emergence'>
+            <CollectiveCurrentScene />
+        </LabeledScene>
+        <LabeledScene label='Shared Load' tags='cooperation, resources'>
+            <SharedLoadScene />
+        </LabeledScene>
+        <LabeledScene label='Phase Change' tags='adaptation, organization'>
+            <PhaseChangeScene />
+        </LabeledScene>
+        <LabeledScene label='Dynamic Balance' tags='maintenance, stability'>
+            <DynamicBalanceScene />
+        </LabeledScene>
+        <LabeledScene label='Two Metronomes' tags='rhythm, synchrony'>
+            <MetronomePairScene />
+        </LabeledScene>
+        <LabeledScene label='Trailing Shadow' tags='self, delay'>
+            <TrailingShadowScene />
+        </LabeledScene>
+        <LabeledScene label='Polarity' tags='relation, orientation'>
+            <PolarityScene />
+        </LabeledScene>
+        <LabeledScene label='Changing of the Guard' tags='continuity, handover'>
+            <GuardChangeScene />
+        </LabeledScene>
+        <LabeledScene label='Corridor Dance' tags='relation, symmetry'>
+            <CorridorDanceScene />
+        </LabeledScene>
+        <LabeledScene label='Domino Ring' tags='causality, recurrence'>
+            <DominoRingScene />
+        </LabeledScene>
+        <LabeledScene label='Thinning Clock' tags='time, scarcity'>
+            <ThinningClockScene />
+        </LabeledScene>
+        <LabeledScene label='Remembered Threshold' tags='mind, residue'>
+            <RememberedThresholdScene />
         </LabeledScene>
     </div>
 )
