@@ -6,6 +6,7 @@ import { FlippingCubeScene } from './components/FlippingCubeScene'
 import { MovingGridScene } from './components/MovingGridScene'
 import { SevenCubesScene } from './components/SevenCubesScene'
 import { ThreeCubesScene } from './components/ThreeCubesScene'
+import { VvlCubeScene } from './components/VvlCubeScene'
 
 export const IllustrationsPage = (): JSX.Element => (
     <div className='cube_illustrations__page'>
@@ -15,5 +16,6 @@ export const IllustrationsPage = (): JSX.Element => (
         <ThreeCubesScene />
         <CenteredCubeScene />
         <SevenCubesScene />
+        <VvlCubeScene />
     </div>
 )
