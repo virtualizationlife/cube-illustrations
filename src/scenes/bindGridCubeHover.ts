@@ -17,7 +17,7 @@ export interface GridCubeHoverController {
 export interface BindGridCubeHoverOptions {
     readonly runtime: GridSceneRuntime
     readonly camera: PerspectiveCamera
-    readonly canvas: HTMLCanvasElement
+    readonly canvas: HTMLElement
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly onChange: (cube: GridSceneCubeEntry | null) => void
 }

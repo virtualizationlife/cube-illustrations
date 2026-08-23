@@ -13,6 +13,7 @@ import {
     getSignSymbolValidationErrors,
     rotateSignSymbol,
 } from '../src/scenes/signSymbols'
+import { getSceneRenderRect } from '../src/scenes/SceneRenderHost'
 import { startSceneAnimation } from '../src/scenes/startSceneAnimation'
 
 describe('scene random utilities', () => {
@@ -46,6 +47,47 @@ describe('grid fade utilities', () => {
             innerRadiusCells: 0,
             outerRadiusCells: 5,
         })
+    })
+})
+
+describe('scene render rectangles', () => {
+    it('keeps viewport and scissor coordinates in logical top-left pixels', () => {
+        expect(
+            getSceneRenderRect(
+                { left: 120, top: 80, width: 260, height: 240 },
+                { left: 100, top: 50 },
+                1000,
+                800
+            )
+        ).toEqual({
+            viewport: { x: 20, y: 30, width: 260, height: 240 },
+            scissor: { x: 20, y: 30, width: 260, height: 240 },
+        })
+    })
+
+    it('clips only the scissor while preserving a partially visible viewport', () => {
+        expect(
+            getSceneRenderRect(
+                { left: -20, top: -30, width: 260, height: 240 },
+                { left: 0, top: 0 },
+                200,
+                150
+            )
+        ).toEqual({
+            viewport: { x: -20, y: -30, width: 260, height: 240 },
+            scissor: { x: 0, y: 0, width: 200, height: 150 },
+        })
+    })
+
+    it('returns an empty scissor for a slot outside the canvas', () => {
+        expect(
+            getSceneRenderRect(
+                { left: 500, top: 500, width: 100, height: 100 },
+                { left: 0, top: 0 },
+                200,
+                150
+            ).scissor
+        ).toEqual({ x: 200, y: 150, width: 0, height: 0 })
     })
 })
 

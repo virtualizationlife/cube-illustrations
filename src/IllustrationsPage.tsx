@@ -1,5 +1,6 @@
 import type { JSX } from 'react'
 
+import { SceneRenderHost } from './scenes/SceneRenderHost'
 import { CenteredCubeScene } from './components/CenteredCubeScene'
 import { CollectiveCurrentScene } from './components/CollectiveCurrentScene'
 import { BoundaryRepairScene } from './components/BoundaryRepairScene'
@@ -49,7 +50,8 @@ const LabeledScene = ({ label, tags, children }: LabeledSceneProps): JSX.Element
 )
 
 export const IllustrationsPage = (): JSX.Element => (
-    <div className='cube_illustrations__page'>
+    <SceneRenderHost>
+        <div className='cube_illustrations__page'>
         <LabeledScene label='Moving World' tags='space, navigation'>
             <MovingGridScene />
         </LabeledScene>
@@ -149,5 +151,6 @@ export const IllustrationsPage = (): JSX.Element => (
         <LabeledScene label='Remembered Threshold' tags='mind, residue'>
             <RememberedThresholdScene />
         </LabeledScene>
-    </div>
+        </div>
+    </SceneRenderHost>
 )
