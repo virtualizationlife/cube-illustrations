@@ -74,6 +74,8 @@ export interface GridSceneRuntime {
     readonly getCubes: () => readonly GridSceneCubeEntry[]
     readonly getCubePosition: (id: string) => GridCoordinate | undefined
     readonly getCubeOpacity: (id: string) => number | undefined
+    /** Replaces the text drawn on an existing cube's faces. */
+    readonly setCubeFaceLabels: (id: string, labels: GridCubeFaceLabelInput) => void
     readonly setCubePosition: (id: string, position: GridCoordinate) => void
     readonly moveCubeTo: (
         id: string,
@@ -766,6 +768,9 @@ export const createGridSceneRuntime = ({
             return position === undefined ? undefined : { ...position }
         },
         getCubeOpacity: (id) => cubes.get(id)?.opacity,
+        setCubeFaceLabels: (id, labels) => {
+            requireCube(id).faceLabels?.setLabels(labels)
+        },
         setCubePosition,
         moveCubeTo,
         setCubeOpacity,

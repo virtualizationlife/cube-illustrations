@@ -20,6 +20,7 @@ export interface CubeFaceLabelsProps {
 export interface CubeFaceLabelAssets {
     readonly object: Object3D
     readonly materials: readonly MeshBasicMaterial[]
+    readonly setLabels: (labels: GridCubeFaceLabelInput) => void
     readonly dispose: () => void
 }
 
@@ -53,13 +54,7 @@ export const resolveCubeFaceLabels = (
     }
 }
 
-const createLabelTexture = (
-    THREE: typeof ThreeWebGpuNamespace,
-    text: string
-): Texture => {
-    const canvas = document.createElement('canvas')
-    canvas.width = TEXTURE_SIZE
-    canvas.height = TEXTURE_SIZE
+const drawLabel = (canvas: HTMLCanvasElement, text: string): void => {
     const context = canvas.getContext('2d')
     if (context === null) throw new Error('Canvas 2D is required for cube face labels')
 
@@ -69,11 +64,21 @@ const createLabelTexture = (
     context.textAlign = 'center'
     context.textBaseline = 'middle'
     context.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.82)
+}
+
+const createLabelTexture = (
+    THREE: typeof ThreeWebGpuNamespace,
+    text: string
+): { readonly canvas: HTMLCanvasElement; readonly texture: Texture } => {
+    const canvas = document.createElement('canvas')
+    canvas.width = TEXTURE_SIZE
+    canvas.height = TEXTURE_SIZE
+    drawLabel(canvas, text)
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.colorSpace = THREE.SRGBColorSpace
     texture.needsUpdate = true
-    return texture
+    return { canvas, texture }
 }
 
 export const createCubeFaceLabels = ({
@@ -87,6 +92,8 @@ export const createCubeFaceLabels = ({
     const geometry = new THREE.PlaneGeometry(size * LABEL_SIZE_RATIO, size * LABEL_SIZE_RATIO)
     const materials: MeshBasicMaterial[] = []
     const textures: Texture[] = []
+    const labelCanvases = new Map<GridCubeFace, HTMLCanvasElement>()
+    const labelTextures = new Map<GridCubeFace, Texture>()
     const offset = size / 2 + size * FACE_OFFSET_RATIO
 
     const transforms: Readonly<
@@ -108,9 +115,7 @@ export const createCubeFaceLabels = ({
 
     for (const face of GRID_CUBE_FACES) {
         const text = resolvedLabels[face]
-        if (text.length === 0) continue
-
-        const texture = createLabelTexture(THREE, text)
+        const { canvas, texture } = createLabelTexture(THREE, text)
         const material = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
@@ -127,11 +132,23 @@ export const createCubeFaceLabels = ({
         object.add(label)
         materials.push(material)
         textures.push(texture)
+        labelCanvases.set(face, canvas)
+        labelTextures.set(face, texture)
     }
 
     return {
         object,
         materials,
+        setLabels: (nextLabels) => {
+            const nextResolvedLabels = resolveCubeFaceLabels(nextLabels)
+            for (const face of GRID_CUBE_FACES) {
+                const canvas = labelCanvases.get(face)
+                const texture = labelTextures.get(face)
+                if (canvas === undefined || texture === undefined) continue
+                drawLabel(canvas, nextResolvedLabels[face])
+                texture.needsUpdate = true
+            }
+        },
         dispose: () => {
             geometry.dispose()
             for (const material of materials) material.dispose()
