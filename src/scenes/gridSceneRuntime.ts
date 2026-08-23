@@ -146,6 +146,11 @@ interface GridLineRecord {
     readonly direction: 'column' | 'row'
 }
 
+interface TrackedTravel {
+    readonly cubeId: string
+    readonly token: symbol
+}
+
 export interface CreateGridSceneRuntimeOptions {
     readonly scene: Scene
     readonly THREE: typeof ThreeWebGpuNamespace
@@ -261,7 +266,7 @@ export const createGridSceneRuntime = ({
     const hasRadialFade = radialFadeOuterRadius > radialFadeInnerRadius
     let gridFocus: GridCoordinate = { column: 0, row: 0 }
     let gridTransition: CoordinateTransition | null = null
-    let trackedTravelCubeId: string | null = null
+    let trackedTravel: TrackedTravel | null = null
     let disposed = false
 
     const setVisualOpacity = (cube: CubeRecord, opacity: number): void => {
@@ -690,8 +695,8 @@ export const createGridSceneRuntime = ({
             }
         }
 
-        if (trackedTravelCubeId !== null) {
-            const trackedPosition = cubes.get(trackedTravelCubeId)?.position
+        if (trackedTravel !== null) {
+            const trackedPosition = cubes.get(trackedTravel.cubeId)?.position
             if (trackedPosition !== undefined) gridFocus = { ...trackedPosition }
         }
 
@@ -726,15 +731,16 @@ export const createGridSceneRuntime = ({
         setGridFocus,
         moveGridFocusTo,
         travelWithCube: async (id, position, options) => {
-            trackedTravelCubeId = id
+            const token = Symbol(id)
+            trackedTravel = { cubeId: id, token }
             await moveCubeTo(id, position, options)
-            if (trackedTravelCubeId === id) trackedTravelCubeId = null
+            if (trackedTravel?.token === token) trackedTravel = null
         },
         update,
         dispose: () => {
             if (disposed) return
             disposed = true
-            trackedTravelCubeId = null
+            trackedTravel = null
             gridTransition?.resolve()
             gridTransition = null
             for (const id of [...cubes.keys()]) removeCube(id)

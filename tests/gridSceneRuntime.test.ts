@@ -184,6 +184,31 @@ describe('grid scene runtime', () => {
         runtime.dispose()
     })
 
+    it('keeps tracking the latest travel when an earlier call finishes', async () => {
+        const { runtime } = createRuntime()
+        const firstTravel = runtime.travelWithCube(
+            MAIN_CUBE_ID,
+            { column: 2, row: 0 },
+            { duration: 1, easing: 'linear' }
+        )
+
+        runtime.update(0.25)
+        const secondTravel = runtime.travelWithCube(
+            MAIN_CUBE_ID,
+            { column: 3, row: 0 },
+            { duration: 1, easing: 'linear' }
+        )
+        await firstTravel
+
+        runtime.update(0.5)
+        expect(runtime.mainCube.position.x).toBeCloseTo(0)
+        expect(runtime.mainCube.position.z).toBeCloseTo(0)
+
+        runtime.update(0.5)
+        await secondTravel
+        runtime.dispose()
+    })
+
     it('supports fading, removal, and complete scene cleanup', () => {
         const { runtime, scene } = createRuntime()
         const distantCube = runtime.addCube({
