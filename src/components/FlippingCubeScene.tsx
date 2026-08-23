@@ -7,9 +7,13 @@ const GRID_CELL_SIZE = 0.13
 const GRID_CELL_COUNT = 3
 
 /** A cube that flips between faces and grows smoothly on hover. */
-export const FlippingCubeScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Element => (
+export const FlippingCubeScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => (
     <FaceFlipCubeScene
         cubeSize={GRID_CELL_SIZE}
+        cubeCornerRadius={cubeCornerRadius}
         gridCellSize={GRID_CELL_SIZE}
         gridCellCount={GRID_CELL_COUNT}
         cameraAzimuthDeg={45}

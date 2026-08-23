@@ -20,9 +20,13 @@ const RANDOM_WALK: GridRandomWalkConfig = {
 }
 
 /** A fixed central cube with a randomly moving and radially fading grid. */
-export const MovingGridScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Element => (
+export const MovingGridScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => (
     <GridPathCubeScene
         cubeSize={GRID_CELL_SIZE}
+        cubeCornerRadius={cubeCornerRadius}
         gridCellSize={GRID_CELL_SIZE}
         gridCellCount={5}
         gridOpacity={1}

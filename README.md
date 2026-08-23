@@ -81,6 +81,23 @@ Available face names are `front`, `back`, `left`, `right`, `top`, and `bottom`. 
 set `mainCubeFaceLabels` on `GridPathCubeScene`, or `faceLabels` on any item in
 `additionalCubes`.
 
+## Rounded corners
+
+Cubes use a corner radius of 5% of their edge by default. Every ready-to-use scene accepts
+`cubeCornerRadius` in world units; set it to `0` for sharp corners. Custom additional cubes can
+override the scene value with `cornerRadius`.
+
+```tsx
+<CenteredCubeScene cubeCornerRadius={0.004} />
+
+<GridPathCubeScene
+    cubeSize={0.1}
+    cubeCornerRadius={0.005}
+    additionalCubes={[{ id: 'sharp', cornerRadius: 0 }]}
+    // ...other required scene props
+/>
+```
+
 ## Collision-safe movement
 
 Grid coordinates are exclusive: adding or directly placing a cube in an occupied cell throws an

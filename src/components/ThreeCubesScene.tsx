@@ -7,7 +7,10 @@ import type { GridSceneCubeDefinition } from '../scenes/gridSceneRuntime'
 const GRID_CELL_SIZE = 0.1
 
 /** Three static cubes in a row with one empty grid cell between adjacent cubes. */
-export const ThreeCubesScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Element => {
+export const ThreeCubesScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => {
     const additionalCubes: readonly GridSceneCubeDefinition[] = [
         { id: 'left-cube', position: { column: -2, row: 0 }, faceLabels },
         { id: 'right-cube', position: { column: 2, row: 0 }, faceLabels },
@@ -16,6 +19,7 @@ export const ThreeCubesScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Elemen
     return (
         <GridPathCubeScene
             cubeSize={GRID_CELL_SIZE}
+            cubeCornerRadius={cubeCornerRadius}
             gridCellSize={GRID_CELL_SIZE}
             gridCellCount={5}
             cameraAzimuthDeg={0}

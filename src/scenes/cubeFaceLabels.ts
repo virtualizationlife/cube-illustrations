@@ -13,6 +13,8 @@ export type GridCubeFaceLabelInput = string | GridCubeFaceLabels
 export interface CubeFaceLabelsProps {
     /** One label for every face, or individual labels. Each label is limited to 3 symbols. */
     readonly faceLabels?: GridCubeFaceLabelInput
+    /** Cube corner radius in world units. Defaults to 5% of the cube edge. */
+    readonly cubeCornerRadius?: number
 }
 
 export interface CubeFaceLabelAssets {

@@ -1,4 +1,5 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 
 import {
     createCubeFaceLabels,
@@ -26,6 +27,12 @@ const GRID_LINE_COLOR = 0xb0b4bc
 const DEFAULT_GRID_OPACITY = 0.5
 const FLOOR_EPSILON_CELLS = 0.02
 const GRID_SEGMENTS_PER_CELL = 6
+const ROUNDED_BODY_SEGMENTS = 3
+const ROUNDED_EDGE_SEGMENTS = 1
+const ROUNDED_EDGE_THRESHOLD_DEG = 30
+
+/** Subtle default rounding, expressed as a fraction of the cube edge. */
+export const DEFAULT_CUBE_CORNER_RADIUS_RATIO = 0.05
 
 export const MAIN_CUBE_ID = 'main'
 
@@ -44,6 +51,8 @@ export interface GridSceneCubeDefinition {
     readonly size?: number
     /** Vertical distance from the grid in grid-cell units. */
     readonly hoverCells?: number
+    /** Corner radius in world units. Set to 0 for sharp corners. */
+    readonly cornerRadius?: number
     readonly opacity?: number
     /** One label for every face, or individual labels. Each label is limited to 3 symbols. */
     readonly faceLabels?: GridCubeFaceLabelInput
@@ -161,6 +170,8 @@ export interface CreateGridSceneRuntimeOptions {
     readonly gridFadeOuterRadiusCells?: number
     readonly mainCubeSize: number
     readonly mainCubeHoverCells: number
+    /** Default corner radius for every cube, in world units. */
+    readonly cubeCornerRadius?: number
     readonly mainCubeFaceLabels?: GridCubeFaceLabelInput
 }
 
@@ -253,6 +264,7 @@ export const createGridSceneRuntime = ({
     gridFadeOuterRadiusCells,
     mainCubeSize,
     mainCubeHoverCells,
+    cubeCornerRadius,
     mainCubeFaceLabels,
 }: CreateGridSceneRuntimeOptions): GridSceneRuntime => {
     const cubes = new Map<string, CubeRecord>()
@@ -430,8 +442,36 @@ export const createGridSceneRuntime = ({
         assertCellAvailable(initialPosition)
 
         const size = definition.size ?? mainCubeSize
-        const geometry = new THREE.BoxGeometry(size, size, size)
-        const edgesGeometry = new THREE.EdgesGeometry(geometry)
+        const requestedCornerRadius =
+            definition.cornerRadius ??
+            cubeCornerRadius ??
+            size * DEFAULT_CUBE_CORNER_RADIUS_RATIO
+        const cornerRadius = Math.min(size / 2, Math.max(0, requestedCornerRadius))
+        const geometry =
+            cornerRadius === 0
+                ? new THREE.BoxGeometry(size, size, size)
+                : new RoundedBoxGeometry(
+                      size,
+                      size,
+                      size,
+                      ROUNDED_BODY_SEGMENTS,
+                      cornerRadius
+                  )
+        const edgeSourceGeometry =
+            cornerRadius === 0
+                ? geometry
+                : new RoundedBoxGeometry(
+                      size,
+                      size,
+                      size,
+                      ROUNDED_EDGE_SEGMENTS,
+                      cornerRadius
+                  )
+        const edgesGeometry = new THREE.EdgesGeometry(
+            edgeSourceGeometry,
+            cornerRadius === 0 ? 1 : ROUNDED_EDGE_THRESHOLD_DEG
+        )
+        if (edgeSourceGeometry !== geometry) edgeSourceGeometry.dispose()
         const bodyMaterial = new THREE.MeshBasicMaterial({
             color: CUBE_COLOR,
             transparent: true,

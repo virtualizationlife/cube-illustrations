@@ -190,7 +190,10 @@ const createLayoutAnimation = (
 }
 
 /** Seven cubes move one by one between a random scatter and a compact island. */
-export const SevenCubesScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Element => {
+export const SevenCubesScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => {
     const [layout] = useState(createRandomLayout)
 
     const onSetup = useCallback(
@@ -215,6 +218,7 @@ export const SevenCubesScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Elemen
 
     const { canvasRef, status } = useSimpleCubeScene({
         cubeSize: GRID_CELL_SIZE,
+        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
         cameraAzimuthDeg: 45,

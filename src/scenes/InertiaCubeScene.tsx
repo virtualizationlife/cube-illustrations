@@ -16,6 +16,8 @@ const INITIAL_SPIN_Y = 0.55
 
 export interface InertiaCubeSceneProps {
     readonly cubeSize: number
+    /** Cube corner radius in world units. Defaults to 5% of cubeSize. */
+    readonly cubeCornerRadius?: number
     readonly gridCellSize: number
     readonly gridCellCount: number
     readonly cameraAzimuthDeg: number
@@ -27,6 +29,7 @@ export interface InertiaCubeSceneProps {
 
 export const InertiaCubeScene = ({
     cubeSize,
+    cubeCornerRadius,
     gridCellSize,
     gridCellCount,
     cameraAzimuthDeg,
@@ -149,6 +152,7 @@ export const InertiaCubeScene = ({
 
     const { canvasRef, status } = useSimpleCubeScene({
         cubeSize,
+        cubeCornerRadius,
         gridCellSize,
         gridCellCount,
         cameraAzimuthDeg,

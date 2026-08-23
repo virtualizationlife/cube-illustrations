@@ -39,6 +39,7 @@ export interface GridPathCubeSceneProps extends IllustrationSceneSizeProps {
 
 export const GridPathCubeScene = ({
     cubeSize,
+    cubeCornerRadius,
     gridCellSize,
     gridCellCount,
     gridOpacity,
@@ -103,6 +104,7 @@ export const GridPathCubeScene = ({
 
     const { canvasRef, status } = useSimpleCubeScene({
         cubeSize,
+        cubeCornerRadius,
         gridCellSize,
         gridCellCount,
         gridOpacity,

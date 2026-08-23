@@ -46,6 +46,8 @@ export interface SimpleCubeSetupContext {
 
 export interface IllustrationSceneSizeProps {
     readonly cubeSize: number
+    /** Cube corner radius in world units. Defaults to 5% of cubeSize. */
+    readonly cubeCornerRadius?: number
     readonly gridCellSize: number
     readonly gridCellCount: number
     /** Maximum line opacity after an entering grid line has fully appeared. */
@@ -82,6 +84,7 @@ export interface SimpleCubeSceneHandle {
 
 export const useSimpleCubeScene = ({
     cubeSize,
+    cubeCornerRadius,
     gridCellSize,
     gridCellCount,
     gridOpacity,
@@ -144,6 +147,7 @@ export const useSimpleCubeScene = ({
                 gridFadeOuterRadiusCells,
                 mainCubeSize: cubeSize,
                 mainCubeHoverCells: hoverCells,
+                cubeCornerRadius,
                 mainCubeFaceLabels,
             })
             const mesh = runtime.mainCube
@@ -252,6 +256,7 @@ export const useSimpleCubeScene = ({
         }
     }, [
         cubeSize,
+        cubeCornerRadius,
         gridCellSize,
         gridCellCount,
         gridOpacity,

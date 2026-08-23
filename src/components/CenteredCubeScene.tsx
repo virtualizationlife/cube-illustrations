@@ -6,9 +6,13 @@ import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
 const GRID_CELL_SIZE = 0.1
 
 /** One static cube centered on the grid, viewed at a 45-degree azimuth. */
-export const CenteredCubeScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Element => (
+export const CenteredCubeScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => (
     <GridPathCubeScene
         cubeSize={GRID_CELL_SIZE}
+        cubeCornerRadius={cubeCornerRadius}
         gridCellSize={GRID_CELL_SIZE}
         gridCellCount={5}
         cameraAzimuthDeg={45}

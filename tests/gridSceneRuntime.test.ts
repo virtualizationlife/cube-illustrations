@@ -10,6 +10,7 @@ import {
 } from '../src/scenes/gridSceneAnimation'
 import {
     createGridSceneRuntime,
+    DEFAULT_CUBE_CORNER_RADIUS_RATIO,
     getGridDistance,
     MAIN_CUBE_ID,
 } from '../src/scenes/gridSceneRuntime'
@@ -38,6 +39,28 @@ const PROXIMITY_OPACITY: GridProximityOpacityConfig = {
 }
 
 describe('grid scene runtime', () => {
+    it('uses subtle rounded corners by default and supports radius overrides', () => {
+        const { runtime } = createRuntime()
+        const mainBody = runtime.mainCube.children[0]
+        if (!(mainBody instanceof THREE.Mesh)) throw new Error('Main cube body is missing')
+
+        expect(mainBody.geometry.type).toBe('RoundedBoxGeometry')
+        expect(mainBody.geometry.parameters.radius).toBeCloseTo(
+            0.1 * DEFAULT_CUBE_CORNER_RADIUS_RATIO
+        )
+
+        const sharpCube = runtime.addCube({
+            id: 'sharp',
+            position: { column: 1, row: 0 },
+            cornerRadius: 0,
+        })
+        const sharpBody = sharpCube.children[0]
+        if (!(sharpBody instanceof THREE.Mesh)) throw new Error('Sharp cube body is missing')
+        expect(sharpBody.geometry.type).toBe('BoxGeometry')
+
+        runtime.dispose()
+    })
+
     it('makes encounter cubes opaque as the main cube approaches', () => {
         expect(getProximityOpacity(5, PROXIMITY_OPACITY)).toBe(0.3)
         expect(getProximityOpacity(3, PROXIMITY_OPACITY)).toBe(0.6)

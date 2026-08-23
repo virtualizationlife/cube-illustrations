@@ -68,7 +68,10 @@ const PROXIMITY_OPACITY: GridProximityOpacityConfig = {
 }
 
 /** A moving main cube that reveals randomly placed cubes as it approaches them. */
-export const EncounterCubeScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Element => {
+export const EncounterCubeScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => {
     const additionalCubesFactory = useCallback(
         () => createEncounterCubes(faceLabels),
         [faceLabels]
@@ -77,6 +80,7 @@ export const EncounterCubeScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Ele
     return (
         <GridPathCubeScene
             cubeSize={GRID_CELL_SIZE}
+            cubeCornerRadius={cubeCornerRadius}
             gridCellSize={GRID_CELL_SIZE}
             gridCellCount={11}
             cameraAzimuthDeg={30}
