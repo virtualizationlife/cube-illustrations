@@ -1,6 +1,7 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
+type Mesh = InstanceType<typeof ThreeWebGpuNamespace.Mesh>
 type MeshBasicMaterial = InstanceType<typeof ThreeWebGpuNamespace.MeshBasicMaterial>
 type Texture = InstanceType<typeof ThreeWebGpuNamespace.Texture>
 
@@ -19,8 +20,10 @@ export interface CubeFaceLabelsProps {
 
 export interface CubeFaceLabelAssets {
     readonly object: Object3D
+    /** Live view of the materials currently in use; one per distinct label text. */
     readonly materials: readonly MeshBasicMaterial[]
     readonly setLabels: (labels: GridCubeFaceLabelInput) => void
+    readonly setOpacity: (opacity: number) => void
     readonly dispose: () => void
 }
 
@@ -66,36 +69,35 @@ const drawLabel = (canvas: HTMLCanvasElement, text: string): void => {
     context.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.82)
 }
 
-const createLabelTexture = (
-    THREE: typeof ThreeWebGpuNamespace,
-    text: string
-): { readonly canvas: HTMLCanvasElement; readonly texture: Texture } => {
-    const canvas = document.createElement('canvas')
-    canvas.width = TEXTURE_SIZE
-    canvas.height = TEXTURE_SIZE
-    drawLabel(canvas, text)
-
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.colorSpace = THREE.SRGBColorSpace
-    texture.needsUpdate = true
-    return { canvas, texture }
+interface LabelSurface {
+    readonly canvas: HTMLCanvasElement
+    readonly texture: Texture
+    readonly material: MeshBasicMaterial
 }
 
+/**
+ * Text drawn on cube faces.
+ *
+ * Two things are deliberately avoided here. Faces whose label is empty get no texture, no
+ * material and no mesh at all — `resolveCubeFaceLabels` fills unspecified faces with `''`,
+ * so building all six unconditionally meant a 256×256 texture and a draw call per blank
+ * face. And faces that share the same text share one surface, so the common
+ * `faceLabels: 'ABC'` case allocates one texture instead of six.
+ */
 export const createCubeFaceLabels = ({
     THREE,
     size,
     labels,
     opacity,
 }: CreateCubeFaceLabelsOptions): CubeFaceLabelAssets => {
-    const resolvedLabels = resolveCubeFaceLabels(labels)
     const object = new THREE.Group()
     const geometry = new THREE.PlaneGeometry(size * LABEL_SIZE_RATIO, size * LABEL_SIZE_RATIO)
     const materials: MeshBasicMaterial[] = []
-    const textures: Texture[] = []
-    const labelCanvases = new Map<GridCubeFace, HTMLCanvasElement>()
-    const labelTextures = new Map<GridCubeFace, Texture>()
-    const offset = size / 2 + size * FACE_OFFSET_RATIO
+    const surfaces = new Map<string, LabelSurface>()
+    const meshes = new Map<GridCubeFace, Mesh>()
+    let currentOpacity = opacity
 
+    const offset = size / 2 + size * FACE_OFFSET_RATIO
     const transforms: Readonly<
         Record<
             GridCubeFace,
@@ -113,46 +115,105 @@ export const createCubeFaceLabels = ({
         bottom: { position: [0, -offset, 0], rotation: [Math.PI / 2, 0, 0] },
     }
 
-    for (const face of GRID_CUBE_FACES) {
-        const text = resolvedLabels[face]
-        const { canvas, texture } = createLabelTexture(THREE, text)
+    const createSurface = (text: string): LabelSurface => {
+        const canvas = document.createElement('canvas')
+        canvas.width = TEXTURE_SIZE
+        canvas.height = TEXTURE_SIZE
+        drawLabel(canvas, text)
+
+        const texture = new THREE.CanvasTexture(canvas)
+        texture.colorSpace = THREE.SRGBColorSpace
+        texture.needsUpdate = true
+
         const material = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            opacity,
+            opacity: currentOpacity,
             depthTest: true,
             depthWrite: false,
             side: THREE.DoubleSide,
         })
-        const label = new THREE.Mesh(geometry, material)
-        const transform = transforms[face]
-        label.position.set(...transform.position)
-        label.rotation.set(...transform.rotation)
-        label.renderOrder = 2
-        object.add(label)
-        materials.push(material)
-        textures.push(texture)
-        labelCanvases.set(face, canvas)
-        labelTextures.set(face, texture)
+        return { canvas, texture, material }
     }
+
+    const disposeSurface = (surface: LabelSurface): void => {
+        surface.material.dispose()
+        surface.texture.dispose()
+    }
+
+    const getMesh = (face: GridCubeFace): Mesh => {
+        const existing = meshes.get(face)
+        if (existing !== undefined) return existing
+
+        const mesh = new THREE.Mesh(geometry)
+        const transform = transforms[face]
+        mesh.position.set(...transform.position)
+        mesh.rotation.set(...transform.rotation)
+        mesh.renderOrder = 2
+        meshes.set(face, mesh)
+        return mesh
+    }
+
+    const applyLabels = (input: GridCubeFaceLabelInput): void => {
+        const resolved = resolveCubeFaceLabels(input)
+        const wantedTexts = new Set(GRID_CUBE_FACES.map((face) => resolved[face]))
+        wantedTexts.delete('')
+
+        // Surfaces whose text is gone become a pool: repainting one is far cheaper than
+        // destroying a texture and uploading a new one mid-animation.
+        const reusable: LabelSurface[] = []
+        for (const [text, surface] of [...surfaces]) {
+            if (wantedTexts.has(text)) continue
+            surfaces.delete(text)
+            reusable.push(surface)
+        }
+
+        for (const text of wantedTexts) {
+            if (surfaces.has(text)) continue
+            const recycled = reusable.pop()
+            if (recycled === undefined) {
+                surfaces.set(text, createSurface(text))
+                continue
+            }
+            drawLabel(recycled.canvas, text)
+            recycled.texture.needsUpdate = true
+            surfaces.set(text, recycled)
+        }
+        for (const surface of reusable) disposeSurface(surface)
+
+        for (const face of GRID_CUBE_FACES) {
+            const text = resolved[face]
+            const mesh = meshes.get(face)
+            if (text === '') {
+                if (mesh !== undefined) object.remove(mesh)
+                continue
+            }
+            const surface = surfaces.get(text)
+            if (surface === undefined) continue
+            const faceMesh = getMesh(face)
+            faceMesh.material = surface.material
+            if (faceMesh.parent !== object) object.add(faceMesh)
+        }
+
+        materials.length = 0
+        for (const surface of surfaces.values()) materials.push(surface.material)
+    }
+
+    applyLabels(labels)
 
     return {
         object,
         materials,
-        setLabels: (nextLabels) => {
-            const nextResolvedLabels = resolveCubeFaceLabels(nextLabels)
-            for (const face of GRID_CUBE_FACES) {
-                const canvas = labelCanvases.get(face)
-                const texture = labelTextures.get(face)
-                if (canvas === undefined || texture === undefined) continue
-                drawLabel(canvas, nextResolvedLabels[face])
-                texture.needsUpdate = true
-            }
+        setLabels: applyLabels,
+        setOpacity: (nextOpacity) => {
+            currentOpacity = nextOpacity
+            for (const surface of surfaces.values()) surface.material.opacity = nextOpacity
         },
         dispose: () => {
             geometry.dispose()
-            for (const material of materials) material.dispose()
-            for (const texture of textures) texture.dispose()
+            for (const surface of surfaces.values()) disposeSurface(surface)
+            surfaces.clear()
+            meshes.clear()
         },
     }
 }

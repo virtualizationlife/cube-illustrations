@@ -1,11 +1,12 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 
 import {
     createCubeFaceLabels,
     type CubeFaceLabelAssets,
     type GridCubeFaceLabelInput,
 } from './cubeFaceLabels'
+import { createCubeGeometryCache } from './cubeGeometryCache'
+import { createGridLines } from './gridLines'
 import {
     findGridPath,
     getGridCellKey,
@@ -19,17 +20,12 @@ type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 type Scene = InstanceType<typeof ThreeWebGpuNamespace.Scene>
 type MeshBasicMaterial = InstanceType<typeof ThreeWebGpuNamespace.MeshBasicMaterial>
 type LineBasicMaterial = InstanceType<typeof ThreeWebGpuNamespace.LineBasicMaterial>
-type BufferAttribute = InstanceType<typeof ThreeWebGpuNamespace.BufferAttribute>
 
 const CUBE_COLOR = 0xfefefe
 const CUBE_EDGE_COLOR = 0x8b919a
 const GRID_LINE_COLOR = 0xb0b4bc
 const DEFAULT_GRID_OPACITY = 0.5
 const FLOOR_EPSILON_CELLS = 0.02
-const GRID_SEGMENTS_PER_CELL = 6
-const ROUNDED_BODY_SEGMENTS = 3
-const ROUNDED_EDGE_SEGMENTS = 1
-const ROUNDED_EDGE_THRESHOLD_DEG = 30
 
 /** Subtle default rounding, expressed as a fraction of the cube edge. */
 export const DEFAULT_CUBE_CORNER_RADIUS_RATIO = 0.02
@@ -54,6 +50,12 @@ export interface GridSceneCubeDefinition {
     /** Corner radius in world units. Set to 0 for sharp corners. */
     readonly cornerRadius?: number
     readonly opacity?: number
+    /**
+     * Whether the cube reserves its grid cell. A non-occupying cube shares cells with the
+     * cubes below it, which is how a lifted cube rides above ground-level ones. Defaults
+     * to true.
+     */
+    readonly occupiesCell?: boolean
     /** One label for every face, or individual labels. Each label is limited to 3 symbols. */
     readonly faceLabels?: GridCubeFaceLabelInput
 }
@@ -72,11 +74,18 @@ export interface GridSceneRuntime {
     readonly hasCube: (id: string) => boolean
     readonly getCube: (id: string) => Object3D | undefined
     readonly getCubes: () => readonly GridSceneCubeEntry[]
+    /**
+     * Changes whenever a cube is added or removed, so callers that derive a list from
+     * `getCubes()` can cache it instead of rebuilding it every frame.
+     */
+    readonly getCubeRevision: () => number
     readonly getCubePosition: (id: string) => GridCoordinate | undefined
     readonly getCubeOpacity: (id: string) => number | undefined
     /** Replaces the text drawn on an existing cube's faces. */
     readonly setCubeFaceLabels: (id: string, labels: GridCubeFaceLabelInput) => void
     readonly setCubePosition: (id: string, position: GridCoordinate) => void
+    /** Turns a cube's grid-cell reservation on or off after it has been created. */
+    readonly setCubeOccupiesCell: (id: string, occupiesCell: boolean) => void
     readonly moveCubeTo: (
         id: string,
         position: GridCoordinate,
@@ -108,6 +117,11 @@ export interface GridSceneRuntime {
     readonly dispose: () => void
 }
 
+interface MutableGridCoordinate {
+    column: number
+    row: number
+}
+
 interface CoordinateTransition {
     elapsed: number
     readonly duration: number
@@ -128,14 +142,15 @@ interface NumberTransition {
 
 interface CubeRecord {
     readonly object: Object3D
-    readonly geometry: { dispose: () => void }
     readonly bodyMaterial: MeshBasicMaterial
     readonly edgeMaterial: LineBasicMaterial
-    readonly edgesGeometry: { dispose: () => void }
     readonly faceLabels: CubeFaceLabelAssets | null
     readonly size: number
+    readonly cornerRadius: number
     readonly hoverCells: number
-    position: GridCoordinate
+    /** Mutated in place; `getCubePosition` hands out copies. */
+    readonly position: MutableGridCoordinate
+    occupiesCell: boolean
     opacity: number
     movement: CubeMovement | null
     opacityTransition: NumberTransition | null
@@ -149,16 +164,6 @@ interface CubeMovement {
     readonly resolve: () => void
     segmentIndex: number
     transition: CoordinateTransition
-}
-
-interface GridLineRecord {
-    readonly object: Object3D
-    readonly material: LineBasicMaterial
-    readonly geometry: { dispose: () => void }
-    readonly colorAttribute: BufferAttribute
-    readonly parallelPositions: readonly number[]
-    readonly basePosition: number
-    readonly direction: 'column' | 'row'
 }
 
 interface TrackedTravel {
@@ -198,13 +203,18 @@ const applyEasing = (progress: number, easing: GridSceneEasing): number => {
     }
 }
 
-const interpolateCoordinate = (
+const createCoordinateTransitionState = (
     from: GridCoordinate,
     to: GridCoordinate,
-    progress: number
-): GridCoordinate => ({
-    column: from.column + (to.column - from.column) * progress,
-    row: from.row + (to.row - from.row) * progress,
+    options: GridSceneTransitionOptions,
+    resolve = (): void => undefined
+): CoordinateTransition => ({
+    elapsed: 0,
+    duration: Math.max(0, options.duration),
+    easing: options.easing ?? 'easeInOutCubic',
+    from: { column: from.column, row: from.row },
+    to: { column: to.column, row: to.row },
+    resolve,
 })
 
 const createCoordinateTransition = (
@@ -222,20 +232,6 @@ const createCoordinateTransition = (
         completion,
     }
 }
-
-const createCoordinateTransitionState = (
-    from: GridCoordinate,
-    to: GridCoordinate,
-    options: GridSceneTransitionOptions,
-    resolve = (): void => undefined
-): CoordinateTransition => ({
-    elapsed: 0,
-    duration: Math.max(0, options.duration),
-    easing: options.easing ?? 'easeInOutCubic',
-    from: { ...from },
-    to: { ...to },
-    resolve,
-})
 
 const createNumberTransition = (
     from: number,
@@ -260,6 +256,43 @@ const createNumberTransition = (
     }
 }
 
+const getTransitionProgress = (transition: {
+    readonly elapsed: number
+    readonly duration: number
+}): number =>
+    transition.duration === 0 ? 1 : Math.min(1, transition.elapsed / transition.duration)
+
+/** Advances a transition and writes the interpolated value into `target`, avoiding a
+ *  fresh coordinate object per cube per frame. Returns whether the transition finished. */
+const advanceCoordinateTransition = (
+    transition: CoordinateTransition,
+    delta: number,
+    target: MutableGridCoordinate
+): boolean => {
+    transition.elapsed += delta
+    const progress = getTransitionProgress(transition)
+    const eased = applyEasing(progress, transition.easing)
+    target.column = transition.from.column + (transition.to.column - transition.from.column) * eased
+    target.row = transition.from.row + (transition.to.row - transition.from.row) * eased
+    return progress >= 1
+}
+
+const advanceNumberTransition = (transition: NumberTransition, delta: number): number => {
+    transition.elapsed += delta
+    const eased = applyEasing(getTransitionProgress(transition), transition.easing)
+    return transition.from + (transition.to - transition.from) * eased
+}
+
+const setMaterialTransparency = (
+    material: { transparent: boolean; needsUpdate: boolean },
+    transparent: boolean
+): void => {
+    // Changing this rebuilds the render pipeline, so only touch it on a real change.
+    if (material.transparent === transparent) return
+    material.transparent = transparent
+    material.needsUpdate = true
+}
+
 export const createGridSceneRuntime = ({
     scene,
     THREE,
@@ -275,15 +308,25 @@ export const createGridSceneRuntime = ({
 }: CreateGridSceneRuntimeOptions): GridSceneRuntime => {
     const cubes = new Map<string, CubeRecord>()
     const reservedCells = new Map<string, string>()
+    const geometryCache = createCubeGeometryCache(THREE)
     const grid = new THREE.Group()
-    const gridLines: GridLineRecord[] = []
-    const halfGridSize = (gridCellSize * gridCellCount) / 2
     let maxGridOpacity = clampOpacity(gridOpacity)
-    let radialFadeInnerRadius = Math.max(0, gridFadeInnerRadiusCells ?? 0) * gridCellSize
-    let radialFadeOuterRadius = Math.max(0, gridFadeOuterRadiusCells ?? 0) * gridCellSize
-    let gridFocus: GridCoordinate = { column: 0, row: 0 }
+    const gridLines = createGridLines({
+        THREE,
+        gridCellSize,
+        gridCellCount,
+        color: GRID_LINE_COLOR,
+        opacity: maxGridOpacity,
+        fadeInnerRadius: Math.max(0, gridFadeInnerRadiusCells ?? 0) * gridCellSize,
+        fadeOuterRadius: Math.max(0, gridFadeOuterRadiusCells ?? 0) * gridCellSize,
+    })
+    grid.add(gridLines.object)
+    scene.add(grid)
+
+    const gridFocus: MutableGridCoordinate = { column: 0, row: 0 }
     let gridTransition: CoordinateTransition | null = null
     let trackedTravel: TrackedTravel | null = null
+    let cubeRevision = 0
     let disposed = false
 
     const setVisualOpacity = (cube: CubeRecord, opacity: number): void => {
@@ -292,7 +335,12 @@ export const createGridSceneRuntime = ({
         cube.object.visible = nextOpacity > 0
         cube.bodyMaterial.opacity = nextOpacity
         cube.edgeMaterial.opacity = nextOpacity
-        for (const material of cube.faceLabels?.materials ?? []) material.opacity = nextOpacity
+        // A fully opaque cube renders identically through the opaque path, which skips
+        // blending and the per-frame back-to-front sort. Labels keep their glyph alpha.
+        const isTransparent = nextOpacity < 1
+        setMaterialTransparency(cube.bodyMaterial, isTransparent)
+        setMaterialTransparency(cube.edgeMaterial, isTransparent)
+        cube.faceLabels?.setOpacity(nextOpacity)
     }
 
     const positionCube = (cube: CubeRecord): void => {
@@ -308,56 +356,7 @@ export const createGridSceneRuntime = ({
         // Only the fractional part matters for an infinite repeating grid.
         const columnFraction = gridFocus.column - Math.floor(gridFocus.column)
         const rowFraction = gridFocus.row - Math.floor(gridFocus.row)
-        const columnOffset = -columnFraction * gridCellSize
-        const rowOffset = -rowFraction * gridCellSize
-
-        const getEdgeFade = (position: number): number =>
-            Math.min(
-                1,
-                Math.max(0, (halfGridSize + gridCellSize - Math.abs(position)) / gridCellSize)
-            )
-
-        const getRadialFade = (column: number, row: number): number => {
-            if (radialFadeOuterRadius <= radialFadeInnerRadius) return 1
-            const distance = Math.hypot(column, row)
-            const progress = Math.min(
-                1,
-                Math.max(
-                    0,
-                    (distance - radialFadeInnerRadius) /
-                        (radialFadeOuterRadius - radialFadeInnerRadius)
-                )
-            )
-            const smoothProgress = progress * progress * (3 - 2 * progress)
-            return 1 - smoothProgress
-        }
-
-        for (const line of gridLines) {
-            const perpendicularPosition =
-                line.direction === 'column'
-                    ? line.basePosition + columnOffset
-                    : line.basePosition + rowOffset
-            const parallelOffset = line.direction === 'column' ? rowOffset : columnOffset
-            let lineIsVisible = false
-
-            for (let index = 0; index < line.parallelPositions.length; index += 1) {
-                const parallelPosition = line.parallelPositions[index] + parallelOffset
-                const column =
-                    line.direction === 'column' ? perpendicularPosition : parallelPosition
-                const row = line.direction === 'row' ? perpendicularPosition : parallelPosition
-                const alpha = getEdgeFade(column) * getEdgeFade(row) * getRadialFade(column, row)
-                line.colorAttribute.setW(index, alpha)
-                if (alpha > 0) lineIsVisible = true
-            }
-
-            line.colorAttribute.needsUpdate = true
-            line.object.visible = lineIsVisible
-            line.object.position.set(
-                line.direction === 'column' ? perpendicularPosition : columnOffset,
-                0,
-                line.direction === 'row' ? perpendicularPosition : rowOffset
-            )
-        }
+        gridLines.setOffset(-columnFraction * gridCellSize, -rowFraction * gridCellSize)
     }
 
     const applyPositions = (): void => {
@@ -365,66 +364,12 @@ export const createGridSceneRuntime = ({
         for (const cube of cubes.values()) positionCube(cube)
     }
 
-    const addGridLine = (direction: GridLineRecord['direction'], basePosition: number): void => {
-        const geometry = new THREE.BufferGeometry()
-        const positions: number[] = []
-        const colors: number[] = []
-        const parallelPositions: number[] = []
-        const parallelStart = -halfGridSize - gridCellSize
-        const segmentLength = gridCellSize / GRID_SEGMENTS_PER_CELL
-        const segmentCount = (gridCellCount + 2) * GRID_SEGMENTS_PER_CELL
-
-        for (let index = 0; index < segmentCount; index += 1) {
-            const start = parallelStart + index * segmentLength
-            const end = start + segmentLength
-            if (direction === 'column') {
-                positions.push(0, 0, start, 0, 0, end)
-            } else {
-                positions.push(start, 0, 0, end, 0, 0)
-            }
-            parallelPositions.push(start, end)
-            // RGB stays white so only vertex alpha modulates the material's grid color.
-            colors.push(1, 1, 1, 1)
-            colors.push(1, 1, 1, 1)
-        }
-
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-        const colorAttribute = new THREE.Float32BufferAttribute(colors, 4)
-        geometry.setAttribute('color', colorAttribute)
-
-        const material = new THREE.LineBasicMaterial({
-            color: GRID_LINE_COLOR,
-            transparent: true,
-            opacity: maxGridOpacity,
-            depthWrite: false,
-            vertexColors: true,
-        })
-        const object = new THREE.LineSegments(geometry, material)
-        object.renderOrder = 0
-        grid.add(object)
-        gridLines.push({
-            object,
-            material,
-            geometry,
-            colorAttribute,
-            parallelPositions,
-            basePosition,
-            direction,
-        })
-    }
-
-    // One extra line on either side cross-fades when the repeating grid moves a cell.
-    for (let index = -1; index <= gridCellCount + 1; index += 1) {
-        const basePosition = (-gridCellCount / 2 + index) * gridCellSize
-        addGridLine('column', basePosition)
-        addGridLine('row', basePosition)
-    }
-    scene.add(grid)
-
     const getBlockedCellKeys = (excludedCubeId?: string): Set<string> => {
         const blocked = new Set<string>()
         for (const [cubeId, cube] of cubes) {
-            if (cubeId !== excludedCubeId) blocked.add(getGridCellKey(cube.position))
+            if (cubeId !== excludedCubeId && cube.occupiesCell) {
+                blocked.add(getGridCellKey(cube.position))
+            }
         }
         for (const [cellKey, cubeId] of reservedCells) {
             if (cubeId !== excludedCubeId) blocked.add(cellKey)
@@ -444,7 +389,8 @@ export const createGridSceneRuntime = ({
             throw new Error(`A cube with id "${definition.id}" already exists`)
         }
         const initialPosition = normalizeGridCoordinate(definition.position ?? { column: 0, row: 0 })
-        assertCellAvailable(initialPosition)
+        const occupiesCell = definition.occupiesCell ?? true
+        if (occupiesCell) assertCellAvailable(initialPosition)
 
         const size = definition.size ?? mainCubeSize
         const requestedCornerRadius =
@@ -452,31 +398,8 @@ export const createGridSceneRuntime = ({
             cubeCornerRadius ??
             size * DEFAULT_CUBE_CORNER_RADIUS_RATIO
         const cornerRadius = Math.min(size / 2, Math.max(0, requestedCornerRadius))
-        const geometry =
-            cornerRadius === 0
-                ? new THREE.BoxGeometry(size, size, size)
-                : new RoundedBoxGeometry(
-                      size,
-                      size,
-                      size,
-                      ROUNDED_BODY_SEGMENTS,
-                      cornerRadius
-                  )
-        const edgeSourceGeometry =
-            cornerRadius === 0
-                ? geometry
-                : new RoundedBoxGeometry(
-                      size,
-                      size,
-                      size,
-                      ROUNDED_EDGE_SEGMENTS,
-                      cornerRadius
-                  )
-        const edgesGeometry = new THREE.EdgesGeometry(
-            edgeSourceGeometry,
-            cornerRadius === 0 ? 1 : ROUNDED_EDGE_THRESHOLD_DEG
-        )
-        if (edgeSourceGeometry !== geometry) edgeSourceGeometry.dispose()
+        const geometrySet = geometryCache.acquire(size, cornerRadius)
+
         const bodyMaterial = new THREE.MeshBasicMaterial({
             color: CUBE_COLOR,
             transparent: true,
@@ -495,11 +418,15 @@ export const createGridSceneRuntime = ({
         })
 
         const object = new THREE.Group()
-        const body = new THREE.Mesh(geometry, bodyMaterial)
+        const body = new THREE.Mesh(geometrySet.body, bodyMaterial)
         body.renderOrder = 1
+        // Lets a hover raycast resolve a hit straight to its cube instead of walking the
+        // scene graph and searching the cube list at every level.
+        body.userData.cubeId = definition.id
+        body.userData.cubeObject = object
         object.add(body)
 
-        const edges = new THREE.LineSegments(edgesGeometry, edgeMaterial)
+        const edges = new THREE.LineSegments(geometrySet.edges, edgeMaterial)
         edges.scale.setScalar(1.01)
         edges.renderOrder = 3
         object.add(edges)
@@ -517,19 +444,20 @@ export const createGridSceneRuntime = ({
 
         const cube: CubeRecord = {
             object,
-            geometry,
             bodyMaterial,
             edgeMaterial,
-            edgesGeometry,
             faceLabels,
             size,
+            cornerRadius,
             hoverCells: definition.hoverCells ?? 0,
-            position: initialPosition,
+            position: { column: initialPosition.column, row: initialPosition.row },
+            occupiesCell,
             opacity: definition.opacity ?? 1,
             movement: null,
             opacityTransition: null,
         }
         cubes.set(definition.id, cube)
+        cubeRevision += 1
         scene.add(object)
         setVisualOpacity(cube, cube.opacity)
         positionCube(cube)
@@ -563,20 +491,21 @@ export const createGridSceneRuntime = ({
         finishCubeMovement(id, cube)
         cube.opacityTransition?.resolve()
         scene.remove(cube.object)
-        cube.geometry.dispose()
-        cube.edgesGeometry.dispose()
+        geometryCache.release(cube.size, cube.cornerRadius)
         cube.bodyMaterial.dispose()
         cube.edgeMaterial.dispose()
         cube.faceLabels?.dispose()
         cubes.delete(id)
+        cubeRevision += 1
     }
 
     const setCubePosition = (id: string, position: GridCoordinate): void => {
         const cube = requireCube(id)
         const normalizedPosition = normalizeGridCoordinate(position)
-        assertCellAvailable(normalizedPosition, id)
+        if (cube.occupiesCell) assertCellAvailable(normalizedPosition, id)
         finishCubeMovement(id, cube)
-        cube.position = normalizedPosition
+        cube.position.column = normalizedPosition.column
+        cube.position.row = normalizedPosition.row
         positionCube(cube)
     }
 
@@ -588,7 +517,8 @@ export const createGridSceneRuntime = ({
         const cube = requireCube(id)
         finishCubeMovement(id, cube)
         const destination = normalizeGridCoordinate(position)
-        const path = findGridPath(cube.position, destination, getBlockedCellKeys(id))
+        const blockedCellKeys = cube.occupiesCell ? getBlockedCellKeys(id) : new Set<string>()
+        const path = findGridPath(cube.position, destination, blockedCellKeys)
         if (path === null || path.length === 0) return Promise.resolve()
 
         let resolveMovement = (): void => undefined
@@ -597,7 +527,9 @@ export const createGridSceneRuntime = ({
         })
         // Keep the starting cell reserved as well. Otherwise another cube could enter it
         // while this cube is still crossing the first cell boundary.
-        const reservedCellKeys = [getGridCellKey(cube.position), ...path.map(getGridCellKey)]
+        const reservedCellKeys = cube.occupiesCell
+            ? [getGridCellKey(cube.position), ...path.map(getGridCellKey)]
+            : []
         for (const cellKey of reservedCellKeys) reservedCells.set(cellKey, id)
         const segmentDuration = Math.max(0, options.duration) / path.length
         cube.movement = {
@@ -641,7 +573,8 @@ export const createGridSceneRuntime = ({
     const setGridFocus = (position: GridCoordinate): void => {
         gridTransition?.resolve()
         gridTransition = null
-        gridFocus = { ...position }
+        gridFocus.column = position.column
+        gridFocus.row = position.row
         applyPositions()
     }
 
@@ -655,42 +588,10 @@ export const createGridSceneRuntime = ({
         return completion
     }
 
-    const updateCoordinateTransition = (
-        transition: CoordinateTransition,
-        delta: number
-    ): { readonly value: GridCoordinate; readonly complete: boolean } => {
-        transition.elapsed += delta
-        const progress =
-            transition.duration === 0 ? 1 : Math.min(1, transition.elapsed / transition.duration)
-        return {
-            value: interpolateCoordinate(
-                transition.from,
-                transition.to,
-                applyEasing(progress, transition.easing)
-            ),
-            complete: progress >= 1,
-        }
-    }
-
-    const updateNumberTransition = (
-        transition: NumberTransition,
-        delta: number
-    ): { readonly value: number; readonly complete: boolean } => {
-        transition.elapsed += delta
-        const progress =
-            transition.duration === 0 ? 1 : Math.min(1, transition.elapsed / transition.duration)
-        const eased = applyEasing(progress, transition.easing)
-        return {
-            value: transition.from + (transition.to - transition.from) * eased,
-            complete: progress >= 1,
-        }
-    }
-
     const update = (delta: number): void => {
         if (gridTransition !== null) {
-            const result = updateCoordinateTransition(gridTransition, delta)
-            gridFocus = result.value
-            if (result.complete) {
+            const complete = advanceCoordinateTransition(gridTransition, delta, gridFocus)
+            if (complete) {
                 const completedTransition = gridTransition
                 gridTransition = null
                 completedTransition.resolve()
@@ -706,9 +607,12 @@ export const createGridSceneRuntime = ({
                     movement.transition.duration - movement.transition.elapsed
                 )
                 const segmentDelta = Math.min(movementDelta, remainingDuration)
-                const result = updateCoordinateTransition(movement.transition, segmentDelta)
-                cube.position = result.value
-                if (!result.complete) break
+                const complete = advanceCoordinateTransition(
+                    movement.transition,
+                    segmentDelta,
+                    cube.position
+                )
+                if (!complete) break
 
                 movementDelta -= segmentDelta
                 movement.segmentIndex += 1
@@ -730,9 +634,9 @@ export const createGridSceneRuntime = ({
             }
 
             if (cube.opacityTransition !== null) {
-                const result = updateNumberTransition(cube.opacityTransition, delta)
-                setVisualOpacity(cube, result.value)
-                if (result.complete) {
+                const value = advanceNumberTransition(cube.opacityTransition, delta)
+                setVisualOpacity(cube, value)
+                if (getTransitionProgress(cube.opacityTransition) >= 1) {
                     const completedTransition = cube.opacityTransition
                     cube.opacityTransition = null
                     completedTransition.resolve()
@@ -742,9 +646,16 @@ export const createGridSceneRuntime = ({
 
         if (trackedTravel !== null) {
             const trackedPosition = cubes.get(trackedTravel.cubeId)?.position
-            if (trackedPosition !== undefined) gridFocus = { ...trackedPosition }
+            if (trackedPosition !== undefined) {
+                gridFocus.column = trackedPosition.column
+                gridFocus.row = trackedPosition.row
+            }
         }
 
+        // Unconditional on purpose. Scenes write to a cube's object transform themselves and
+        // rely on this pass to restore it from the grid coordinates every frame — the flip
+        // lift in FaceFlipCubeScene does `mesh.position.y += ...` and would otherwise
+        // accumulate forever. Skipping it when no transition is running is not safe.
         applyPositions()
     }
 
@@ -754,6 +665,7 @@ export const createGridSceneRuntime = ({
         hoverCells: mainCubeHoverCells,
         faceLabels: mainCubeFaceLabels,
     })
+    updateGridVisual()
 
     return {
         grid,
@@ -763,29 +675,38 @@ export const createGridSceneRuntime = ({
         hasCube: (id) => cubes.has(id),
         getCube: (id) => cubes.get(id)?.object,
         getCubes: () => [...cubes.entries()].map(([id, cube]) => ({ id, object: cube.object })),
+        getCubeRevision: () => cubeRevision,
         getCubePosition: (id) => {
             const position = cubes.get(id)?.position
-            return position === undefined ? undefined : { ...position }
+            return position === undefined
+                ? undefined
+                : { column: position.column, row: position.row }
         },
         getCubeOpacity: (id) => cubes.get(id)?.opacity,
         setCubeFaceLabels: (id, labels) => {
             requireCube(id).faceLabels?.setLabels(labels)
         },
         setCubePosition,
+        setCubeOccupiesCell: (id, occupiesCell) => {
+            const cube = requireCube(id)
+            if (occupiesCell && !cube.occupiesCell) assertCellAvailable(cube.position, id)
+            cube.occupiesCell = occupiesCell
+        },
         moveCubeTo,
         setCubeOpacity,
         fadeCubeTo,
-        getGridFocus: () => ({ ...gridFocus }),
+        getGridFocus: () => ({ column: gridFocus.column, row: gridFocus.row }),
         setGridFocus,
         moveGridFocusTo,
         setGridOpacity: (opacity) => {
             maxGridOpacity = clampOpacity(opacity)
-            for (const line of gridLines) line.material.opacity = maxGridOpacity
+            gridLines.setOpacity(maxGridOpacity)
         },
         setGridFadeRadii: (innerRadiusCells, outerRadiusCells) => {
-            radialFadeInnerRadius = Math.max(0, innerRadiusCells) * gridCellSize
-            radialFadeOuterRadius = Math.max(0, outerRadiusCells) * gridCellSize
-            updateGridVisual()
+            gridLines.setFadeRadii(
+                Math.max(0, innerRadiusCells) * gridCellSize,
+                Math.max(0, outerRadiusCells) * gridCellSize
+            )
         },
         travelWithCube: async (id, position, options) => {
             const token = Symbol(id)
@@ -802,11 +723,8 @@ export const createGridSceneRuntime = ({
             gridTransition = null
             for (const id of [...cubes.keys()]) removeCube(id)
             scene.remove(grid)
-            for (const line of gridLines) {
-                line.geometry.dispose()
-                line.material.dispose()
-            }
-            gridLines.length = 0
+            gridLines.dispose()
+            geometryCache.dispose()
         },
     }
 }

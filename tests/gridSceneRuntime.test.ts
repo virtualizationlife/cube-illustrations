@@ -67,6 +67,25 @@ describe('grid scene runtime', () => {
         expect(getProximityOpacity(1, PROXIMITY_OPACITY)).toBe(1)
     })
 
+    it('restores a cube transform that was written to from outside', () => {
+        // Scenes animate on top of the runtime's transform and rely on every update
+        // restoring it from the grid coordinates. FaceFlipCubeScene's flip lift does
+        // `mesh.position.y += ...` each frame; without the restore it accumulates and the
+        // cube leaves the frame for good.
+        const { runtime } = createRuntime()
+        const baseY = runtime.mainCube.position.y
+
+        runtime.mainCube.position.y += 0.5
+        runtime.update(0.016)
+        expect(runtime.mainCube.position.y).toBeCloseTo(baseY)
+
+        runtime.mainCube.position.y += 0.5
+        runtime.update(0.016)
+        expect(runtime.mainCube.position.y).toBeCloseTo(baseY)
+
+        runtime.dispose()
+    })
+
     it('measures proximity between grid cells', () => {
         expect(getGridDistance({ column: -1, row: 1 }, { column: 2, row: 5 })).toBe(5)
     })

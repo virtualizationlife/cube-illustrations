@@ -7,6 +7,7 @@ import type {
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCamera>
+type Intersection = ThreeWebGpuNamespace.Intersection<Object3D>
 
 export interface GridCubeHoverController {
     readonly update: () => void
@@ -21,19 +22,13 @@ export interface BindGridCubeHoverOptions {
     readonly onChange: (cube: GridSceneCubeEntry | null) => void
 }
 
-const findCubeEntry = (
-    object: Object3D,
-    cubes: readonly GridSceneCubeEntry[]
-): GridSceneCubeEntry | null => {
-    let current: Object3D | null = object
-    while (current !== null) {
-        const cube = cubes.find((entry) => entry.object === current)
-        if (cube !== undefined) return cube
-        current = current.parent
-    }
-    return null
-}
-
+/**
+ * Hover picking runs on every frame the pointer is over the canvas, because cubes move
+ * under a stationary pointer. So the per-frame work is kept to the raycast itself: the hit
+ * list is rebuilt only when cubes are added or removed, the intersection array is reused,
+ * and each hit carries its cube's id, replacing a walk up the scene graph that searched the
+ * cube list at every level.
+ */
 export const bindGridCubeHover = ({
     runtime,
     camera,
@@ -44,8 +39,40 @@ export const bindGridCubeHover = ({
     const raycaster = new THREE.Raycaster()
     const pointer = new THREE.Vector2()
     const previousCursor = canvas.style.cursor
+    const intersections: Intersection[] = []
+    const entriesById = new Map<string, GridSceneCubeEntry>()
+    let hitTargets: Object3D[] = []
+    let cachedRevision = -1
     let pointerInside = false
     let hoveredCubeId: string | null = null
+
+    const refreshHitTargets = (): void => {
+        const revision = runtime.getCubeRevision()
+        if (revision === cachedRevision) return
+        cachedRevision = revision
+
+        hitTargets = []
+        entriesById.clear()
+        for (const entry of runtime.getCubes()) {
+            entriesById.set(entry.id, entry)
+            // Only the body mesh is a direct child; edges are lines and labels sit in a group.
+            for (const child of entry.object.children) {
+                if (child instanceof THREE.Mesh) hitTargets.push(child)
+            }
+        }
+    }
+
+    const findHoveredCube = (): GridSceneCubeEntry | null => {
+        for (const intersection of intersections) {
+            const { cubeId, cubeObject } = intersection.object.userData
+            if (typeof cubeId !== 'string') continue
+            // Opacity 0 hides a cube by clearing `visible` on its group, and the group is
+            // not what was raycast, so invisible cubes have to be stepped over here.
+            if (cubeObject?.visible !== true) continue
+            return entriesById.get(cubeId) ?? null
+        }
+        return null
+    }
 
     const setHoveredCube = (cube: GridSceneCubeEntry | null): void => {
         const nextCubeId = cube?.id ?? null
@@ -76,15 +103,11 @@ export const bindGridCubeHover = ({
     return {
         update: () => {
             if (!pointerInside) return
-            const cubes = runtime.getCubes().filter((cube) => cube.object.visible)
-            const hitTargets = cubes.flatMap((cube) =>
-                cube.object.children.filter((child) => child instanceof THREE.Mesh)
-            )
+            refreshHitTargets()
             raycaster.setFromCamera(pointer, camera)
-            const intersection = raycaster.intersectObjects(hitTargets, false)[0]
-            setHoveredCube(
-                intersection === undefined ? null : findCubeEntry(intersection.object, cubes)
-            )
+            intersections.length = 0
+            raycaster.intersectObjects(hitTargets, false, intersections)
+            setHoveredCube(findHoveredCube())
         },
         dispose: () => {
             canvas.removeEventListener('pointermove', onPointerMove)

@@ -13,6 +13,7 @@ import {
     type GridSceneCubeEntry,
     type GridSceneRuntime,
 } from './gridSceneRuntime'
+import { getSharedGpuDevice } from './sharedGpuDevice'
 
 type WebGpuRenderer = InstanceType<typeof ThreeWebGpuNamespace.WebGPURenderer>
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
@@ -21,6 +22,7 @@ type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCam
 
 export type CubeRendererStatus = 'loading' | 'ready' | 'unsupported'
 
+/** Fallback drawing-buffer size, used only while the canvas has no laid-out box yet. */
 export const ILLUSTRATION_VIEWPORT = 300
 
 /** Camera distance from look-at; elevation defaults to 35° above the horizon. */
@@ -131,6 +133,8 @@ export const useSimpleCubeScene = ({
         let disposed = false
         let renderer: WebGpuRenderer | null = null
         let disconnectTimer: (() => void) | null = null
+        let disconnectResizeObserver: (() => void) | null = null
+        let stopLoop: (() => void) | null = null
         let teardownSetup: (() => void) | null = null
         let runtime: GridSceneRuntime | null = null
         let hoverController: GridCubeHoverController | null = null
@@ -163,10 +167,23 @@ export const useSimpleCubeScene = ({
             })
             const mesh = runtime.mainCube
 
-            scene.add(new THREE.AmbientLight(0xffffff, 1.15))
-            scene.add(new THREE.HemisphereLight(0xf0f2f5, 0x8a8e96, 0.85))
+            // No lights: every material in these scenes is a *BasicMaterial, which ignores
+            // them entirely. They only ever cost render-list and lighting-state work.
 
-            renderer = new THREE.WebGPURenderer({ canvas, antialias: true, alpha: true })
+            // A null device means WebGPU is unavailable; the renderer then picks its own
+            // backend and falls back to WebGL2 exactly as it did before.
+            const device = await getSharedGpuDevice()
+            if (disposed) {
+                runtime.dispose()
+                runtime = null
+                return
+            }
+
+            renderer = new THREE.WebGPURenderer(
+                device === null
+                    ? { canvas, antialias: true, alpha: true }
+                    : { canvas, antialias: true, alpha: true, device }
+            )
             renderer.setClearColor(0x000000, 0)
 
             try {
@@ -188,9 +205,30 @@ export const useSimpleCubeScene = ({
             }
 
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-            renderer.setSize(ILLUSTRATION_VIEWPORT, ILLUSTRATION_VIEWPORT, false)
-            camera.aspect = 1
-            camera.updateProjectionMatrix()
+
+            // Follow the element instead of assuming a fixed 300 logical pixels: a smaller
+            // slot stops paying for pixels the browser would only downscale away, and a
+            // larger one no longer gets a stretched, under-resolved image.
+            let appliedWidth = 0
+            let appliedHeight = 0
+            const applyViewportSize = (): void => {
+                if (renderer === null) return
+                const width = Math.max(1, Math.round(canvas.clientWidth) || ILLUSTRATION_VIEWPORT)
+                const height = Math.max(1, Math.round(canvas.clientHeight) || ILLUSTRATION_VIEWPORT)
+                if (width === appliedWidth && height === appliedHeight) return
+                appliedWidth = width
+                appliedHeight = height
+                renderer.setSize(width, height, false)
+                camera.aspect = width / height
+                camera.updateProjectionMatrix()
+            }
+            applyViewportSize()
+
+            const resizeObserver = new ResizeObserver(applyViewportSize)
+            resizeObserver.observe(canvas)
+            disconnectResizeObserver = () => {
+                resizeObserver.disconnect()
+            }
 
             const setupResult = onSetupRef.current?.({
                 mesh,
@@ -231,13 +269,18 @@ export const useSimpleCubeScene = ({
                 timer.disconnect()
             }
 
-            let lastElapsed = 0
+            let lastTimerElapsed = 0
+            // Scene clock accumulated from clamped deltas rather than read straight off the
+            // timer, so a scene that was paused off-screen resumes where it stopped instead
+            // of finding its hold timings expired by the length of the pause.
+            let elapsed = 0
 
-            void renderer.setAnimationLoop(() => {
+            const renderFrame = (): void => {
                 timer.update()
-                const elapsed = timer.getElapsed()
-                const delta = Math.min(elapsed - lastElapsed, 0.05)
-                lastElapsed = elapsed
+                const timerElapsed = timer.getElapsed()
+                const delta = Math.min(timerElapsed - lastTimerElapsed, 0.05)
+                lastTimerElapsed = timerElapsed
+                elapsed += delta
 
                 runtime?.update(delta)
                 hoverController?.update()
@@ -253,7 +296,38 @@ export const useSimpleCubeScene = ({
                     })
                 }
                 renderer?.render(scene, camera)
-            })
+            }
+
+            // A page of scenes only ever has a handful on screen. Rendering the rest costs a
+            // full frame each and shows nobody anything, so the loop follows visibility.
+            let loopRunning = false
+            let intersecting = false
+            const setLoopRunning = (shouldRun: boolean): void => {
+                if (renderer === null || shouldRun === loopRunning) return
+                loopRunning = shouldRun
+                void renderer.setAnimationLoop(shouldRun ? renderFrame : null)
+            }
+            const syncLoopState = (): void => {
+                setLoopRunning(intersecting && !document.hidden)
+            }
+
+            const intersectionObserver = new IntersectionObserver(
+                (entries) => {
+                    const entry = entries[entries.length - 1]
+                    if (entry === undefined) return
+                    intersecting = entry.isIntersecting
+                    syncLoopState()
+                },
+                // Start a scene slightly before it scrolls in so it is already running.
+                { rootMargin: '128px' }
+            )
+            intersectionObserver.observe(canvas)
+            document.addEventListener('visibilitychange', syncLoopState)
+            stopLoop = () => {
+                intersectionObserver.disconnect()
+                document.removeEventListener('visibilitychange', syncLoopState)
+                setLoopRunning(false)
+            }
 
             setStatus('ready')
         }
@@ -262,10 +336,14 @@ export const useSimpleCubeScene = ({
 
         return () => {
             disposed = true
+            stopLoop?.()
+            stopLoop = null
             teardownSetup?.()
             teardownSetup = null
             hoverController?.dispose()
             hoverController = null
+            disconnectResizeObserver?.()
+            disconnectResizeObserver = null
             disconnectTimer?.()
             disconnectTimer = null
             void renderer?.setAnimationLoop(null)
