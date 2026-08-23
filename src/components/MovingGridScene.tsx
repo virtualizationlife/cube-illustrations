@@ -17,9 +17,11 @@ const RANDOM_WALK: GridRandomWalkConfig = {
     opacitySmoothingDuration: 0.15,
     encounterDistance: 1,
     encounterPauseDuration: 1,
+    companionChance: 0.4,
+    companionStepCounts: [2, 3, 4],
 }
 
-/** A fixed central cube with a randomly moving and radially fading grid. */
+/** A fixed central cube explores a moving world; an occasional encounter follows briefly. */
 export const MovingGridScene = ({
     faceLabels,
     cubeCornerRadius,

@@ -189,6 +189,30 @@ const moveToShape = async (
         const target = assignments.get(cubeId)
         return source !== undefined && target !== undefined && !isSameGridCell(source, target)
     })
+    const seedCubeId =
+        pendingCubeIds[Math.floor(Math.random() * pendingCubeIds.length)]
+    const seedPosition =
+        seedCubeId === undefined ? undefined : runtime.getCubePosition(seedCubeId)
+    if (seedPosition !== undefined) {
+        pendingCubeIds.sort((leftId, rightId) => {
+            const leftPosition = runtime.getCubePosition(leftId)
+            const rightPosition = runtime.getCubePosition(rightId)
+            if (leftPosition === undefined || rightPosition === undefined) return 0
+            return (
+                getGridDistance(seedPosition, leftPosition) -
+                getGridDistance(seedPosition, rightPosition)
+            )
+        })
+        await runtime.fadeCubeTo(seedCubeId, 0.32, {
+            duration: 0.16,
+            easing: 'easeOutCubic',
+        })
+        if (isCancelled()) return
+        await runtime.fadeCubeTo(seedCubeId, 1, {
+            duration: 0.18,
+            easing: 'easeOutCubic',
+        })
+    }
 
     while (pendingCubeIds.length > 0 && !isCancelled()) {
         const occupiedCells = new Map<string, string>()
@@ -264,7 +288,7 @@ const createStructureAnimation = (runtime: GridSceneRuntime): StructureAnimation
     }
 }
 
-/** Sixteen cubes continuously rearrange into a random form from a fixed shape set. */
+/** A random seed cube starts each spatial chain reaction into a new group form. */
 export const StructureMorphScene = ({
     faceLabels,
     cubeCornerRadius,

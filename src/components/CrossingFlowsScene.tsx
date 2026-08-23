@@ -25,6 +25,8 @@ const MAX_ACTIVE_CUBES = 14
 const SPAWN_CHANCE_PER_SIDE = 0.38
 const MOVE_DURATION_S = 0.42
 const TICK_PAUSE_S = 0.08
+const PRIORITY_DENSITY_THRESHOLD = 7
+const PRIORITY_START_CHANCE = 0.32
 const MAIN_CUBE_PARKING_POSITION: GridCoordinate = { column: 100, row: 100 }
 
 type FlowDirection = -1 | 1
@@ -72,6 +74,10 @@ const createFlowAnimation = (
 ): FlowAnimationController => {
     let cancelled = false
     let cubeCounter = 0
+    let priorityDirection: FlowDirection | null = null
+    let nextPriorityDirection: FlowDirection = 1
+    let priorityTicksRemaining = 0
+    let priorityCooldownTicks = 0
     const delay = createCancellableDelay()
     const cubes = new Map<string, FlowCube>()
 
@@ -166,6 +172,19 @@ const createFlowAnimation = (
     }
 
     const moveOneTick = async (): Promise<void> => {
+        if (priorityDirection === null) {
+            priorityCooldownTicks = Math.max(0, priorityCooldownTicks - 1)
+            if (
+                cubes.size >= PRIORITY_DENSITY_THRESHOLD &&
+                priorityCooldownTicks === 0 &&
+                Math.random() < PRIORITY_START_CHANCE
+            ) {
+                priorityDirection = nextPriorityDirection
+                priorityTicksRemaining = 3 + Math.floor(Math.random() * 2)
+            }
+        }
+
+        const activePriorityDirection = priorityDirection
         const occupiedCells = getOccupiedCells()
         const reservedTargets = new Set<string>()
         const handledCubeIds = new Set<string>()
@@ -191,7 +210,14 @@ const createFlowAnimation = (
                 blockingPosition.column + blockingCube.direction === position.column
 
             if (!isHeadOn || blockingCube === undefined) continue
-            const yieldingCube = Math.random() < 0.5 ? cube : blockingCube
+            const yieldingCube =
+                activePriorityDirection === null
+                    ? Math.random() < 0.5
+                        ? cube
+                        : blockingCube
+                    : cube.direction === activePriorityDirection
+                      ? blockingCube
+                      : cube
             const sideStep = getSideStep(yieldingCube, occupiedCells, reservedTargets)
             if (sideStep !== null) {
                 movements.set(yieldingCube.id, sideStep)
@@ -204,6 +230,12 @@ const createFlowAnimation = (
 
         for (const cube of shuffle([...cubes.values()])) {
             if (handledCubeIds.has(cube.id)) continue
+            if (
+                activePriorityDirection !== null &&
+                cube.direction !== activePriorityDirection
+            ) {
+                continue
+            }
             const position = runtime.getCubePosition(cube.id)
             if (position === undefined) continue
 
@@ -258,6 +290,15 @@ const createFlowAnimation = (
                 runtime.removeCube(cube.id)
             }
         }
+
+        if (priorityDirection !== null) {
+            priorityTicksRemaining -= 1
+            if (priorityTicksRemaining <= 0) {
+                nextPriorityDirection = priorityDirection === 1 ? -1 : 1
+                priorityDirection = null
+                priorityCooldownTicks = 4
+            }
+        }
     }
 
     const play = async (): Promise<void> => {
@@ -287,7 +328,7 @@ const createFlowAnimation = (
     }
 }
 
-/** Random cubes cross a 10-by-10 grid in opposite directions and yield on conflict. */
+/** Opposing flows yield individually or alternate group priority when traffic grows dense. */
 export const CrossingFlowsScene = ({
     faceLabels,
     cubeCornerRadius,

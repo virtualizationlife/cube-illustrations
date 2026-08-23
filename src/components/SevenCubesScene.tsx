@@ -61,11 +61,13 @@ const shuffle = <Item,>(items: readonly Item[]): Item[] => {
     return shuffled
 }
 
-const createRandomIsland = (): readonly GridCoordinate[] => {
+const createRandomIsland = (
+    cubeCount: number = CUBE_IDS.length
+): readonly GridCoordinate[] => {
     const positions: GridCoordinate[] = [{ column: 0, row: 0 }]
     const occupiedCells = new Set([getGridCellKey(positions[0])])
 
-    while (positions.length < CUBE_IDS.length) {
+    while (positions.length < cubeCount) {
         const anchor = positions[Math.floor(Math.random() * positions.length)]
         const direction =
             CARDINAL_DIRECTIONS[Math.floor(Math.random() * CARDINAL_DIRECTIONS.length)]
@@ -85,6 +87,46 @@ const createRandomIsland = (): readonly GridCoordinate[] => {
     }
 
     return positions
+}
+
+const getWaitingPosition = (
+    island: readonly GridCoordinate[]
+): GridCoordinate => {
+    const occupied = new Set(island.map(getGridCellKey))
+    const candidates = shuffle(
+        island.flatMap((position) =>
+            CARDINAL_DIRECTIONS.map((direction) => ({
+                column: position.column + direction.column,
+                row: position.row + direction.row,
+            }))
+        )
+    )
+    return (
+        candidates.find(
+            (position) =>
+                Math.abs(position.column) <= ISLAND_RADIUS + 1 &&
+                Math.abs(position.row) <= ISLAND_RADIUS + 1 &&
+                !occupied.has(getGridCellKey(position))
+        ) ?? { column: ISLAND_RADIUS + 1, row: 0 }
+    )
+}
+
+const createReconfiguredIsland = (
+    provisionalIsland: readonly GridCoordinate[]
+): readonly GridCoordinate[] => {
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+        const candidate = createRandomIsland()
+        const candidateCells = new Set(candidate.map(getGridCellKey))
+        const changedPositions = provisionalIsland.filter(
+            (position) => !candidateCells.has(getGridCellKey(position))
+        ).length
+        if (changedPositions >= 2) return candidate
+    }
+
+    return createRandomIsland().map((position) => ({
+        column: position.column + 1,
+        row: position.row,
+    }))
 }
 
 const createRandomLayout = (): readonly CubeLayoutEntry[] => {
@@ -166,7 +208,28 @@ const createLayoutAnimation = (
         await delay.wait(SCATTERED_HOLD_DURATION_S)
 
         while (!cancelled) {
-            await moveCubesInRandomTurns(layout, createRandomIsland())
+            const lateCube = layout[Math.floor(Math.random() * layout.length)]
+            if (lateCube === undefined) return
+            const earlyCubes = layout.filter((cube) => cube.id !== lateCube.id)
+            const provisionalIsland = createRandomIsland(earlyCubes.length)
+
+            await moveCubesInRandomTurns(earlyCubes, provisionalIsland)
+            if (cancelled) return
+            await delay.wait(0.65)
+            if (cancelled) return
+
+            await moveCubesInRandomTurns(
+                [lateCube],
+                [getWaitingPosition(provisionalIsland)]
+            )
+            if (cancelled) return
+            await delay.wait(0.4)
+            if (cancelled) return
+
+            await moveCubesInRandomTurns(
+                layout,
+                createReconfiguredIsland(provisionalIsland)
+            )
             if (cancelled) return
             await delay.wait(ISLAND_HOLD_DURATION_S)
             if (cancelled) return
@@ -189,7 +252,7 @@ const createLayoutAnimation = (
     }
 }
 
-/** Seven cubes move one by one between a random scatter and a compact island. */
+/** Six cubes gather first, then the group reorganizes to include a random late arrival. */
 export const SevenCubesScene = ({
     faceLabels,
     cubeCornerRadius,

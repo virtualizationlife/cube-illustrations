@@ -74,13 +74,21 @@ const createQueueAnimation = (
         }
     }
 
-    const bringCubeToTail = async (cubeId: string): Promise<void> => {
+    const stageCubeBesideTail = async (cubeId: string): Promise<void> => {
         const approachFromRight = Math.random() >= 0.5
+        const waitingColumn = approachFromRight ? 6 : -6
         runtime.setCubePosition(cubeId, {
-            column: approachFromRight ? 6 : -6,
+            column: waitingColumn,
             row: QUEUE_TAIL_ROW,
         })
         runtime.setCubeOpacity(cubeId, 0)
+        await runtime.fadeCubeTo(cubeId, 0.42, {
+            duration: 0.34,
+            easing: 'easeOutCubic',
+        })
+    }
+
+    const bringCubeToTail = async (cubeId: string): Promise<void> => {
         await Promise.all([
             runtime.moveCubeTo(
                 cubeId,
@@ -88,7 +96,7 @@ const createQueueAnimation = (
                 { duration: NEW_CUBE_MOVE_DURATION_S, easing: 'easeInOutCubic' }
             ),
             runtime.fadeCubeTo(cubeId, 1, {
-                duration: NEW_CUBE_MOVE_DURATION_S * 0.7,
+                duration: NEW_CUBE_MOVE_DURATION_S,
                 easing: 'easeOutCubic',
             }),
         ])
@@ -101,6 +109,8 @@ const createQueueAnimation = (
             if (departingCubeId === undefined) return
 
             await moveForward(departingCubeId, true)
+            if (cancelled) return
+            await stageCubeBesideTail(departingCubeId)
             if (cancelled) return
 
             for (let index = 1; index < queue.length; index += 1) {
@@ -127,7 +137,7 @@ const createQueueAnimation = (
     }
 }
 
-/** A continuous, evenly spaced queue advances out of frame and accepts a new cube. */
+/** A waiting arrival joins only after every queue element advances one by one. */
 export const ContinuousQueueScene = ({
     faceLabels,
     cubeCornerRadius,

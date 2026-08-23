@@ -44,6 +44,10 @@ export interface GridRandomWalkConfig {
     readonly opacitySmoothingDuration: number
     readonly encounterDistance: number
     readonly encounterPauseDuration: number
+    /** Chance that a newly met cube follows the main cube for a few steps. */
+    readonly companionChance?: number
+    /** Possible numbers of steps for which a selected companion follows. */
+    readonly companionStepCounts?: readonly number[]
 }
 
 export type GridSceneMovementMode = 'move-grid' | 'move-cube'
@@ -140,25 +144,27 @@ export const createGridSceneAnimation = ({
     let previousDirection: GridCoordinate | null = null
     let encounterCounter = 0
     let pursuedEncounterId: string | null = null
+    let companionCubeId: string | null = null
+    let companionStepsRemaining = 0
     const randomEncounterIds = new Set<string>()
     const visibleRandomEncounterIds = new Set<string>()
 
     const initialCubes = [...additionalCubes, ...(additionalCubesFactory?.() ?? [])]
     for (const cube of initialCubes) runtime.addCube(cube)
 
-    const hasNearbyCube = (targetCubeIds: Iterable<string>, distance: number): boolean => {
+    const getNearbyCubeIds = (
+        targetCubeIds: Iterable<string>,
+        distance: number
+    ): string[] => {
         const sourcePosition = runtime.getCubePosition(MAIN_CUBE_ID)
-        if (sourcePosition === undefined) return false
-        for (const targetCubeId of targetCubeIds) {
+        if (sourcePosition === undefined) return []
+        return [...targetCubeIds].filter((targetCubeId) => {
             const targetPosition = runtime.getCubePosition(targetCubeId)
-            if (
+            return (
                 targetPosition !== undefined &&
                 getGridDistance(sourcePosition, targetPosition) <= distance
-            ) {
-                return true
-            }
-        }
-        return false
+            )
+        })
     }
 
     const removeDistantRandomEncounters = (sourcePosition: GridCoordinate): void => {
@@ -315,8 +321,53 @@ export const createGridSceneAnimation = ({
             await moveToNextCell(runtime, movementMode, destination, moveDuration)
             if (cancelled) return
 
-            const hasEncounter = hasNearbyCube(randomEncounterIds, randomWalk.encounterDistance)
+            if (companionCubeId !== null) {
+                await runtime.moveCubeTo(companionCubeId, sourcePosition, {
+                    duration: moveDuration * 0.7,
+                    easing: 'easeInOutCubic',
+                })
+                companionStepsRemaining -= 1
+                if (companionStepsRemaining <= 0) {
+                    randomEncounterIds.add(companionCubeId)
+                    visibleRandomEncounterIds.add(companionCubeId)
+                    companionCubeId = null
+                }
+                if (cancelled) return
+            }
+
+            const nearbyCubeIds = getNearbyCubeIds(
+                randomEncounterIds,
+                randomWalk.encounterDistance
+            )
+            const hasEncounter = nearbyCubeIds.length > 0
             if (hasEncounter) pursuedEncounterId = null
+            const companionChance = randomWalk.companionChance ?? 0
+            const companionStepCounts = randomWalk.companionStepCounts ?? []
+            if (
+                companionCubeId === null &&
+                nearbyCubeIds.length > 0 &&
+                companionStepCounts.length > 0 &&
+                Math.random() < companionChance
+            ) {
+                const selectedCubeId =
+                    nearbyCubeIds[Math.floor(Math.random() * nearbyCubeIds.length)]
+                const stepCount =
+                    companionStepCounts[
+                        Math.floor(Math.random() * companionStepCounts.length)
+                    ]
+                if (selectedCubeId !== undefined && stepCount !== undefined) {
+                    companionCubeId = selectedCubeId
+                    companionStepsRemaining = Math.max(1, stepCount)
+                    randomEncounterIds.delete(selectedCubeId)
+                    visibleRandomEncounterIds.delete(selectedCubeId)
+                    runtime.setCubeOpacity(selectedCubeId, 1)
+                    await runtime.moveCubeTo(selectedCubeId, sourcePosition, {
+                        duration: moveDuration * 0.65,
+                        easing: 'easeInOutCubic',
+                    })
+                    if (cancelled) return
+                }
+            }
             await delay.wait(hasEncounter ? randomWalk.encounterPauseDuration : stepPause)
         }
     }
@@ -388,6 +439,7 @@ export const createGridSceneAnimation = ({
             delay.cancel()
             randomEncounterIds.clear()
             visibleRandomEncounterIds.clear()
+            companionCubeId = null
         },
     }
 }
