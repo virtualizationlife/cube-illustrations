@@ -2,6 +2,7 @@ import { useCallback, useRef, type JSX } from 'react'
 
 import type { Quaternion, Vector3 } from 'three'
 
+import { CubeSceneViewport } from './CubeSceneViewport'
 import type { GridCubeFaceLabelInput } from './cubeFaceLabels'
 import type { GridSceneCubeEntry } from './gridSceneRuntime'
 import {
@@ -153,16 +154,5 @@ export const FaceFlipCubeScene = ({
         onFrame,
     })
 
-    return (
-        <div className='cube_illustrations__slot' data-status={status}>
-            <canvas
-                ref={canvasRef}
-                className='cube_illustrations__canvas'
-                data-ready={status === 'ready' ? 'true' : 'false'}
-            />
-            {status === 'unsupported' && (
-                <div className='cube_illustrations__fallback'>WebGPU unavailable</div>
-            )}
-        </div>
-    )
+    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
 }

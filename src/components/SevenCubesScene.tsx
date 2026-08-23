@@ -1,6 +1,8 @@
 import { useCallback, useState, type JSX } from 'react'
 
+import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
 import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
+import { createCancellableDelay } from '../scenes/createCancellableDelay'
 import { findGridPath, getGridCellKey } from '../scenes/gridPathfinding'
 import {
     MAIN_CUBE_ID,
@@ -110,18 +112,7 @@ const createLayoutAnimation = (
     layout: readonly CubeLayoutEntry[]
 ): LayoutAnimationController => {
     let cancelled = false
-    let waitTimer: number | null = null
-    let finishWait: (() => void) | null = null
-
-    const wait = (duration: number): Promise<void> =>
-        new Promise((resolve) => {
-            finishWait = resolve
-            waitTimer = window.setTimeout(() => {
-                waitTimer = null
-                finishWait = null
-                resolve()
-            }, duration * 1000)
-        })
+    const delay = createCancellableDelay()
 
     const moveCubesInRandomTurns = async (
         cubes: readonly CubeLayoutEntry[],
@@ -164,7 +155,7 @@ const createLayoutAnimation = (
                     easing: 'easeInOutCubic',
                 })
                 movedAtLeastOneCube = true
-                if (!cancelled) await wait(TURN_PAUSE_DURATION_S)
+                if (!cancelled) await delay.wait(TURN_PAUSE_DURATION_S)
             }
 
             if (allCubesPlaced || !movedAtLeastOneCube) return
@@ -172,19 +163,19 @@ const createLayoutAnimation = (
     }
 
     const play = async (): Promise<void> => {
-        await wait(SCATTERED_HOLD_DURATION_S)
+        await delay.wait(SCATTERED_HOLD_DURATION_S)
 
         while (!cancelled) {
             await moveCubesInRandomTurns(layout, createRandomIsland())
             if (cancelled) return
-            await wait(ISLAND_HOLD_DURATION_S)
+            await delay.wait(ISLAND_HOLD_DURATION_S)
             if (cancelled) return
             await moveCubesInRandomTurns(
                 layout,
                 layout.map((cube) => cube.scatteredPosition)
             )
             if (cancelled) return
-            await wait(SCATTERED_HOLD_DURATION_S)
+            await delay.wait(SCATTERED_HOLD_DURATION_S)
         }
     }
 
@@ -193,10 +184,7 @@ const createLayoutAnimation = (
     return {
         dispose: () => {
             cancelled = true
-            if (waitTimer !== null) window.clearTimeout(waitTimer)
-            waitTimer = null
-            finishWait?.()
-            finishWait = null
+            delay.cancel()
         },
     }
 }
@@ -238,16 +226,5 @@ export const SevenCubesScene = ({ faceLabels }: CubeFaceLabelsProps): JSX.Elemen
         onFrame: () => undefined,
     })
 
-    return (
-        <div className='cube_illustrations__slot' data-status={status}>
-            <canvas
-                ref={canvasRef}
-                className='cube_illustrations__canvas'
-                data-ready={status === 'ready' ? 'true' : 'false'}
-            />
-            {status === 'unsupported' && (
-                <div className='cube_illustrations__fallback'>WebGPU unavailable</div>
-            )}
-        </div>
-    )
+    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
 }

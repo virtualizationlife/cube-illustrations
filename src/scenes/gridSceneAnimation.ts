@@ -5,6 +5,7 @@ import {
     type GridSceneCubeDefinition,
     type GridSceneRuntime,
 } from './gridSceneRuntime'
+import { createCancellableDelay } from './createCancellableDelay'
 
 const CARDINAL_DIRECTIONS: readonly GridCoordinate[] = [
     { column: 1, row: 0 },
@@ -72,6 +73,16 @@ const interpolateSmoothly = (from: number, to: number, progress: number): number
     return from + (to - from) * smoothProgress
 }
 
+const smoothTowards = (
+    current: number,
+    target: number,
+    delta: number,
+    duration: number
+): number => {
+    const progress = 1 - Math.exp(-delta / Math.max(0.0001, duration))
+    return current + (target - current) * progress
+}
+
 export const getProximityOpacity = (
     distance: number,
     config: GridProximityOpacityConfig
@@ -125,8 +136,7 @@ export const createGridSceneAnimation = ({
     stepPause,
 }: CreateGridSceneAnimationOptions): GridSceneAnimationController => {
     let cancelled = false
-    let waitTimer: number | null = null
-    let finishWait: (() => void) | null = null
+    const delay = createCancellableDelay()
     let previousDirection: GridCoordinate | null = null
     let encounterCounter = 0
     let pursuedEncounterId: string | null = null
@@ -135,19 +145,6 @@ export const createGridSceneAnimation = ({
 
     const initialCubes = [...additionalCubes, ...(additionalCubesFactory?.() ?? [])]
     for (const cube of initialCubes) runtime.addCube(cube)
-
-    const wait = (duration: number): Promise<void> =>
-        new Promise((resolve) => {
-            finishWait = resolve
-            waitTimer = window.setTimeout(
-                () => {
-                    waitTimer = null
-                    finishWait = null
-                    resolve()
-                },
-                Math.max(0, duration) * 1000
-            )
-        })
 
     const hasNearbyCube = (targetCubeIds: Iterable<string>, distance: number): boolean => {
         const sourcePosition = runtime.getCubePosition(MAIN_CUBE_ID)
@@ -276,7 +273,7 @@ export const createGridSceneAnimation = ({
 
     const playRoute = async (): Promise<void> => {
         if (route.length === 0) return
-        await wait(initialDelay)
+        await delay.wait(initialDelay)
 
         while (!cancelled) {
             for (const position of route) {
@@ -299,14 +296,14 @@ export const createGridSceneAnimation = ({
                         )
                     })
 
-                await wait(hasEncounter ? encounterPause.duration : stepPause)
+                await delay.wait(hasEncounter ? encounterPause.duration : stepPause)
             }
         }
     }
 
     const playRandomWalk = async (): Promise<void> => {
         if (randomWalk === undefined) return
-        await wait(initialDelay)
+        await delay.wait(initialDelay)
 
         while (!cancelled) {
             const sourcePosition = runtime.getCubePosition(MAIN_CUBE_ID)
@@ -320,7 +317,7 @@ export const createGridSceneAnimation = ({
 
             const hasEncounter = hasNearbyCube(randomEncounterIds, randomWalk.encounterDistance)
             if (hasEncounter) pursuedEncounterId = null
-            await wait(hasEncounter ? randomWalk.encounterPauseDuration : stepPause)
+            await delay.wait(hasEncounter ? randomWalk.encounterPauseDuration : stepPause)
         }
     }
 
@@ -349,14 +346,14 @@ export const createGridSceneAnimation = ({
                         )
                         const fadeProgress = (randomWalk.visibilityDistance - distance) / fadeRange
                         const targetOpacity = interpolateSmoothly(0, 1, fadeProgress)
-                        const smoothingDuration = Math.max(
-                            0.0001,
-                            randomWalk.opacitySmoothingDuration
-                        )
-                        const smoothingProgress = 1 - Math.exp(-delta / smoothingDuration)
                         runtime.setCubeOpacity(
                             cubeId,
-                            currentOpacity + (targetOpacity - currentOpacity) * smoothingProgress
+                            smoothTowards(
+                                currentOpacity,
+                                targetOpacity,
+                                delta,
+                                randomWalk.opacitySmoothingDuration
+                            )
                         )
                     }
                 }
@@ -375,23 +372,20 @@ export const createGridSceneAnimation = ({
                 const targetOpacity = getProximityOpacity(distance, proximityOpacity)
                 const currentOpacity = runtime.getCubeOpacity(targetCubeId)
                 if (currentOpacity === undefined) continue
-                const smoothingDuration = Math.max(
-                    0.0001,
-                    proximityOpacity.smoothingDuration ?? 0.3
-                )
-                const smoothingProgress = 1 - Math.exp(-delta / smoothingDuration)
                 runtime.setCubeOpacity(
                     targetCubeId,
-                    currentOpacity + (targetOpacity - currentOpacity) * smoothingProgress
+                    smoothTowards(
+                        currentOpacity,
+                        targetOpacity,
+                        delta,
+                        proximityOpacity.smoothingDuration ?? 0.3
+                    )
                 )
             }
         },
         dispose: () => {
             cancelled = true
-            if (waitTimer !== null) window.clearTimeout(waitTimer)
-            waitTimer = null
-            finishWait?.()
-            finishWait = null
+            delay.cancel()
             randomEncounterIds.clear()
             visibleRandomEncounterIds.clear()
         },

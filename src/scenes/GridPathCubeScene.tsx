@@ -1,5 +1,6 @@
 import { useCallback, useRef, type JSX } from 'react'
 
+import { CubeSceneViewport } from './CubeSceneViewport'
 import {
     createGridSceneAnimation,
     type GridEncounterPauseConfig,
@@ -116,16 +117,5 @@ export const GridPathCubeScene = ({
         onFrame,
     })
 
-    return (
-        <div className='cube_illustrations__slot' data-status={status}>
-            <canvas
-                ref={canvasRef}
-                className='cube_illustrations__canvas'
-                data-ready={status === 'ready' ? 'true' : 'false'}
-            />
-            {status === 'unsupported' && (
-                <div className='cube_illustrations__fallback'>WebGPU unavailable</div>
-            )}
-        </div>
-    )
+    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
 }
