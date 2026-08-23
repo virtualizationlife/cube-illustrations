@@ -18,7 +18,7 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.045
+const GRID_CELL_SIZE = 0.04
 const ENTRY: GridCoordinate = { column: -7, row: 0 }
 const VISIBLE_START: GridCoordinate = { column: -5, row: 0 }
 const JUNCTION: GridCoordinate = { column: -3, row: 0 }
@@ -117,7 +117,7 @@ const createPredictedPathsAnimation = (
         zoom: 1,
         gridOpacity: 0.55,
         gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 8,
+        gridFadeOuterRadiusCells: 10,
     })
 
     const movePrediction = async (id: string, route: readonly GridCoordinate[]): Promise<void> => {
@@ -171,7 +171,7 @@ const createPredictedPathsAnimation = (
             zoom: 0.8,
             gridOpacity: 0.72,
             gridFadeInnerRadiusCells: 7,
-            gridFadeOuterRadiusCells: 9,
+            gridFadeOuterRadiusCells: 10,
         })
         await delay.wait(0.7)
 
@@ -216,7 +216,7 @@ const createPredictedPathsAnimation = (
             zoom: 1.08,
             gridOpacity: 0.48,
             gridFadeInnerRadiusCells: 4.5,
-            gridFadeOuterRadiusCells: 7,
+            gridFadeOuterRadiusCells: 8,
         })
         await delay.wait(0.45)
 
@@ -306,11 +306,12 @@ export const PredictedPathsScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 17,
+        gridCellCount: 19,
         gridOpacity: 0.55,
         gridFadeInnerRadiusCells: 5,
-        gridFadeOuterRadiusCells: 8,
+        gridFadeOuterRadiusCells: 10,
         cameraAzimuthDeg: 15,
+        cameraElevationDeg: 50,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

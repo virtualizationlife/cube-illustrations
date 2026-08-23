@@ -18,7 +18,7 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.055
+const GRID_CELL_SIZE = 0.047
 const SIGN_CUBE_IDS = Array.from({ length: 9 }, (_, index) => `meaning-sign-${index}`)
 const SCATTER_POSITIONS: readonly GridCoordinate[] = [
     { column: -5, row: -4 },
@@ -113,8 +113,8 @@ const createBecomingSignAnimation = (
     const presentation = createScenePresentation({
         zoom: 1.12,
         gridOpacity: 0.42,
-        gridFadeInnerRadiusCells: 3.5,
-        gridFadeOuterRadiusCells: 6,
+        gridFadeInnerRadiusCells: 5,
+        gridFadeOuterRadiusCells: 10,
     })
 
     const moveSignCubes = async (positions: readonly GridCoordinate[]): Promise<void> => {
@@ -182,7 +182,7 @@ const createBecomingSignAnimation = (
                 zoom: 0.76,
                 gridOpacity: 0.66,
                 gridFadeInnerRadiusCells: 7,
-                gridFadeOuterRadiusCells: 9,
+                gridFadeOuterRadiusCells: 10,
             })
             await moveSignCubes(rotateArrow(definition.direction))
             if (cancelled) return
@@ -191,8 +191,8 @@ const createBecomingSignAnimation = (
             presentation.setTarget({
                 zoom: 1,
                 gridOpacity: 0.5,
-                gridFadeInnerRadiusCells: 5,
-                gridFadeOuterRadiusCells: 7,
+                gridFadeInnerRadiusCells: 5.5,
+                gridFadeOuterRadiusCells: 9,
             })
             await followSign(definition)
             if (cancelled) return
@@ -201,8 +201,8 @@ const createBecomingSignAnimation = (
             presentation.setTarget({
                 zoom: 1.12,
                 gridOpacity: 0.42,
-                gridFadeInnerRadiusCells: 3.5,
-                gridFadeOuterRadiusCells: 6,
+                gridFadeInnerRadiusCells: 5,
+                gridFadeOuterRadiusCells: 10,
             })
             await moveSignCubes(SCATTER_POSITIONS)
             if (!cancelled) await delay.wait(0.7)
@@ -253,11 +253,12 @@ export const BecomingSignScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 17,
+        gridCellCount: 19,
         gridOpacity: 0.42,
-        gridFadeInnerRadiusCells: 3.5,
-        gridFadeOuterRadiusCells: 6,
+        gridFadeInnerRadiusCells: 5,
+        gridFadeOuterRadiusCells: 10,
         cameraAzimuthDeg: 0,
+        cameraElevationDeg: 65,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

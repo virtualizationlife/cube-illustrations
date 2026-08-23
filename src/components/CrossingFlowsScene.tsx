@@ -15,7 +15,7 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.05
+const GRID_CELL_SIZE = 0.045
 const GRID_CELL_COUNT = 10
 const ENTRY_COLUMN = 6
 const FULL_OPACITY_COLUMN = 4
@@ -356,9 +356,10 @@ export const CrossingFlowsScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
-        gridFadeInnerRadiusCells: 3.5,
-        gridFadeOuterRadiusCells: 6,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 6.5,
         cameraAzimuthDeg: 0,
+        cameraElevationDeg: 55,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

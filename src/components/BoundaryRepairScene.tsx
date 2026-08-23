@@ -14,7 +14,7 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.06
+const GRID_CELL_SIZE = 0.052
 const BREACH_HOLD_DURATION_S = 0.9
 const REPAIRED_HOLD_DURATION_S = 1.4
 const IMPACT_CUBE_ID = 'boundary-impact-cube'
@@ -172,10 +172,11 @@ export const BoundaryRepairScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 11,
-        gridFadeInnerRadiusCells: 3,
-        gridFadeOuterRadiusCells: 5.5,
+        gridCellCount: 13,
+        gridFadeInnerRadiusCells: 4,
+        gridFadeOuterRadiusCells: 7,
         cameraAzimuthDeg: 45,
+        cameraElevationDeg: 55,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

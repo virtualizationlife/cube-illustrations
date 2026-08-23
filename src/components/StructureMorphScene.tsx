@@ -14,8 +14,8 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.042
-const GRID_CELL_COUNT = 13
+const GRID_CELL_SIZE = 0.035
+const GRID_CELL_COUNT = 15
 const SHAPE_HOLD_DURATION_S = 1.6
 const MOVE_DURATION_PER_CELL_S = 0.09
 const MOVE_PAUSE_DURATION_S = 0.035
@@ -317,7 +317,10 @@ export const StructureMorphScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
+        gridFadeInnerRadiusCells: 5,
+        gridFadeOuterRadiusCells: 8,
         cameraAzimuthDeg: 45,
+        cameraElevationDeg: 60,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

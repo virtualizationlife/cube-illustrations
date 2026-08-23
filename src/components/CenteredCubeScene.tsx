@@ -9,7 +9,7 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.1
+const GRID_CELL_SIZE = 0.075
 const GRID_EDGE = 5
 const PASSING_LANES = [-2, -1, 1, 2] as const
 const MOVE_DURATION_PER_CELL_S = 0.4
@@ -208,10 +208,11 @@ export const CenteredCubeScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 9,
-        gridFadeInnerRadiusCells: 2.5,
-        gridFadeOuterRadiusCells: 5,
+        gridCellCount: 11,
+        gridFadeInnerRadiusCells: 3,
+        gridFadeOuterRadiusCells: 6,
         cameraAzimuthDeg: 45,
+        cameraElevationDeg: 30,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

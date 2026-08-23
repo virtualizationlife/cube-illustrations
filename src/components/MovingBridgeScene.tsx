@@ -17,7 +17,7 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.07
+const GRID_CELL_SIZE = 0.06
 const INITIAL_RAIL_COLUMNS = [-2, -1, 0, 1, 2] as const
 const UPPER_RAIL_IDS = INITIAL_RAIL_COLUMNS.map((_, index) => `bridge-upper-${index}`)
 const LOWER_RAIL_IDS = INITIAL_RAIL_COLUMNS.map((_, index) => `bridge-lower-${index}`)
@@ -38,8 +38,8 @@ const createMovingBridgeAnimation = (runtime: GridSceneRuntime): MovingBridgeCon
     const presentation = createScenePresentation({
         zoom: 1.02,
         gridOpacity: 0.52,
-        gridFadeInnerRadiusCells: 3,
-        gridFadeOuterRadiusCells: 5.5,
+        gridFadeInnerRadiusCells: 3.5,
+        gridFadeOuterRadiusCells: 7,
     })
 
     const moveRearSupportsToFront = async (): Promise<void> => {
@@ -69,8 +69,8 @@ const createMovingBridgeAnimation = (runtime: GridSceneRuntime): MovingBridgeCon
             presentation.setTarget({
                 zoom: 0.94,
                 gridOpacity: 0.46,
-                gridFadeInnerRadiusCells: 3.5,
-                gridFadeOuterRadiusCells: 6,
+                gridFadeInnerRadiusCells: 4,
+                gridFadeOuterRadiusCells: 7.5,
             })
             mainColumn += 1
             await runtime.travelWithCube(
@@ -86,8 +86,8 @@ const createMovingBridgeAnimation = (runtime: GridSceneRuntime): MovingBridgeCon
                 presentation.setTarget({
                     zoom: 1.18,
                     gridOpacity: 0.7,
-                    gridFadeInnerRadiusCells: 2,
-                    gridFadeOuterRadiusCells: 4.5,
+                    gridFadeInnerRadiusCells: 2.5,
+                    gridFadeOuterRadiusCells: 5,
                 })
                 await delay.wait(1.05)
             }
@@ -155,11 +155,12 @@ export const MovingBridgeScene = ({
         cubeSize: GRID_CELL_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 11,
+        gridCellCount: 13,
         gridOpacity: 0.52,
-        gridFadeInnerRadiusCells: 3,
-        gridFadeOuterRadiusCells: 5.5,
+        gridFadeInnerRadiusCells: 3.5,
+        gridFadeOuterRadiusCells: 7,
         cameraAzimuthDeg: 45,
+        cameraElevationDeg: 25,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,

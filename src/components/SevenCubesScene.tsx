@@ -14,8 +14,8 @@ import {
     type SimpleCubeSetupContext,
 } from '../scenes/useSimpleCubeScene'
 
-const GRID_CELL_SIZE = 0.03
-const GRID_CELL_COUNT = 15
+const GRID_CELL_SIZE = 0.027
+const GRID_CELL_COUNT = 19
 const GRID_RADIUS = 7
 const ISLAND_RADIUS = 2
 const MOVE_DURATION_PER_CELL_S = 0.22
@@ -284,7 +284,10 @@ export const SevenCubesScene = ({
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
+        gridFadeInnerRadiusCells: 6,
+        gridFadeOuterRadiusCells: 10,
         cameraAzimuthDeg: 45,
+        cameraElevationDeg: 50,
         viewOffsetY: 0,
         hoverCells: 0,
         mainCubeFaceLabels: faceLabels,
