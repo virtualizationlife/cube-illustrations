@@ -36,12 +36,26 @@ Each ready-to-use scene is a separate component:
 
 ```tsx
 import {
+    BoundaryRepairScene,
+    BecomingSignScene,
     CenteredCubeScene,
+    ContinuousQueueScene,
+    CrossingFlowsScene,
     EncounterCubeScene,
     FlippingCubeScene,
+    LearnedDetourScene,
+    LearnedRhythmScene,
+    MemoryReplayScene,
     MovingGridScene,
+    MovingBridgeScene,
+    PredictedPathsScene,
+    PreferenceChoiceScene,
+    ReunitingPairScene,
     SevenCubesScene,
+    StructureMorphScene,
     ThreeCubesScene,
+    VllCubeScene,
+    ValenceFieldScene,
 } from 'cube-illustrations'
 
 export const Scene = () => (
@@ -51,7 +65,21 @@ export const Scene = () => (
         <FlippingCubeScene />
         <EncounterCubeScene />
         <ThreeCubesScene />
+        <VllCubeScene />
         <SevenCubesScene />
+        <StructureMorphScene />
+        <ContinuousQueueScene />
+        <CrossingFlowsScene />
+        <LearnedDetourScene />
+        <MemoryReplayScene />
+        <BoundaryRepairScene />
+        <ReunitingPairScene />
+        <PreferenceChoiceScene />
+        <PredictedPathsScene />
+        <LearnedRhythmScene />
+        <ValenceFieldScene />
+        <MovingBridgeScene />
+        <BecomingSignScene />
     </>
 )
 ```
@@ -59,6 +87,22 @@ export const Scene = () => (
 `SevenCubesScene` starts from a random scatter. On every cycle it generates a new connected
 seven-cell island, creates a random cube queue, and moves only one cube at a time. A turn covers
 one, two, or three cells before the next cube gets its turn.
+
+`StructureMorphScene` continuously rearranges sixteen cubes into a random non-repeating form from
+its built-in shape set. `ContinuousQueueScene` advances an evenly spaced queue and brings each
+departing cube back through a faded side entrance as a new arrival. `CrossingFlowsScene` sends
+random cubes across a 10-by-10 grid from both sides; head-on cubes yield through a neighboring lane.
+
+`LearnedDetourScene` repeatedly adapts when a changing barrier blocks its learned route.
+`MemoryReplayScene` reconstructs a completed journey with moving translucent echoes.
+`BoundaryRepairScene` repairs a ring after an external cube breaches it. `ReunitingPairScene` makes
+two cubes wait for each other after unequal routes. `PreferenceChoiceScene` follows the same shape
+after two destination arrangements exchange sides.
+
+`PredictedPathsScene` simulates possible routes before acting. `LearnedRhythmScene` learns another
+cube's changing crossing rhythm. `ValenceFieldScene` approaches one form and avoids another after
+they swap sides. `MovingBridgeScene` recycles rear supports ahead of a centered traveler.
+`BecomingSignScene` turns a random scatter into a directional sign that guides the main cube.
 
 ## Face labels
 
@@ -83,7 +127,7 @@ set `mainCubeFaceLabels` on `GridPathCubeScene`, or `faceLabels` on any item in
 
 ## Rounded corners
 
-Cubes use a corner radius of 5% of their edge by default. Every ready-to-use scene accepts
+Cubes use a corner radius of 3% of their edge by default. Every ready-to-use scene accepts
 `cubeCornerRadius` in world units; set it to `0` for sharp corners. Custom additional cubes can
 override the scene value with `cornerRadius`.
 
@@ -92,7 +136,7 @@ override the scene value with `cornerRadius`.
 
 <GridPathCubeScene
     cubeSize={0.1}
-    cubeCornerRadius={0.005}
+    cubeCornerRadius={0.003}
     additionalCubes={[{ id: 'sharp', cornerRadius: 0 }]}
     // ...other required scene props
 />

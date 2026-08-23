@@ -1,0 +1,188 @@
+import { useCallback, type JSX } from 'react'
+
+import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
+import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
+import { createCancellableDelay } from '../scenes/createCancellableDelay'
+import { isSameGridCell } from '../scenes/gridPathfinding'
+import {
+    MAIN_CUBE_ID,
+    type GridCoordinate,
+    type GridSceneRuntime,
+} from '../scenes/gridSceneRuntime'
+import {
+    useSimpleCubeScene,
+    type SimpleCubeSetupContext,
+} from '../scenes/useSimpleCubeScene'
+
+const GRID_CELL_SIZE = 0.06
+const BREACH_HOLD_DURATION_S = 0.9
+const REPAIRED_HOLD_DURATION_S = 1.4
+const IMPACT_CUBE_ID = 'boundary-impact-cube'
+const IMPACT_PARKING_POSITION: GridCoordinate = { column: 100, row: 101 }
+
+const BOUNDARY_POSITIONS: readonly GridCoordinate[] = [
+    { column: -1, row: -1 },
+    { column: 0, row: -1 },
+    { column: 1, row: -1 },
+    { column: 1, row: 0 },
+    { column: 1, row: 1 },
+    { column: 0, row: 1 },
+    { column: -1, row: 1 },
+    { column: -1, row: 0 },
+]
+
+const BOUNDARY_CUBE_IDS = BOUNDARY_POSITIONS.map(
+    (_, index) => `boundary-cube-${index}`
+)
+const BREACHABLE_INDICES = [1, 3, 5, 7] as const
+
+interface BoundaryAnimationController {
+    readonly dispose: () => void
+}
+
+const createBoundaryAnimation = (runtime: GridSceneRuntime): BoundaryAnimationController => {
+    let cancelled = false
+    const delay = createCancellableDelay()
+
+    const play = async (): Promise<void> => {
+        await delay.wait(REPAIRED_HOLD_DURATION_S)
+        while (!cancelled) {
+            const breachedIndex =
+                BREACHABLE_INDICES[Math.floor(Math.random() * BREACHABLE_INDICES.length)]
+            if (breachedIndex === undefined) return
+            const breachedPosition = BOUNDARY_POSITIONS[breachedIndex]
+            if (breachedPosition === undefined) return
+            const breachedCubeId = BOUNDARY_CUBE_IDS.find((cubeId) => {
+                const position = runtime.getCubePosition(cubeId)
+                return position !== undefined && isSameGridCell(position, breachedPosition)
+            })
+            if (breachedCubeId === undefined) return
+
+            const impactStart = {
+                column: breachedPosition.column * 4,
+                row: breachedPosition.row * 4,
+            }
+            const impactContact = {
+                column: breachedPosition.column * 3,
+                row: breachedPosition.row * 3,
+            }
+            runtime.setCubePosition(IMPACT_CUBE_ID, impactStart)
+            runtime.setCubeOpacity(IMPACT_CUBE_ID, 0)
+            await Promise.all([
+                runtime.moveCubeTo(IMPACT_CUBE_ID, impactContact, {
+                    duration: 0.58,
+                    easing: 'easeInOutCubic',
+                }),
+                runtime.fadeCubeTo(IMPACT_CUBE_ID, 1, {
+                    duration: 0.42,
+                    easing: 'easeOutCubic',
+                }),
+            ])
+            if (cancelled) return
+
+            await runtime.moveCubeTo(
+                breachedCubeId,
+                {
+                    column: breachedPosition.column * 2,
+                    row: breachedPosition.row * 2,
+                },
+                { duration: 0.38, easing: 'easeOutCubic' }
+            )
+            if (cancelled) return
+            await delay.wait(BREACH_HOLD_DURATION_S * 0.55)
+            await Promise.all([
+                runtime.moveCubeTo(IMPACT_CUBE_ID, impactStart, {
+                    duration: 0.48,
+                    easing: 'easeInOutCubic',
+                }),
+                runtime.fadeCubeTo(IMPACT_CUBE_ID, 0, {
+                    duration: 0.48,
+                    easing: 'easeOutCubic',
+                }),
+            ])
+            runtime.setCubePosition(IMPACT_CUBE_ID, IMPACT_PARKING_POSITION)
+            if (cancelled) return
+
+            let vacantPosition = breachedPosition
+            const repairShiftCount = 2 + Math.floor(Math.random() * 3)
+            for (let offset = 1; offset <= repairShiftCount; offset += 1) {
+                const movingIndex =
+                    (breachedIndex - offset + BOUNDARY_CUBE_IDS.length) %
+                    BOUNDARY_CUBE_IDS.length
+                const source = BOUNDARY_POSITIONS[movingIndex]
+                if (source === undefined) continue
+                const movingCubeId = BOUNDARY_CUBE_IDS.find((cubeId) => {
+                    const position = runtime.getCubePosition(cubeId)
+                    return position !== undefined && isSameGridCell(position, source)
+                })
+                if (movingCubeId === undefined) continue
+                await runtime.moveCubeTo(movingCubeId, vacantPosition, {
+                    duration: 0.34,
+                    easing: 'easeInOutCubic',
+                })
+                vacantPosition = source
+                if (cancelled) return
+                await delay.wait(0.08)
+            }
+
+            await runtime.moveCubeTo(breachedCubeId, vacantPosition, {
+                duration: 0.72,
+                easing: 'easeInOutCubic',
+            })
+            if (!cancelled) await delay.wait(REPAIRED_HOLD_DURATION_S)
+        }
+    }
+
+    void play()
+    return {
+        dispose: () => {
+            cancelled = true
+            delay.cancel()
+        },
+    }
+}
+
+/** An external cube breaches a protective boundary, which redistributes and repairs itself. */
+export const BoundaryRepairScene = ({
+    faceLabels,
+    cubeCornerRadius,
+}: CubeFaceLabelsProps): JSX.Element => {
+    const onSetup = useCallback(
+        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
+            for (let index = 0; index < BOUNDARY_POSITIONS.length; index += 1) {
+                const id = BOUNDARY_CUBE_IDS[index]
+                const position = BOUNDARY_POSITIONS[index]
+                if (id !== undefined && position !== undefined) {
+                    runtime.addCube({ id, position, faceLabels })
+                }
+            }
+            runtime.addCube({
+                id: IMPACT_CUBE_ID,
+                position: IMPACT_PARKING_POSITION,
+                opacity: 0,
+                faceLabels,
+            })
+            const animation = createBoundaryAnimation(runtime)
+            return () => animation.dispose()
+        },
+        [faceLabels]
+    )
+
+    const { canvasRef, status } = useSimpleCubeScene({
+        cubeSize: GRID_CELL_SIZE,
+        cubeCornerRadius,
+        gridCellSize: GRID_CELL_SIZE,
+        gridCellCount: 11,
+        gridFadeInnerRadiusCells: 3,
+        gridFadeOuterRadiusCells: 5.5,
+        cameraAzimuthDeg: 45,
+        viewOffsetY: 0,
+        hoverCells: 0,
+        mainCubeFaceLabels: faceLabels,
+        enableCubeHover: true,
+        onSetup,
+        onFrame: () => undefined,
+    })
+
+    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
+}

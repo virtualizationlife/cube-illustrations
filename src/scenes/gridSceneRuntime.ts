@@ -32,7 +32,7 @@ const ROUNDED_EDGE_SEGMENTS = 1
 const ROUNDED_EDGE_THRESHOLD_DEG = 30
 
 /** Subtle default rounding, expressed as a fraction of the cube edge. */
-export const DEFAULT_CUBE_CORNER_RADIUS_RATIO = 0.05
+export const DEFAULT_CUBE_CORNER_RADIUS_RATIO = 0.02
 
 export const MAIN_CUBE_ID = 'main'
 
@@ -92,6 +92,10 @@ export interface GridSceneRuntime {
         position: GridCoordinate,
         options: GridSceneTransitionOptions
     ) => Promise<void>
+    /** Changes grid line opacity without recreating the scene. */
+    readonly setGridOpacity: (opacity: number) => void
+    /** Changes the radial grid fade radii, measured in grid cells. */
+    readonly setGridFadeRadii: (innerRadiusCells: number, outerRadiusCells: number) => void
     /** Keeps a cube fixed in the viewport while the repeating grid moves underneath it. */
     readonly travelWithCube: (
         id: string,
@@ -272,10 +276,9 @@ export const createGridSceneRuntime = ({
     const grid = new THREE.Group()
     const gridLines: GridLineRecord[] = []
     const halfGridSize = (gridCellSize * gridCellCount) / 2
-    const maxGridOpacity = clampOpacity(gridOpacity)
-    const radialFadeInnerRadius = Math.max(0, gridFadeInnerRadiusCells ?? 0) * gridCellSize
-    const radialFadeOuterRadius = Math.max(0, gridFadeOuterRadiusCells ?? 0) * gridCellSize
-    const hasRadialFade = radialFadeOuterRadius > radialFadeInnerRadius
+    let maxGridOpacity = clampOpacity(gridOpacity)
+    let radialFadeInnerRadius = Math.max(0, gridFadeInnerRadiusCells ?? 0) * gridCellSize
+    let radialFadeOuterRadius = Math.max(0, gridFadeOuterRadiusCells ?? 0) * gridCellSize
     let gridFocus: GridCoordinate = { column: 0, row: 0 }
     let gridTransition: CoordinateTransition | null = null
     let trackedTravel: TrackedTravel | null = null
@@ -313,7 +316,7 @@ export const createGridSceneRuntime = ({
             )
 
         const getRadialFade = (column: number, row: number): number => {
-            if (!hasRadialFade) return 1
+            if (radialFadeOuterRadius <= radialFadeInnerRadius) return 1
             const distance = Math.hypot(column, row)
             const progress = Math.min(
                 1,
@@ -770,6 +773,15 @@ export const createGridSceneRuntime = ({
         getGridFocus: () => ({ ...gridFocus }),
         setGridFocus,
         moveGridFocusTo,
+        setGridOpacity: (opacity) => {
+            maxGridOpacity = clampOpacity(opacity)
+            for (const line of gridLines) line.material.opacity = maxGridOpacity
+        },
+        setGridFadeRadii: (innerRadiusCells, outerRadiusCells) => {
+            radialFadeInnerRadius = Math.max(0, innerRadiusCells) * gridCellSize
+            radialFadeOuterRadius = Math.max(0, outerRadiusCells) * gridCellSize
+            updateGridVisual()
+        },
         travelWithCube: async (id, position, options) => {
             const token = Symbol(id)
             trackedTravel = { cubeId: id, token }

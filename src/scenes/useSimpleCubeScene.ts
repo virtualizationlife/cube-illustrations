@@ -29,6 +29,7 @@ const CAMERA_ELEVATION = (35 * Math.PI) / 180
 export interface SimpleCubeFrameContext {
     readonly mesh: Object3D
     readonly runtime: GridSceneRuntime
+    readonly camera: PerspectiveCamera
     readonly delta: number
     readonly elapsed: number
     readonly canvas: HTMLCanvasElement
@@ -46,7 +47,7 @@ export interface SimpleCubeSetupContext {
 
 export interface IllustrationSceneSizeProps {
     readonly cubeSize: number
-    /** Cube corner radius in world units. Defaults to 5% of cubeSize. */
+    /** Cube corner radius in world units. Defaults to 3% of cubeSize. */
     readonly cubeCornerRadius?: number
     readonly gridCellSize: number
     readonly gridCellCount: number
@@ -231,7 +232,15 @@ export const useSimpleCubeScene = ({
                 runtime?.update(delta)
                 hoverController?.update()
                 if (runtime !== null) {
-                    onFrameRef.current({ mesh, runtime, delta, elapsed, canvas, THREE })
+                    onFrameRef.current({
+                        mesh,
+                        runtime,
+                        camera,
+                        delta,
+                        elapsed,
+                        canvas,
+                        THREE,
+                    })
                 }
                 renderer?.render(scene, camera)
             })

@@ -39,7 +39,7 @@ interface FlipState {
 
 export interface FaceFlipCubeSceneProps {
     readonly cubeSize: number
-    /** Cube corner radius in world units. Defaults to 5% of cubeSize. */
+    /** Cube corner radius in world units. Defaults to 3% of cubeSize. */
     readonly cubeCornerRadius?: number
     readonly gridCellSize: number
     readonly gridCellCount: number
