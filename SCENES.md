@@ -185,3 +185,47 @@ A central cube advances along two parallel rows of supporting cubes. Because the
 Nine scattered cubes appear to be unrelated until they assemble into one of twelve randomly selected symbols: an arrow, chevron, plus, cross, diamond, frame, exclamation mark, lightning bolt, fork, spiral, gate, or pause sign. The same symbol never appears twice in succession, and every form can be rotated in a random direction. As the camera pulls back, a separate cube enters from a transparent edge, responds to the sign, and disappears through the corresponding edge. The symbol then dissolves back into scattered parts before another one forms.
 
 **Abstract meaning:** Separate elements acquire meaning when their arrangement becomes a shared sign capable of directing another entity's action.
+
+## New Phenomena
+
+The following five scenes focus on communication, collective coordination, cooperation, phase transitions, and self-maintaining balance. Every cube remains the same size as one grid cell throughout each animation.
+
+### 21. Signal Relay (`SignalRelayScene`)
+
+**Tags:** `communication`, `continuity`
+
+Nine cubes form a continuous line across the grid. A brief opacity pulse travels from one cube to the next, making the signal visibly independent from any single carrier. After the pulse reaches the end, the first cube fades through the transparent left edge, the remaining cubes advance one cell at a time, and the departed cube reappears from the transparent right edge to complete the renewed chain.
+
+**Abstract meaning:** Information can continue to exist by moving between temporary carriers.
+
+### 22. Collective Current (`CollectiveCurrentScene`)
+
+**Tags:** `coordination`, `emergence`
+
+Twelve scattered cubes initially take independent one-cell steps in random cardinal directions. A randomly selected cube then pulses and establishes a direction. The other cubes progressively take repeated steps in that same direction, producing a temporary collective current. The alignment eventually dissolves into independent movement before a different cube initiates another direction.
+
+**Abstract meaning:** Collective order can emerge from local influence without a permanent leader or fixed global plan.
+
+### 23. Shared Load (`SharedLoadScene`)
+
+**Tags:** `cooperation`, `resources`
+
+A raised cube advances between two rows of supporting cubes. After every step, one rear support travels around the structure to the front, followed separately by a support from the opposite row. The load waits until both individual transfers are complete and then advances again while the grid follows its continuing journey.
+
+**Abstract meaning:** Limited resources can sustain a shared task when participants repeatedly give up completed positions to prepare what is needed next.
+
+### 24. Phase Change (`PhaseChangeScene`)
+
+**Tags:** `adaptation`, `organization`
+
+Twelve cubes begin widely scattered around a large grid. A different random target cell becomes the seed of each cycle, and the cubes approach it one at a time in an expanding spatial order until they form a compact three-by-four crystal. After a pause, the cubes leave in random order and return to separated positions around the transparent perimeter before another crystal forms.
+
+**Abstract meaning:** The same collection can alternate between independent freedom and collective order as its governing conditions change.
+
+### 25. Dynamic Balance (`DynamicBalanceScene`)
+
+**Tags:** `maintenance`, `stability`
+
+A central cube and seven surrounding cubes form a compact group with one vacant boundary cell. A translucent cube arrives from the faded edge and fills the vacancy. The cube on the opposite side then leaves and becomes the next incoming participant, while one to three remaining cubes move around the perimeter to redistribute the empty position before the next arrival.
+
+**Abstract meaning:** Stability is an ongoing achievement produced through exchange and internal redistribution rather than complete immobility.
