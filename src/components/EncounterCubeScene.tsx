@@ -15,19 +15,38 @@ import {
 const GRID_CELL_SIZE = 0.04
 const ENCOUNTER_CUBE_IDS = ['encounter-1', 'encounter-2', 'encounter-3'] as const
 
+/**
+ * The exploration runs inside a closed territory, so the grid has to end somewhere the
+ * viewer can see. Cells reach from -5 to +5 on both axes — the widest square that still
+ * fits inside the frame whole, border included — and the odd count keeps the lines on
+ * half-integers, which is what puts a whole-numbered coordinate at a cell centre.
+ */
+const TERRITORY_RADIUS_CELLS = 5
+const GRID_CELL_COUNT = TERRITORY_RADIUS_CELLS * 2 + 1
+
+/**
+ * Zero radii switch the radial fade off (see `createGridLines`). The default fade dissolves
+ * the grid into an open plane well before its edge, which is the opposite of what this
+ * scene says: here every cell of the territory stays drawn, and the only thing that ends
+ * the grid is its border.
+ */
+const TERRITORY_FADE_RADIUS_CELLS = 0
+
 /** Minimum Manhattan distance between generated cubes, measured in grid cells. */
 export const ENCOUNTER_SCENE_MIN_CUBE_DISTANCE = 2
 
+// Turns one cell short of the border on every side, so the route reads as movement the
+// territory contains rather than as a cube sliding along its edge.
 const MOVEMENT_ROUTE: readonly GridCoordinate[] = [
-    { column: 1, row: 0 },
-    { column: 3, row: 0 },
-    { column: 3, row: 3 },
-    { column: 1, row: 3 },
+    { column: 1, row: -3 },
+    { column: 4, row: -3 },
+    { column: 4, row: 2 },
     { column: 1, row: 2 },
-    { column: -2, row: 2 },
-    { column: -3, row: 2 },
-    { column: -3, row: 0 },
-    { column: 0, row: 0 },
+    { column: 1, row: 1 },
+    { column: -2, row: 1 },
+    { column: -4, row: 1 },
+    { column: -4, row: -3 },
+    { column: 0, row: -3 },
 ]
 
 const createEncounterCubes = (
@@ -39,8 +58,8 @@ const createEncounterCubes = (
         let position: GridCoordinate
         do {
             position = {
-                column: Math.floor(Math.random() * 9) - 4,
-                row: Math.floor(Math.random() * 9) - 4,
+                column: Math.floor(Math.random() * GRID_CELL_COUNT) - TERRITORY_RADIUS_CELLS,
+                row: Math.floor(Math.random() * GRID_CELL_COUNT) - TERRITORY_RADIUS_CELLS,
             }
         } while (
             getGridDistance({ column: 0, row: 0 }, position) <
@@ -82,7 +101,9 @@ export const EncounterCubeScene = ({
             cubeSize={GRID_CELL_SIZE}
             cubeCornerRadius={cubeCornerRadius}
             gridCellSize={GRID_CELL_SIZE}
-            gridCellCount={15}
+            gridCellCount={GRID_CELL_COUNT}
+            gridFadeInnerRadiusCells={TERRITORY_FADE_RADIUS_CELLS}
+            gridFadeOuterRadiusCells={TERRITORY_FADE_RADIUS_CELLS}
             cameraAzimuthDeg={30}
             viewOffsetY={0}
             hoverCells={0}

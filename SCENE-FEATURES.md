@@ -194,7 +194,7 @@ pair of destinations, or a rotated position of the free cell.
 | --: | --- | --: | --: | --: | --- | --- | --- | :-: |
 | 1 | Moving World | 13 | 0.085 | 60° | 1 / 7 | · | fixed 1 | · |
 | 2 | Changing Faces | 11 | 0.13 | 40° | default | · | · | ● |
-| 3 | Discovery | 15 | 0.04 | 30° | default | · | · | · |
+| 3 | Discovery | 11 | 0.04 | 30° | off (bounded) | · | · | · |
 | 4 | Three Cubes | 9 | 0.1 | 0° | default | · | · | · |
 | 5 | Main Cube | 15 | 0.075 | 45° | 2 / 8 | · | · | · |
 | 6 | Forming a Group | 23 | 0.027 | 45° | 4 / 12 | · | · | · |
@@ -219,7 +219,8 @@ pair of destinations, or a rotated position of the free cell.
 | 25 | Dynamic Balance | 17 | 0.055 | 45° | 3 / 9 | · | · | · |
 
 Camera elevation is 35° in every scene. The fade columns give the animated range where a scene
-changes it; `default` means the wide radii derived from the grid size. Pointer hovering highlights a
+changes it; `default` means the wide radii derived from the grid size, and `off (bounded)` means the
+radial fade is disabled so the grid stays at full strength up to its border. Pointer hovering highlights a
 cube with a pointer cursor in every scene, but only the two face-flip scenes scale the cube in
 response.
 

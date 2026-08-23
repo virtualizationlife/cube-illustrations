@@ -26,9 +26,9 @@ When the pointer hovers over the cube, it smoothly grows to 120% of its normal s
 
 **Tags:** `space`, `perception`
 
-The main cube continuously follows a fixed, looping route across the grid. Three additional cubes are placed at random positions and initially appear with low opacity.
+The grid is a closed territory of 11 by 11 cells: it keeps full strength up to its border instead of fading away, so the limits of the space are visible. The main cube continuously follows a fixed, looping route that stays one cell inside that border. Three additional cubes are placed at random positions inside the territory and initially appear with low opacity.
 
-As the main cube approaches one of them, that cube becomes brighter and eventually fully visible. It fades back toward its initial opacity as the main cube moves away. The scene represents exploration and the discovery of other objects in the surrounding space.
+As the main cube approaches one of them, that cube becomes brighter and eventually fully visible. It fades back toward its initial opacity as the main cube moves away. The scene represents exploration and the discovery of other objects within a bounded territory.
 
 **Abstract meaning:** As an entity follows its path, it discovers what previously remained unnoticed.
 
