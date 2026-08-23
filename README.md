@@ -109,7 +109,8 @@ after two destination arrangements exchange sides.
 `PredictedPathsScene` simulates possible routes before acting. `LearnedRhythmScene` learns another
 cube's changing crossing rhythm. `ValenceFieldScene` approaches one form and avoids another after
 they swap sides. `MovingBridgeScene` recycles rear supports ahead of a centered traveler.
-`BecomingSignScene` turns a random scatter into a directional sign that guides the main cube.
+`BecomingSignScene` turns a random scatter into one of twelve non-repeating symbols that guides the
+main cube.
 
 ## Face labels
 
@@ -163,7 +164,11 @@ compositions.
 
 Lower-level scenes accept `cameraAzimuthDeg` for rotation around the grid and the optional
 `cameraElevationDeg` for the angle above the horizon. Elevation defaults to `35` degrees when it is
-not specified.
+not specified. All ready-to-use scenes use this standard elevation.
+
+When radial grid fade radii are omitted, the grid fades completely at its nominal outer boundary.
+The fully opaque center occupies 40% of that radius, leaving the remaining 60% for a broad partial-
+opacity transition.
 
 ## Styling
 

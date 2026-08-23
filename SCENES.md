@@ -182,6 +182,6 @@ A central cube advances along two parallel rows of supporting cubes. Because the
 
 **Tags:** `meaning`, `symbol`
 
-Nine scattered cubes appear to be unrelated until they move into a large directional arrow. As the camera pulls back, the complete sign becomes visible. A separate cube enters from a transparent edge, reads the direction expressed by the group, follows it, and disappears through the corresponding edge. The arrow then dissolves back into scattered parts and forms again with a different direction.
+Nine scattered cubes appear to be unrelated until they assemble into one of twelve randomly selected symbols: an arrow, chevron, plus, cross, diamond, frame, exclamation mark, lightning bolt, fork, spiral, gate, or pause sign. The same symbol never appears twice in succession, and every form can be rotated in a random direction. As the camera pulls back, a separate cube enters from a transparent edge, responds to the sign, and disappears through the corresponding edge. The symbol then dissolves back into scattered parts before another one forms.
 
 **Abstract meaning:** Separate elements acquire meaning when their arrangement becomes a shared sign capable of directing another entity's action.
