@@ -1,0 +1,46 @@
+.cube_illustrations__page {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: var(--cube-illustrations-page-padding, 24px);
+    gap: var(--cube-illustrations-gap, 0);
+    background: var(--cube-illustrations-background, #ffffff);
+}
+
+.cube_illustrations__slot {
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0;
+    width: var(--cube-illustrations-scene-size, 260px);
+    height: var(--cube-illustrations-scene-size, 260px);
+    border: var(--cube-illustrations-border, 0);
+}
+
+.cube_illustrations__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    touch-action: none;
+    transition: opacity 0.4s ease-out;
+}
+
+.cube_illustrations__canvas[data-ready='true'] {
+    opacity: 1;
+}
+
+.cube_illustrations__fallback {
+    display: grid;
+    position: absolute;
+    place-items: center;
+    margin: 0;
+    inset: 0;
+    padding: var(--cube-illustrations-fallback-padding, 16px);
+    color: var(--cube-illustrations-muted-color, #6b7280);
+    font-size: var(--cube-illustrations-fallback-font-size, 14px);
+    text-align: center;
+    pointer-events: none;
+}

@@ -1,0 +1,47 @@
+{
+    "name": "cube-illustrations",
+    "version": "0.1.0",
+    "description": "Reusable animated WebGPU cube illustration scenes for React",
+    "type": "module",
+    "sideEffects": ["**/*.css"],
+    "files": ["dist"],
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./styles.css": "./dist/styles.css"
+    },
+    "scripts": {
+        "demo": "vite --config vite.demo.config.ts",
+        "build": "vite build && tsc -p tsconfig.build.json",
+        "check": "tsc -p tsconfig.json --noEmit && npm run build",
+        "test": "vitest run",
+        "pack:check": "npm pack --dry-run"
+    },
+    "engines": {
+        "node": ">=20.19.0"
+    },
+    "peerDependencies": {
+        "react": ">=18.2.0",
+        "react-dom": ">=18.2.0",
+        "three": ">=0.185.0"
+    },
+    "devDependencies": {
+        "@types/node": "^24.10.1",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.4",
+        "@types/three": "^0.185.3",
+        "@vitejs/plugin-react": "^6.0.5",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "three": "^0.185.1",
+        "typescript": "^6.0.3",
+        "vite": "^8.2.0",
+        "vitest": "^4.1.10"
+    },
+    "license": "ISC"
+}
