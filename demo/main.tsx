@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 
-import { IllustrationsPage } from '@app/index'
+import { IllustrationsRouter } from './IllustrationsRouter'
+
 import '../src/styles.css'
 import './demo.css'
 
@@ -10,4 +11,4 @@ if (root === null) {
     throw new Error('Demo root element was not found')
 }
 
-createRoot(root).render(<IllustrationsPage />)
+createRoot(root).render(<IllustrationsRouter />)
