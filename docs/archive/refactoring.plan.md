@@ -143,9 +143,9 @@
 ### Проблема
 
 32 теста на 12 329 строк кода, и все три файла проверяют утилиты:
-[`tests/unit/gridWorld.test.ts`](../tests/unit/gridWorld.test.ts),
-[`tests/unit/gridSceneRuntime.test.ts`](../tests/unit/gridSceneRuntime.test.ts),
-[`tests/unit/sceneUtilities.test.ts`](../tests/unit/sceneUtilities.test.ts).
+[`tests/unit/gridWorld.test.ts`](../../tests/unit/gridWorld.test.ts),
+[`tests/unit/gridSceneRuntime.test.ts`](../../tests/unit/gridSceneRuntime.test.ts),
+[`tests/unit/sceneUtilities.test.ts`](../../tests/unit/sceneUtilities.test.ts).
 
 Жизненный цикл сценария не покрыт ничем — а именно его семантику этапы 1–2 будут менять
 в сорока файлах.
@@ -153,7 +153,7 @@
 ### Что делать
 
 Добавить `tests/unit/runSceneScript.test.ts` поверх фейкового `GridSceneRuntime`
-(GPU не нужен: [`runSceneScript`](../src/runtime/core/runSceneScript.ts) работает с любым объектом,
+(GPU не нужен: [`runSceneScript`](../../src/runtime/core/runSceneScript.ts) работает с любым объектом,
 удовлетворяющим интерфейсу). Проверить:
 
 1. `dispose()` во время `delay` → следующая команда runtime не выполняется.
@@ -165,7 +165,7 @@
    runtime), после отмены возобновляется — но первый же вызов runtime бросает.
    Это фиксирует реальную гарантию, а не желаемую (см. ниже).
 
-Дополнительно — тест на [`createSceneChoreography`](../src/sdk/choreography.ts):
+Дополнительно — тест на [`createSceneChoreography`](../../src/sdk/choreography.ts):
 `timeline.stagger` соблюдает задержки, `timeline.loop` прерывается отменой через
 cancellation-aware операцию в теле, `cubes.get(id)` мемоизирует актёра.
 
@@ -187,7 +187,7 @@ cancellation-aware операцию в теле, `cubes.get(id)` мемоизи�
 
 - `timeline.wait` / `delay` — отклоняется немедленно при отмене;
 - **любой** вызов метода runtime после отмены — прокси в
-  [`runSceneScript`](../src/runtime/core/runSceneScript.ts) вызывает `throwIfCancelled` на входе
+  [`runSceneScript`](../../src/runtime/core/runSceneScript.ts) вызывает `throwIfCancelled` на входе
   в каждый метод, синхронный он или асинхронный;
 - четыре async-метода из `ASYNC_RUNTIME_METHODS` — `moveCubeTo`, `fadeCubeTo`,
   `moveGridFocusTo`, `travelWithCube` — дополнительно гонятся с отменой и отклоняются
@@ -226,9 +226,9 @@ runtime, — но при добавлении в SDK новых async-возмо
 
 | Пилот                                                                      | Категория                                   | Что должен выявить                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------- |
-| [`PhaseChangeScene`](../src/gallery/cycles/PhaseChangeScene.tsx) (152)     | простой скрипт                              | базовый путь, эталон для волны A                            |
-| [`GuardChangeScene`](../src/gallery/continuity/GuardChangeScene.tsx) (199) | `presentation` + `controllerRef`            | нужна ли `presentation` первым классом                      |
-| [`ThreeCubesScene`](../src/gallery/structure/ThreeCubesScene.tsx) (283)    | hover-взаимодействие, два экспорта из файла | как SDK отдаёт две сцены из одного модуля и hover-состояние |
+| [`PhaseChangeScene`](../../src/gallery/cycles/PhaseChangeScene.tsx) (152)     | простой скрипт                              | базовый путь, эталон для волны A                            |
+| [`GuardChangeScene`](../../src/gallery/continuity/GuardChangeScene.tsx) (199) | `presentation` + `controllerRef`            | нужна ли `presentation` первым классом                      |
+| [`ThreeCubesScene`](../../src/gallery/structure/ThreeCubesScene.tsx) (283)    | hover-взаимодействие, два экспорта из файла | как SDK отдаёт две сцены из одного модуля и hover-состояние |
 
 По итогам пилотов:
 
@@ -270,8 +270,8 @@ runtime, — но при добавлении в SDK новых async-возмо
 | **ручных `if (cancelled)`**       | **156 вхождений** |
 
 Сравнение при одинаковой сложности хореографии:
-[`GuardChangeScene.tsx`](../src/gallery/continuity/GuardChangeScene.tsx) — 199 строк, из них ~70 плиты;
-[`SignalRelayScene.tsx`](../src/gallery/interaction/SignalRelayScene.tsx) — 105 строк, плиты нет.
+[`GuardChangeScene.tsx`](../../src/gallery/continuity/GuardChangeScene.tsx) — 199 строк, из них ~70 плиты;
+[`SignalRelayScene.tsx`](../../src/gallery/interaction/SignalRelayScene.tsx) — 105 строк, плиты нет.
 
 ### Проблема B: сценарии продолжают работать после размонтирования
 
@@ -280,15 +280,15 @@ runtime, — но при добавлении в SDK новых async-возмо
 1. `createCancellableDelay.cancel()` **резолвил** активное ожидание, а не отклонял
    (`cancel: finish`, где `finish()` зовёт `resolveWait`). Модуль удалён на этапе 7;
    его содержимое смотреть в истории git.
-2. [`gridWorld.dispose()`](../src/runtime/grid/gridWorld.ts) и
-   [`removeCube`](../src/runtime/grid/gridSceneRuntime.ts) тоже **резолвят** висящие переходы
+2. [`gridWorld.dispose()`](../../src/runtime/grid/gridWorld.ts) и
+   [`removeCube`](../../src/runtime/grid/gridSceneRuntime.ts) тоже **резолвят** висящие переходы
    (`gridTransition?.resolve()`, `cube.opacityTransition?.resolve()`).
 3. Значит, после teardown резолвятся и `await delay.wait(...)`, и `await runtime.moveCubeTo(...)`,
    и тело сценария продолжает исполняться.
 4. Если следующий оператор не прикрыт `if (cancelled)` / `while (!cancelled)`, он зовёт
    разобранный runtime: `requireCube` бросает `Unknown cube id "..."`, `addCube` —
    `Cannot add a cube to a disposed grid scene`.
-5. [`startSceneAnimation`](../src/runtime/animation/startSceneAnimation.ts) ловит и печатает
+5. [`startSceneAnimation`](../../src/runtime/animation/startSceneAnimation.ts) ловит и печатает
    `[cube-illustrations] <Имя> animation stopped`.
 
 Симптом — не падение, а поток ошибок в консоли при размонтировании, HMR и навигации;
@@ -320,51 +320,51 @@ fadeTo(0.28) + fadeTo(1)          cubes.get(id).pulse()
 
 | Сцена                                                                     | строк | `await delay.wait` |
 | ------------------------------------------------------------------------- | ----- | ------------------ |
-| [TrailingShadowScene](../src/gallery/interaction/TrailingShadowScene.tsx) | 152   | 2                  |
-| [DominoRingScene](../src/gallery/cycles/DominoRingScene.tsx)              | 155   | 0                  |
-| [ThinningClockScene](../src/gallery/cycles/ThinningClockScene.tsx)        | 164   | 5                  |
-| [MemoryReplayScene](../src/gallery/mind/MemoryReplayScene.tsx)            | 167   | 4                  |
-| [ReunitingPairScene](../src/gallery/continuity/ReunitingPairScene.tsx)    | 171   | 6                  |
-| [PreferenceChoiceScene](../src/gallery/mind/PreferenceChoiceScene.tsx)    | 175   | 5                  |
-| [MetronomePairScene](../src/gallery/cycles/MetronomePairScene.tsx)        | 176   | 2                  |
-| [ContinuousQueueScene](../src/gallery/flow/ContinuousQueueScene.tsx)      | 179   | 3                  |
-| [BoundaryRepairScene](../src/gallery/continuity/BoundaryRepairScene.tsx)  | 189   | 4                  |
-| [CorridorDanceScene](../src/gallery/flow/CorridorDanceScene.tsx)          | 189   | 7                  |
-| [DynamicBalanceScene](../src/gallery/structure/DynamicBalanceScene.tsx)   | 192   | 4                  |
-| [CollectiveCurrentScene](../src/gallery/flow/CollectiveCurrentScene.tsx)  | 196   | 4                  |
+| [TrailingShadowScene](../../src/gallery/interaction/TrailingShadowScene.tsx) | 152   | 2                  |
+| [DominoRingScene](../../src/gallery/cycles/DominoRingScene.tsx)              | 155   | 0                  |
+| [ThinningClockScene](../../src/gallery/cycles/ThinningClockScene.tsx)        | 164   | 5                  |
+| [MemoryReplayScene](../../src/gallery/mind/MemoryReplayScene.tsx)            | 167   | 4                  |
+| [ReunitingPairScene](../../src/gallery/continuity/ReunitingPairScene.tsx)    | 171   | 6                  |
+| [PreferenceChoiceScene](../../src/gallery/mind/PreferenceChoiceScene.tsx)    | 175   | 5                  |
+| [MetronomePairScene](../../src/gallery/cycles/MetronomePairScene.tsx)        | 176   | 2                  |
+| [ContinuousQueueScene](../../src/gallery/flow/ContinuousQueueScene.tsx)      | 179   | 3                  |
+| [BoundaryRepairScene](../../src/gallery/continuity/BoundaryRepairScene.tsx)  | 189   | 4                  |
+| [CorridorDanceScene](../../src/gallery/flow/CorridorDanceScene.tsx)          | 189   | 7                  |
+| [DynamicBalanceScene](../../src/gallery/structure/DynamicBalanceScene.tsx)   | 192   | 4                  |
+| [CollectiveCurrentScene](../../src/gallery/flow/CollectiveCurrentScene.tsx)  | 196   | 4                  |
 
 **Волна B — крупные скрипты без `presentation` (6 сцен).**
-[PolarityScene](../src/gallery/interaction/PolarityScene.tsx) (148),
-[LearnedDetourScene](../src/gallery/mind/LearnedDetourScene.tsx) (213),
-[CenteredCubeScene](../src/gallery/structure/CenteredCubeScene.tsx) (215),
-[SevenCubesScene](../src/gallery/cycles/SevenCubesScene.tsx) (290),
-[StructureMorphScene](../src/gallery/structure/StructureMorphScene.tsx) (336),
-[CrossingFlowsScene](../src/gallery/flow/CrossingFlowsScene.tsx) (362).
+[PolarityScene](../../src/gallery/interaction/PolarityScene.tsx) (148),
+[LearnedDetourScene](../../src/gallery/mind/LearnedDetourScene.tsx) (213),
+[CenteredCubeScene](../../src/gallery/structure/CenteredCubeScene.tsx) (215),
+[SevenCubesScene](../../src/gallery/cycles/SevenCubesScene.tsx) (290),
+[StructureMorphScene](../../src/gallery/structure/StructureMorphScene.tsx) (336),
+[CrossingFlowsScene](../../src/gallery/flow/CrossingFlowsScene.tsx) (362).
 
 **Волна C — сцены с `presentation` и `controllerRef` (10 сцен без пилота).**
 Используют механизм, зафиксированный на этапе 1.
-[MovingBridgeScene](../src/gallery/flow/MovingBridgeScene.tsx) (173),
-[LearnedRhythmScene](../src/gallery/mind/LearnedRhythmScene.tsx) (220),
-[ValenceFieldScene](../src/gallery/interaction/ValenceFieldScene.tsx) (236),
-[RecursiveFrameScene](../src/gallery/continuity/RecursiveFrameScene.tsx) (241),
-[RememberedThresholdScene](../src/gallery/continuity/RememberedThresholdScene.tsx) (241),
-[BecomingSignScene](../src/gallery/interaction/BecomingSignScene.tsx) (260),
-[RecognizedPartnerScene](../src/gallery/mind/RecognizedPartnerScene.tsx) (275),
-[AnticipatoryReturnScene](../src/gallery/mind/AnticipatoryReturnScene.tsx) (303),
-[SharedLoadScene](../src/gallery/flow/SharedLoadScene.tsx) (312),
-[PredictedPathsScene](../src/gallery/mind/PredictedPathsScene.tsx) (324).
+[MovingBridgeScene](../../src/gallery/flow/MovingBridgeScene.tsx) (173),
+[LearnedRhythmScene](../../src/gallery/mind/LearnedRhythmScene.tsx) (220),
+[ValenceFieldScene](../../src/gallery/interaction/ValenceFieldScene.tsx) (236),
+[RecursiveFrameScene](../../src/gallery/continuity/RecursiveFrameScene.tsx) (241),
+[RememberedThresholdScene](../../src/gallery/continuity/RememberedThresholdScene.tsx) (241),
+[BecomingSignScene](../../src/gallery/interaction/BecomingSignScene.tsx) (260),
+[RecognizedPartnerScene](../../src/gallery/mind/RecognizedPartnerScene.tsx) (275),
+[AnticipatoryReturnScene](../../src/gallery/mind/AnticipatoryReturnScene.tsx) (303),
+[SharedLoadScene](../../src/gallery/flow/SharedLoadScene.tsx) (312),
+[PredictedPathsScene](../../src/gallery/mind/PredictedPathsScene.tsx) (324).
 
 **Волна D — нестандартные сцены (9 файлов без пилота).**
-[ThreeCubeStatesScene](../src/gallery/structure/ThreeCubeStatesScene.tsx) (258);
-построенные на декларативном [`createGridSceneAnimation`](../src/runtime/animation/gridSceneAnimation.ts)
-[MovingGridScene](../src/gallery/flow/MovingGridScene.tsx),
-[EncounterCubeScene](../src/gallery/interaction/EncounterCubeScene.tsx),
-[GridPathCubeScene](../src/runtime/presentation/GridPathCubeScene.tsx);
-короткие, где выигрыш мал — [FaceFlipCubeScene](../src/runtime/presentation/FaceFlipCubeScene.tsx) (241),
-[InertiaCubeScene](../src/runtime/presentation/InertiaCubeScene.tsx) (170),
-[VllCubeScene](../src/gallery/structure/VllCubeScene.tsx) (71),
-[NestedCubeScene](../src/gallery/structure/NestedCubeScene.tsx) (58),
-[FlippingCubeScene](../src/gallery/interaction/FlippingCubeScene.tsx) (24).
+[ThreeCubeStatesScene](../../src/gallery/structure/ThreeCubeStatesScene.tsx) (258);
+построенные на декларативном [`createGridSceneAnimation`](../../src/runtime/animation/gridSceneAnimation.ts)
+[MovingGridScene](../../src/gallery/flow/MovingGridScene.tsx),
+[EncounterCubeScene](../../src/gallery/interaction/EncounterCubeScene.tsx),
+[GridPathCubeScene](../../src/runtime/presentation/GridPathCubeScene.tsx);
+короткие, где выигрыш мал — [FaceFlipCubeScene](../../src/runtime/presentation/FaceFlipCubeScene.tsx) (241),
+[InertiaCubeScene](../../src/runtime/presentation/InertiaCubeScene.tsx) (170),
+[VllCubeScene](../../src/gallery/structure/VllCubeScene.tsx) (71),
+[NestedCubeScene](../../src/gallery/structure/NestedCubeScene.tsx) (58),
+[FlippingCubeScene](../../src/gallery/interaction/FlippingCubeScene.tsx) (24).
 
 Отдельный вопрос по итогам волны D: `createGridSceneAnimation` (440 строк) сам содержит
 5 ручных `if (cancelled)` и свой `createCancellableDelay`. Либо переводить его на
@@ -382,7 +382,7 @@ fadeTo(0.28) + fadeTo(1)          cubes.get(id).pulse()
    и покрывает все сцены разом. Нужен браузерный контекст с WebGPU — либо `vitest`
    в browser mode, либо отдельный Playwright-прогон демо.
 2. **Детерминированная визуальная сверка.** У SDK уже есть `seed`
-   ([`CubeSceneProps`](../src/sdk/defineScene.tsx)) — прогонять сцену с фиксированным
+   ([`CubeSceneProps`](../../src/sdk/defineScene.tsx)) — прогонять сцену с фиксированным
    зерном до и после переноса. Для каждой сцены завести короткий чек-лист ключевых
    кадров (начальная расстановка, кульминация, состояние на стыке цикла) вместо
    свободного «посмотрел, вроде так же».
@@ -455,8 +455,8 @@ fadeTo(0.28) + fadeTo(1)          cubes.get(id).pulse()
 ### Проблема
 
 `mainCubeFaceLabels` стоит в массиве зависимостей эффекта
-([`useSimpleCubeScene.ts:390`](../src/runtime/core/useSimpleCubeScene.ts#L390)) и в зависимостях
-`onSetup` внутри [`defineScene`](../src/sdk/defineScene.tsx). Это объект: потребитель,
+([`useSimpleCubeScene.ts:390`](../../src/runtime/core/useSimpleCubeScene.ts#L390)) и в зависимостях
+`onSetup` внутри [`defineScene`](../../src/sdk/defineScene.tsx). Это объект: потребитель,
 пишущий `<Scene faceLabels={{ front: 'A' }} />`, на каждом рендере даёт новую ссылку —
 и вся WebGPU-сцена сносится и пересобирается. Эффект двойной: пересоздаётся и рендерер,
 и сценарий.
@@ -486,10 +486,10 @@ fadeTo(0.28) + fadeTo(1)          cubes.get(id).pulse()
 
 ### Проблема
 
-[`useSimpleCubeScene.ts`](../src/runtime/core/useSimpleCubeScene.ts) — 405 строк, из них один
+[`useSimpleCubeScene.ts`](../../src/runtime/core/useSimpleCubeScene.ts) — 405 строк, из них один
 `useEffect` примерно на 250. Внутри три несвязанные ответственности: сборка three-сцены
 и runtime; standalone-рендерер с `ResizeObserver`; регистрация в
-[`SceneRenderHost`](../src/runtime/rendering/SceneRenderHost.tsx) и цикл
+[`SceneRenderHost`](../../src/runtime/rendering/SceneRenderHost.tsx) и цикл
 `IntersectionObserver` + `visibilitychange`.
 
 Ресурсы разматываются вручную через восемь переменных `let …: (() => void) | null`,
@@ -515,7 +515,7 @@ fadeTo(0.28) + fadeTo(1)          cubes.get(id).pulse()
       россыпью ручных проверок `if (disposed)` после каждого `await`.
 
 Заодно убрать мёртвую ветку
-[`useSimpleCubeScene.ts:305`](../src/runtime/core/useSimpleCubeScene.ts#L305):
+[`useSimpleCubeScene.ts:305`](../../src/runtime/core/useSimpleCubeScene.ts#L305):
 `if (standaloneSyncLoopState === null) return` — проверка на `null` сразу после присваивания
 функции, условие никогда не истинно.
 
@@ -582,10 +582,10 @@ fadeTo(0.28) + fadeTo(1)          cubes.get(id).pulse()
 | Файл                                   | строк |
 | -------------------------------------- | ----- |
 | [render.md](render.md)                 | 811   |
-| [SCENES.md](SCENES.md)                 | 445   |
-| [SCENE-FEATURES.md](SCENE-FEATURES.md) | 366   |
-| [CUBE.md](CUBE.md)                     | 360   |
-| [README.md](../README.md)              | 321   |
+| [SCENES.md](../SCENES.md)                 | 445   |
+| [SCENE-FEATURES.md](../SCENE-FEATURES.md) | 366   |
+| [CUBE.md](../CUBE.md)                     | 360   |
+| [README.md](../../README.md)              | 321   |
 
 `render.md` и `render.v2.md` сведены в один документ из двух частей: выполненный проход
 оптимизации и проектный документ, который из него следует. Перечни сцен не генерируются:
