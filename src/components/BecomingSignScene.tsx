@@ -1,29 +1,10 @@
-import { useCallback, useRef, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps, GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import {
-    createScenePresentation,
-    type ScenePresentationController,
-} from '../scenes/scenePresentation'
-import { getDifferentRandomIndex } from '../scenes/sceneRandom'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
 import {
     SIGN_SYMBOLS,
     rotateSignSymbol,
     type SignDirection,
 } from '../scenes/signSymbols'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeFrameContext,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.047
 const SIGN_CUBE_IDS = Array.from({ length: 9 }, (_, index) => `meaning-sign-${index}`)
@@ -77,184 +58,141 @@ const DIRECTIONS: readonly SignDirectionDefinition[] = [
     },
 ]
 
-interface BecomingSignController {
-    readonly presentation: ScenePresentationController
-    readonly dispose: () => void
+const BASE_PRESENTATION = {
+    zoom: 1.12,
+    gridOpacity: 0.42,
+    gridFadeInnerRadiusCells: 4,
+    gridFadeOuterRadiusCells: 12,
+} as const
+
+interface BecomingSignState {
+    previousDirectionIndex: number
+    previousSymbolIndex: number
 }
 
-const createBecomingSignAnimation = (
-    runtime: GridSceneRuntime,
-    faceLabels: GridCubeFaceLabelInput | undefined
-): BecomingSignController => {
-    let cancelled = false
-    let previousDirectionIndex = -1
-    let previousSymbolIndex = -1
-    const delay = createCancellableDelay()
-    const presentation = createScenePresentation({
-        zoom: 1.12,
-        gridOpacity: 0.42,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 12,
-    })
+/** A random-looking group becomes one of many symbols that guides the main cube. */
+export const BecomingSignScene = defineScene<CubeSceneProps, BecomingSignState>({
+    metadata: {
+        id: 'becoming-a-sign',
+        title: 'Becoming a Sign',
+        tags: ['meaning', 'symbol'],
+        description: 'A scattered group resolves into a sign and is followed.',
+    },
+    view: {
+        cubeSize: GRID_CELL_SIZE,
+        gridCellSize: GRID_CELL_SIZE,
+        gridCellCount: 23,
+        gridOpacity: BASE_PRESENTATION.gridOpacity,
+        gridFadeInnerRadiusCells: BASE_PRESENTATION.gridFadeInnerRadiusCells,
+        gridFadeOuterRadiusCells: BASE_PRESENTATION.gridFadeOuterRadiusCells,
+        cameraAzimuthDeg: 0,
+        viewOffsetY: 0,
+        hoverCells: 0,
+    },
+    presentation: BASE_PRESENTATION,
+    setup: ({ runtime, props }) => {
+        runtime.setCubePosition(MAIN_CUBE_ID, { column: -7, row: 0 })
+        runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
+        SIGN_CUBE_IDS.forEach((id, index) => {
+            const position = SCATTER_POSITIONS[index]
+            if (position !== undefined) {
+                runtime.addCube({ id, position, faceLabels: props.faceLabels })
+            }
+        })
+        return { previousDirectionIndex: -1, previousSymbolIndex: -1 }
+    },
+    script: async ({ runtime, timeline, random, state, presentation }) => {
+        const moveSignCubes = async (
+            positions: readonly GridCoordinate[]
+        ): Promise<void> => {
+            for (let index = 0; index < SIGN_CUBE_IDS.length; index += 1) {
+                const id = SIGN_CUBE_IDS[index]
+                const position = positions[index]
+                if (id === undefined || position === undefined) continue
+                await runtime.moveCubeTo(id, position, {
+                    duration: 0.3,
+                    easing: 'easeInOutCubic',
+                })
+                await timeline.wait(0.035)
+            }
+        }
 
-    const moveSignCubes = async (positions: readonly GridCoordinate[]): Promise<void> => {
-        for (let index = 0; index < SIGN_CUBE_IDS.length; index += 1) {
-            const id = SIGN_CUBE_IDS[index]
-            const position = positions[index]
-            if (id === undefined || position === undefined) continue
-            await runtime.moveCubeTo(id, position, {
-                duration: 0.3,
+        const enterMainCube = async (
+            definition: SignDirectionDefinition
+        ): Promise<void> => {
+            runtime.setCubePosition(MAIN_CUBE_ID, definition.entry)
+            runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
+            await Promise.all([
+                runtime.moveCubeTo(MAIN_CUBE_ID, definition.visibleEntry, {
+                    duration: 0.52,
+                    easing: 'easeInOutCubic',
+                }),
+                runtime.fadeCubeTo(MAIN_CUBE_ID, 1, {
+                    duration: 0.52,
+                    easing: 'easeOutCubic',
+                }),
+            ])
+        }
+
+        const followSign = async (definition: SignDirectionDefinition): Promise<void> => {
+            await runtime.moveCubeTo(MAIN_CUBE_ID, definition.visibleExit, {
+                duration: 1.15,
                 easing: 'easeInOutCubic',
             })
-            if (cancelled) return
-            await delay.wait(0.035)
+            await Promise.all([
+                runtime.moveCubeTo(MAIN_CUBE_ID, definition.exit, {
+                    duration: 0.5,
+                    easing: 'easeInOutCubic',
+                }),
+                runtime.fadeCubeTo(MAIN_CUBE_ID, 0, {
+                    duration: 0.5,
+                    easing: 'easeOutCubic',
+                }),
+            ])
         }
-    }
 
-    const enterMainCube = async (definition: SignDirectionDefinition): Promise<void> => {
-        runtime.setCubePosition(MAIN_CUBE_ID, definition.entry)
-        runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
-        await Promise.all([
-            runtime.moveCubeTo(MAIN_CUBE_ID, definition.visibleEntry, {
-                duration: 0.52,
-                easing: 'easeInOutCubic',
-            }),
-            runtime.fadeCubeTo(MAIN_CUBE_ID, 1, {
-                duration: 0.52,
-                easing: 'easeOutCubic',
-            }),
-        ])
-    }
-
-    const followSign = async (definition: SignDirectionDefinition): Promise<void> => {
-        await runtime.moveCubeTo(MAIN_CUBE_ID, definition.visibleExit, {
-            duration: 1.15,
-            easing: 'easeInOutCubic',
-        })
-        await Promise.all([
-            runtime.moveCubeTo(MAIN_CUBE_ID, definition.exit, {
-                duration: 0.5,
-                easing: 'easeInOutCubic',
-            }),
-            runtime.fadeCubeTo(MAIN_CUBE_ID, 0, {
-                duration: 0.5,
-                easing: 'easeOutCubic',
-            }),
-        ])
-    }
-
-    const play = async (): Promise<void> => {
-        await delay.wait(0.8)
-        while (!cancelled) {
-            const directionIndex = getDifferentRandomIndex(
+        await timeline.wait(0.8)
+        await timeline.loop(async () => {
+            const directionIndex = random.differentIndex(
                 DIRECTIONS.length,
-                previousDirectionIndex
+                state.previousDirectionIndex
             )
-            previousDirectionIndex = directionIndex
+            state.previousDirectionIndex = directionIndex
             const definition = DIRECTIONS[directionIndex]
             if (definition === undefined) return
 
-            const symbolIndex = getDifferentRandomIndex(
+            const symbolIndex = random.differentIndex(
                 SIGN_SYMBOLS.length,
-                previousSymbolIndex
+                state.previousSymbolIndex
             )
-            previousSymbolIndex = symbolIndex
+            state.previousSymbolIndex = symbolIndex
             const symbol = SIGN_SYMBOLS[symbolIndex]
             if (symbol === undefined) return
 
             await enterMainCube(definition)
-            if (cancelled) return
-            await delay.wait(0.7)
+            await timeline.wait(0.7)
 
-            presentation.setTarget({
+            presentation?.setTarget({
                 zoom: 0.76,
                 gridOpacity: 0.66,
                 gridFadeInnerRadiusCells: 5.5,
                 gridFadeOuterRadiusCells: 12,
             })
-            await moveSignCubes(
-                rotateSignSymbol(symbol.positions, definition.direction)
-            )
-            if (cancelled) return
-            await delay.wait(1)
+            await moveSignCubes(rotateSignSymbol(symbol.positions, definition.direction))
+            await timeline.wait(1)
 
-            presentation.setTarget({
+            presentation?.setTarget({
                 zoom: 1,
                 gridOpacity: 0.5,
                 gridFadeInnerRadiusCells: 4.5,
                 gridFadeOuterRadiusCells: 12,
             })
             await followSign(definition)
-            if (cancelled) return
-            await delay.wait(0.55)
+            await timeline.wait(0.55)
 
-            presentation.setTarget({
-                zoom: 1.12,
-                gridOpacity: 0.42,
-                gridFadeInnerRadiusCells: 4,
-                gridFadeOuterRadiusCells: 12,
-            })
+            presentation?.setTarget(BASE_PRESENTATION)
             await moveSignCubes(SCATTER_POSITIONS)
-            if (!cancelled) await delay.wait(0.7)
-        }
-    }
-
-    void startSceneAnimation('Becoming a Sign', play)
-    return {
-        presentation,
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
-/** A random-looking group becomes one of many symbols that guides the main cube. */
-export const BecomingSignScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const controllerRef = useRef<BecomingSignController | null>(null)
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            runtime.setCubePosition(MAIN_CUBE_ID, { column: -7, row: 0 })
-            runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
-            SIGN_CUBE_IDS.forEach((id, index) => {
-                const position = SCATTER_POSITIONS[index]
-                if (position !== undefined) runtime.addCube({ id, position, faceLabels })
-            })
-            const controller = createBecomingSignAnimation(runtime, faceLabels)
-            controllerRef.current = controller
-            return () => {
-                controller.dispose()
-                if (controllerRef.current === controller) controllerRef.current = null
-            }
-        },
-        [faceLabels]
-    )
-    const onFrame = useCallback(
-        ({ delta, camera, runtime }: SimpleCubeFrameContext): void => {
-            controllerRef.current?.presentation.update(delta, camera, runtime)
-        },
-        []
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
-        cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
-        gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 23,
-        gridOpacity: 0.42,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 12,
-        cameraAzimuthDeg: 0,
-        viewOffsetY: 0,
-        hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+            await timeline.wait(0.7)
+        })
+    },
+})

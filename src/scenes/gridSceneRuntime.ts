@@ -73,7 +73,11 @@ export interface GridSceneRuntime {
     readonly getCubeRevision: () => number
     readonly getCubePosition: (id: string) => GridCoordinate | undefined
     readonly getCubeOpacity: (id: string) => number | undefined
-    readonly setCubeFaceLabels: (id: string, labels: GridCubeFaceLabelInput) => void
+    /** Passing `undefined` removes the labels; passing labels adds them if absent. */
+    readonly setCubeFaceLabels: (
+        id: string,
+        labels: GridCubeFaceLabelInput | undefined
+    ) => void
     readonly setCubePosition: (id: string, position: GridCoordinate) => void
     readonly setCubeOccupiesCell: (id: string, occupiesCell: boolean) => void
     readonly moveCubeTo: (
@@ -118,7 +122,7 @@ interface CubeRecord {
     readonly object: Object3D
     readonly bodyMaterial: MeshBasicMaterial
     readonly edgeMaterial: LineBasicMaterial
-    readonly faceLabels: CubeFaceLabelAssets | null
+    faceLabels: CubeFaceLabelAssets | null
     readonly size: number
     readonly cornerRadius: number
     readonly hoverCells: number
@@ -424,7 +428,30 @@ export const createGridSceneRuntime = ({
         getCubePosition: world.getCubePosition,
         getCubeOpacity: (id) => cubes.get(id)?.opacity,
         setCubeFaceLabels: (id, labels) => {
-            requireCube(id).faceLabels?.setLabels(labels)
+            const cube = requireCube(id)
+
+            if (labels === undefined) {
+                if (cube.faceLabels === null) return
+                cube.object.remove(cube.faceLabels.object)
+                cube.faceLabels.dispose()
+                cube.faceLabels = null
+                return
+            }
+
+            if (cube.faceLabels === null) {
+                // The cube was built without labels, so its assets have to be created now.
+                const created = createCubeFaceLabels({
+                    THREE,
+                    size: cube.size,
+                    labels,
+                    opacity: cube.opacity,
+                })
+                cube.object.add(created.object)
+                cube.faceLabels = created
+                return
+            }
+
+            cube.faceLabels.setLabels(labels)
         },
         setCubePosition: (id, position) => {
             world.setCubePosition(id, position)

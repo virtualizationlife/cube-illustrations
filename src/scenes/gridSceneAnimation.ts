@@ -5,9 +5,8 @@ import {
     type GridSceneCubeDefinition,
     type GridSceneRuntime,
 } from './gridSceneRuntime'
-import { createCancellableDelay } from './createCancellableDelay'
 import { getRandomItem } from './sceneRandom'
-import { startSceneAnimation } from './startSceneAnimation'
+import { runSceneScript, type SceneScriptContext } from './runSceneScript'
 
 const CARDINAL_DIRECTIONS: readonly GridCoordinate[] = [
     { column: 1, row: 0 },
@@ -141,8 +140,6 @@ export const createGridSceneAnimation = ({
     moveDuration,
     stepPause,
 }: CreateGridSceneAnimationOptions): GridSceneAnimationController => {
-    let cancelled = false
-    const delay = createCancellableDelay()
     let previousDirection: GridCoordinate | null = null
     let encounterCounter = 0
     let pursuedEncounterId: string | null = null
@@ -276,15 +273,16 @@ export const createGridSceneAnimation = ({
         return movement.destination
     }
 
-    const playRoute = async (): Promise<void> => {
+    const playRoute = async ({
+        runtime: scriptRuntime,
+        delay,
+    }: SceneScriptContext): Promise<void> => {
         if (route.length === 0) return
-        await delay.wait(initialDelay)
+        await delay(initialDelay)
 
-        while (!cancelled) {
+        for (;;) {
             for (const position of route) {
-                if (cancelled) return
-                await moveToNextCell(runtime, movementMode, position, moveDuration)
-                if (cancelled) return
+                await moveToNextCell(scriptRuntime, movementMode, position, moveDuration)
 
                 const sourcePosition = runtime.getCubePosition(
                     encounterPause?.sourceCubeId ?? MAIN_CUBE_ID
@@ -301,27 +299,29 @@ export const createGridSceneAnimation = ({
                         )
                     })
 
-                await delay.wait(hasEncounter ? encounterPause.duration : stepPause)
+                await delay(hasEncounter ? encounterPause.duration : stepPause)
             }
         }
     }
 
-    const playRandomWalk = async (): Promise<void> => {
+    const playRandomWalk = async ({
+        runtime: scriptRuntime,
+        delay,
+    }: SceneScriptContext): Promise<void> => {
         if (randomWalk === undefined) return
-        await delay.wait(initialDelay)
+        await delay(initialDelay)
 
-        while (!cancelled) {
+        for (;;) {
             const sourcePosition = runtime.getCubePosition(MAIN_CUBE_ID)
             if (sourcePosition === undefined) return
             removeDistantRandomEncounters(sourcePosition)
 
             const destination = getRandomDestination(sourcePosition)
             maybeAddRandomEncounter(sourcePosition, destination)
-            await moveToNextCell(runtime, movementMode, destination, moveDuration)
-            if (cancelled) return
+            await moveToNextCell(scriptRuntime, movementMode, destination, moveDuration)
 
             if (companionCubeId !== null) {
-                await runtime.moveCubeTo(companionCubeId, sourcePosition, {
+                await scriptRuntime.moveCubeTo(companionCubeId, sourcePosition, {
                     duration: moveDuration * 0.7,
                     easing: 'easeInOutCubic',
                 })
@@ -331,7 +331,6 @@ export const createGridSceneAnimation = ({
                     visibleRandomEncounterIds.add(companionCubeId)
                     companionCubeId = null
                 }
-                if (cancelled) return
             }
 
             const nearbyCubeIds = getNearbyCubeIds(
@@ -355,23 +354,21 @@ export const createGridSceneAnimation = ({
                     companionStepsRemaining = Math.max(1, stepCount)
                     randomEncounterIds.delete(selectedCubeId)
                     visibleRandomEncounterIds.delete(selectedCubeId)
-                    runtime.setCubeOpacity(selectedCubeId, 1)
-                    await runtime.moveCubeTo(selectedCubeId, sourcePosition, {
+                    scriptRuntime.setCubeOpacity(selectedCubeId, 1)
+                    await scriptRuntime.moveCubeTo(selectedCubeId, sourcePosition, {
                         duration: moveDuration * 0.65,
                         easing: 'easeInOutCubic',
                     })
-                    if (cancelled) return
                 }
             }
-            await delay.wait(hasEncounter ? randomWalk.encounterPauseDuration : stepPause)
+            await delay(hasEncounter ? randomWalk.encounterPauseDuration : stepPause)
         }
     }
 
-    if (randomWalk === undefined) {
-        void startSceneAnimation('Grid Path Route', playRoute)
-    } else {
-        void startSceneAnimation('Grid Random Walk', playRandomWalk)
-    }
+    const script =
+        randomWalk === undefined
+            ? runSceneScript('Grid Path Route', runtime, playRoute)
+            : runSceneScript('Grid Random Walk', runtime, playRandomWalk)
 
     return {
         update: (delta) => {
@@ -430,8 +427,7 @@ export const createGridSceneAnimation = ({
             }
         },
         dispose: () => {
-            cancelled = true
-            delay.cancel()
+            script.dispose()
             randomEncounterIds.clear()
             visibleRandomEncounterIds.clear()
             companionCubeId = null

@@ -3,6 +3,7 @@ import {
     startSceneAnimation,
     type SceneAnimationErrorHandler,
 } from './startSceneAnimation'
+import { scaleSceneDuration } from './timeScale'
 
 const ASYNC_RUNTIME_METHODS = new Set<PropertyKey>([
     'moveCubeTo',
@@ -80,7 +81,7 @@ const createAbortableDelay = (
             }
             const timer = globalThis.setTimeout(
                 finish,
-                Math.max(0, durationSeconds) * 1000
+                scaleSceneDuration(durationSeconds) * 1000
             )
             signal.addEventListener('abort', handleAbort, { once: true })
         })

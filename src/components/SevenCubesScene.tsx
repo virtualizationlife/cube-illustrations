@@ -1,20 +1,7 @@
-import { useCallback, useState, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
 import { findGridPath, getGridCellKey } from '../scenes/gridPathfinding'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import { getRandomItem, shuffle } from '../scenes/sceneRandom'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
+import type { SceneRandom } from '../scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.027
 const GRID_CELL_COUNT = 23
@@ -48,19 +35,20 @@ interface CubeLayoutEntry {
     readonly scatteredPosition: GridCoordinate
 }
 
-interface LayoutAnimationController {
-    readonly dispose: () => void
+interface SevenCubesState {
+    readonly layout: readonly CubeLayoutEntry[]
 }
 
 const createRandomIsland = (
+    random: SceneRandom,
     cubeCount: number = CUBE_IDS.length
 ): readonly GridCoordinate[] => {
     const positions: GridCoordinate[] = [{ column: 0, row: 0 }]
     const occupiedCells = new Set([getGridCellKey(positions[0])])
 
     while (positions.length < cubeCount) {
-        const anchor = getRandomItem(positions)
-        const direction = getRandomItem(CARDINAL_DIRECTIONS)
+        const anchor = random.item(positions)
+        const direction = random.item(CARDINAL_DIRECTIONS)
         if (anchor === undefined || direction === undefined) continue
         const candidate = {
             column: anchor.column + direction.column,
@@ -81,10 +69,11 @@ const createRandomIsland = (
 }
 
 const getWaitingPosition = (
-    island: readonly GridCoordinate[]
+    island: readonly GridCoordinate[],
+    random: SceneRandom
 ): GridCoordinate => {
     const occupied = new Set(island.map(getGridCellKey))
-    const candidates = shuffle(
+    const candidates = random.shuffle(
         island.flatMap((position) =>
             CARDINAL_DIRECTIONS.map((direction) => ({
                 column: position.column + direction.column,
@@ -103,10 +92,11 @@ const getWaitingPosition = (
 }
 
 const createReconfiguredIsland = (
-    provisionalIsland: readonly GridCoordinate[]
+    provisionalIsland: readonly GridCoordinate[],
+    random: SceneRandom
 ): readonly GridCoordinate[] => {
     for (let attempt = 0; attempt < 12; attempt += 1) {
-        const candidate = createRandomIsland()
+        const candidate = createRandomIsland(random)
         const candidateCells = new Set(candidate.map(getGridCellKey))
         const changedPositions = provisionalIsland.filter(
             (position) => !candidateCells.has(getGridCellKey(position))
@@ -114,13 +104,13 @@ const createReconfiguredIsland = (
         if (changedPositions >= 2) return candidate
     }
 
-    return createRandomIsland().map((position) => ({
+    return createRandomIsland(random).map((position) => ({
         column: position.column + 1,
         row: position.row,
     }))
 }
 
-const createRandomLayout = (): readonly CubeLayoutEntry[] => {
+const createRandomLayout = (random: SceneRandom): readonly CubeLayoutEntry[] => {
     const availablePositions: GridCoordinate[] = []
 
     for (let column = -GRID_RADIUS; column <= GRID_RADIUS; column += 1) {
@@ -132,7 +122,7 @@ const createRandomLayout = (): readonly CubeLayoutEntry[] => {
         }
     }
 
-    const shuffledPositions = shuffle(availablePositions)
+    const shuffledPositions = random.shuffle(availablePositions)
 
     return CUBE_IDS.map((id, index) => ({
         id,
@@ -140,139 +130,16 @@ const createRandomLayout = (): readonly CubeLayoutEntry[] => {
     }))
 }
 
-const createLayoutAnimation = (
-    runtime: GridSceneRuntime,
-    layout: readonly CubeLayoutEntry[]
-): LayoutAnimationController => {
-    let cancelled = false
-    const delay = createCancellableDelay()
-
-    const moveCubesInRandomTurns = async (
-        cubes: readonly CubeLayoutEntry[],
-        positions: readonly GridCoordinate[]
-    ): Promise<void> => {
-        const targets = new Map(cubes.map((cube, index) => [cube.id, positions[index]]))
-        const queue = shuffle(cubes)
-
-        while (!cancelled) {
-            let allCubesPlaced = true
-            let movedAtLeastOneCube = false
-
-            for (const cube of queue) {
-                if (cancelled) return
-                const source = runtime.getCubePosition(cube.id)
-                const target = targets.get(cube.id)
-                if (source === undefined || target === undefined) continue
-                if (getGridCellKey(source) === getGridCellKey(target)) continue
-                allCubesPlaced = false
-
-                const blockedCells = new Set<string>()
-                for (const otherCube of runtime.getCubes()) {
-                    if (otherCube.id === cube.id) continue
-                    const otherPosition = runtime.getCubePosition(otherCube.id)
-                    if (otherPosition !== undefined) {
-                        blockedCells.add(getGridCellKey(otherPosition))
-                    }
-                }
-
-                const path = findGridPath(source, target, blockedCells)
-                if (path === null || path.length === 0) continue
-                const requestedStep =
-                    getRandomItem(MOVE_STEP_LENGTHS) ?? 1
-                const stepLength = Math.min(requestedStep, path.length)
-                const destination = path[stepLength - 1]
-                if (destination === undefined) continue
-
-                await runtime.moveCubeTo(cube.id, destination, {
-                    duration: MOVE_DURATION_PER_CELL_S * stepLength,
-                    easing: 'easeInOutCubic',
-                })
-                movedAtLeastOneCube = true
-                if (!cancelled) await delay.wait(TURN_PAUSE_DURATION_S)
-            }
-
-            if (allCubesPlaced || !movedAtLeastOneCube) return
-        }
-    }
-
-    const play = async (): Promise<void> => {
-        await delay.wait(SCATTERED_HOLD_DURATION_S)
-
-        while (!cancelled) {
-            const lateCube = getRandomItem(layout)
-            if (lateCube === undefined) return
-            const earlyCubes = layout.filter((cube) => cube.id !== lateCube.id)
-            const provisionalIsland = createRandomIsland(earlyCubes.length)
-
-            await moveCubesInRandomTurns(earlyCubes, provisionalIsland)
-            if (cancelled) return
-            await delay.wait(0.65)
-            if (cancelled) return
-
-            await moveCubesInRandomTurns(
-                [lateCube],
-                [getWaitingPosition(provisionalIsland)]
-            )
-            if (cancelled) return
-            await delay.wait(0.4)
-            if (cancelled) return
-
-            await moveCubesInRandomTurns(
-                layout,
-                createReconfiguredIsland(provisionalIsland)
-            )
-            if (cancelled) return
-            await delay.wait(ISLAND_HOLD_DURATION_S)
-            if (cancelled) return
-            await moveCubesInRandomTurns(
-                layout,
-                layout.map((cube) => cube.scatteredPosition)
-            )
-            if (cancelled) return
-            await delay.wait(SCATTERED_HOLD_DURATION_S)
-        }
-    }
-
-    void startSceneAnimation('Forming a Group', play)
-
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
 /** Six cubes gather first, then the group reorganizes to include a random late arrival. */
-export const SevenCubesScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const [layout] = useState(createRandomLayout)
-
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            for (const cube of layout) {
-                if (cube.id === MAIN_CUBE_ID) {
-                    runtime.setCubePosition(cube.id, cube.scatteredPosition)
-                } else {
-                    runtime.addCube({
-                        id: cube.id,
-                        position: cube.scatteredPosition,
-                        faceLabels,
-                    })
-                }
-            }
-
-            const animation = createLayoutAnimation(runtime, layout)
-            return () => animation.dispose()
-        },
-        [faceLabels, layout]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const SevenCubesScene = defineScene<CubeSceneProps, SevenCubesState>({
+    metadata: {
+        id: 'forming-a-group',
+        title: 'Forming a Group',
+        tags: ['relation', 'organization'],
+        description: 'A group forms, then reorganises around a late arrival.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
         gridFadeInnerRadiusCells: 4,
@@ -280,11 +147,98 @@ export const SevenCubesScene = ({
         cameraAzimuthDeg: 45,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
+    },
+    setup: ({ runtime, props, random }) => {
+        const layout = createRandomLayout(random)
+        for (const cube of layout) {
+            if (cube.id === MAIN_CUBE_ID) {
+                runtime.setCubePosition(cube.id, cube.scatteredPosition)
+            } else {
+                runtime.addCube({
+                    id: cube.id,
+                    position: cube.scatteredPosition,
+                    faceLabels: props.faceLabels,
+                })
+            }
+        }
+        return { layout }
+    },
+    script: async ({ runtime, timeline, random, state }) => {
+        const { layout } = state
 
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+        const moveCubesInRandomTurns = async (
+            cubes: readonly CubeLayoutEntry[],
+            positions: readonly GridCoordinate[]
+        ): Promise<void> => {
+            const targets = new Map(cubes.map((cube, index) => [cube.id, positions[index]]))
+            const queue = random.shuffle(cubes)
+
+            for (;;) {
+                let allCubesPlaced = true
+                let movedAtLeastOneCube = false
+
+                for (const cube of queue) {
+                    const source = runtime.getCubePosition(cube.id)
+                    const target = targets.get(cube.id)
+                    if (source === undefined || target === undefined) continue
+                    if (getGridCellKey(source) === getGridCellKey(target)) continue
+                    allCubesPlaced = false
+
+                    const blockedCells = new Set<string>()
+                    for (const otherCube of runtime.getCubes()) {
+                        if (otherCube.id === cube.id) continue
+                        const otherPosition = runtime.getCubePosition(otherCube.id)
+                        if (otherPosition !== undefined) {
+                            blockedCells.add(getGridCellKey(otherPosition))
+                        }
+                    }
+
+                    const path = findGridPath(source, target, blockedCells)
+                    if (path === null || path.length === 0) continue
+                    const requestedStep = random.item(MOVE_STEP_LENGTHS) ?? 1
+                    const stepLength = Math.min(requestedStep, path.length)
+                    const destination = path[stepLength - 1]
+                    if (destination === undefined) continue
+
+                    await runtime.moveCubeTo(cube.id, destination, {
+                        duration: MOVE_DURATION_PER_CELL_S * stepLength,
+                        easing: 'easeInOutCubic',
+                    })
+                    movedAtLeastOneCube = true
+                    await timeline.wait(TURN_PAUSE_DURATION_S)
+                }
+
+                if (allCubesPlaced || !movedAtLeastOneCube) return
+            }
+        }
+
+        await timeline.wait(SCATTERED_HOLD_DURATION_S)
+
+        await timeline.loop(async () => {
+            const lateCube = random.item(layout)
+            if (lateCube === undefined) return
+            const earlyCubes = layout.filter((cube) => cube.id !== lateCube.id)
+            const provisionalIsland = createRandomIsland(random, earlyCubes.length)
+
+            await moveCubesInRandomTurns(earlyCubes, provisionalIsland)
+            await timeline.wait(0.65)
+
+            await moveCubesInRandomTurns(
+                [lateCube],
+                [getWaitingPosition(provisionalIsland, random)]
+            )
+            await timeline.wait(0.4)
+
+            await moveCubesInRandomTurns(
+                layout,
+                createReconfiguredIsland(provisionalIsland, random)
+            )
+            await timeline.wait(ISLAND_HOLD_DURATION_S)
+            await moveCubesInRandomTurns(
+                layout,
+                layout.map((cube) => cube.scatteredPosition)
+            )
+            await timeline.wait(SCATTERED_HOLD_DURATION_S)
+        })
+    },
+})

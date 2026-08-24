@@ -4,6 +4,8 @@ export type SceneRandomSeed = number | string
 export interface SceneRandom {
     readonly next: SceneRandomSource
     readonly index: (length: number) => number
+    /** An index other than `excludedIndex`, so a repeated choice never repeats itself. */
+    readonly differentIndex: (length: number, excludedIndex: number) => number
     readonly item: <Item>(items: readonly Item[]) => Item | undefined
     readonly shuffle: <Item>(items: readonly Item[]) => Item[]
 }
@@ -76,6 +78,8 @@ export const createSceneRandom = (seed?: SceneRandomSeed): SceneRandom => {
     return {
         next,
         index: (length) => getRandomIndex(length, next),
+        differentIndex: (length, excludedIndex) =>
+            getDifferentRandomIndex(length, excludedIndex, next),
         item: (items) => getRandomItem(items, next),
         shuffle: (items) => shuffle(items, next),
     }

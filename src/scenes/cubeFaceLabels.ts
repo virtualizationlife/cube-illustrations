@@ -46,7 +46,6 @@ export const resolveCubeFaceLabels = (
 ): Readonly<Record<GridCubeFace, string>> => {
     const getLabel = (face: GridCubeFace): string =>
         normalizeCubeFaceLabel(typeof labels === 'string' ? labels : (labels[face] ?? ''))
-
     return {
         front: getLabel('front'),
         back: getLabel('back'),
@@ -55,6 +54,18 @@ export const resolveCubeFaceLabels = (
         top: getLabel('top'),
         bottom: getLabel('bottom'),
     }
+}
+
+/**
+ * A value key for face labels. Two label inputs that paint the same cube produce the same
+ * key, which lets callers compare labels by value instead of by object identity.
+ */
+export const getCubeFaceLabelsKey = (
+    labels: GridCubeFaceLabelInput | undefined
+): string => {
+    if (labels === undefined) return ''
+    const resolved = resolveCubeFaceLabels(labels)
+    return GRID_CUBE_FACES.map((face) => resolved[face]).join('\u0000')
 }
 
 const drawLabel = (canvas: HTMLCanvasElement, text: string): void => {

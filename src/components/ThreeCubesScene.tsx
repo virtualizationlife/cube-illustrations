@@ -1,17 +1,13 @@
-import { useCallback, useRef, type JSX } from 'react'
+import type { JSX } from 'react'
 
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
 import { GridPathCubeScene } from '../scenes/GridPathCubeScene'
 import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
 import {
     MAIN_CUBE_ID,
     type GridSceneCubeDefinition,
 } from '../scenes/gridSceneRuntime'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeFrameContext,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import type { SimpleCubeSetupContext } from '../scenes/useSimpleCubeScene'
+import { attachSceneMetadata, defineScene } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.1
 const CUBE_SIZE = GRID_CELL_SIZE
@@ -206,58 +202,50 @@ const createPointerRepulsionController = ({
 }
 
 /** Three anchored cubes that physically move away whenever the pointer approaches them. */
-export const CursorRepulsionScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const controllerRef = useRef<PointerRepulsionController | null>(null)
-
-    const onSetup = useCallback(
-        (context: SimpleCubeSetupContext): (() => void) => {
-            const { runtime } = context
-            runtime.addCube({
-                id: LEFT_CUBE_ID,
-                position: { column: -2, row: 0 },
-                faceLabels,
-            })
-            runtime.addCube({
-                id: RIGHT_CUBE_ID,
-                position: { column: 2, row: 0 },
-                faceLabels,
-            })
-
-            const controller = createPointerRepulsionController(context)
-            controllerRef.current = controller
-            return () => {
-                controller.dispose()
-                if (controllerRef.current === controller) controllerRef.current = null
-            }
-        },
-        [faceLabels]
-    )
-
-    const onFrame = useCallback(({ delta }: SimpleCubeFrameContext): void => {
-        controllerRef.current?.update(delta)
-    }, [])
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const CursorRepulsionScene = defineScene<
+    CubeFaceLabelsProps,
+    PointerRepulsionController
+>({
+    metadata: {
+        id: 'cursor-repulsion',
+        title: 'Cursor Repulsion',
+        tags: ['interaction', 'avoidance'],
+        description: 'Three cubes physically retreat from the pointer.',
+    },
+    view: {
         cubeSize: CUBE_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: 9,
         cameraAzimuthDeg: 0,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        onSetup,
-        onFrame,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+        // This scene handles the pointer itself; the shared hover highlight would fight it.
+        enableCubeHover: false,
+    },
+    setup: (context) => {
+        const { runtime, props } = context
+        runtime.addCube({
+            id: LEFT_CUBE_ID,
+            position: { column: -2, row: 0 },
+            faceLabels: props.faceLabels,
+        })
+        runtime.addCube({
+            id: RIGHT_CUBE_ID,
+            position: { column: 2, row: 0 },
+            faceLabels: props.faceLabels,
+        })
+        return createPointerRepulsionController(context)
+    },
+    onFrame: ({ delta, state }) => {
+        state.update(delta)
+    },
+    teardown: (_context, state) => {
+        state.dispose()
+    },
+})
 
 /** Three static cubes in a row with one empty grid cell between adjacent cubes. */
-export const ThreeCubesScene = ({
+const ThreeCubesSceneComponent = ({
     faceLabels,
     cubeCornerRadius,
 }: CubeFaceLabelsProps): JSX.Element => {
@@ -281,3 +269,10 @@ export const ThreeCubesScene = ({
         />
     )
 }
+
+export const ThreeCubesScene = attachSceneMetadata(ThreeCubesSceneComponent, {
+    id: 'three-cubes',
+    title: 'Three Cubes',
+    tags: ['relation', 'structure'],
+    description: 'Three cubes hold a row with one empty cell between them.',
+})

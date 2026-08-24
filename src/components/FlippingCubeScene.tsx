@@ -2,12 +2,13 @@ import type { JSX } from 'react'
 
 import { FaceFlipCubeScene } from '../scenes/FaceFlipCubeScene'
 import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
+import { attachSceneMetadata } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.13
 const GRID_CELL_COUNT = 11
 
 /** A cube that flips between faces and grows smoothly on hover. */
-export const FlippingCubeScene = ({
+const FlippingCubeSceneComponent = ({
     faceLabels,
     cubeCornerRadius,
 }: CubeFaceLabelsProps): JSX.Element => (
@@ -22,3 +23,10 @@ export const FlippingCubeScene = ({
         mainCubeFaceLabels={faceLabels}
     />
 )
+
+export const FlippingCubeScene = attachSceneMetadata(FlippingCubeSceneComponent, {
+    id: 'changing-faces',
+    title: 'Changing Faces',
+    tags: ['form', 'transformation'],
+    description: 'A cube that turns to show a different face.',
+})

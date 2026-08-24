@@ -1,16 +1,7 @@
-import { useCallback, useRef, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import {
-    MAIN_CUBE_ID,
-    type GridSceneCubeEntry,
-} from '../scenes/gridSceneRuntime'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeFrameContext,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
+import type { SceneRandom } from '../scenes/sceneRandom'
+import type { SimpleCubeSetupContext } from '../scenes/useSimpleCubeScene'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.1
 const CUBE_SIZE = GRID_CELL_SIZE
@@ -40,10 +31,10 @@ const easeInOutCubic = (progress: number): number =>
 const moveToward = (current: number, target: number, amount: number): number =>
     current < target ? Math.min(target, current + amount) : Math.max(target, current - amount)
 
-const shuffleAxes = (): RotationAxis[] => {
+const shuffleAxes = (random: SceneRandom): RotationAxis[] => {
     const axes: RotationAxis[] = ['x', 'y', 'z']
     for (let index = axes.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1))
+        const swapIndex = Math.floor(random.next() * (index + 1))
         const current = axes[index]
         const replacement = axes[swapIndex]
         if (current === undefined || replacement === undefined) continue
@@ -53,10 +44,10 @@ const shuffleAxes = (): RotationAxis[] => {
     return axes
 }
 
-const createThreeCubeStatesController = ({
-    runtime,
-    THREE,
-}: SimpleCubeSetupContext): ThreeCubeStatesController => {
+const createThreeCubeStatesController = (
+    { runtime, THREE }: SimpleCubeSetupContext,
+    random: SceneRandom
+): ThreeCubeStatesController => {
     const leftCube = runtime.getCube(LEFT_CUBE_ID)
     const middleCube = runtime.getCube(MAIN_CUBE_ID)
     const rightCube = runtime.getCube(RIGHT_CUBE_ID)
@@ -82,7 +73,7 @@ const createThreeCubeStatesController = ({
     const beginRotation = (): void => {
         const axis = rotationAxes[rotationIndex] ?? 'x'
         axisVector.set(axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0)
-        const direction = Math.random() < 0.5 ? -1 : 1
+        const direction = random.next() < 0.5 ? -1 : 1
         rotationStart.copy(middleCube.quaternion)
         rotationStep.setFromAxisAngle(axisVector, direction * QUARTER_TURN)
         rotationTarget.copy(rotationStart).multiply(rotationStep).normalize()
@@ -136,7 +127,7 @@ const createThreeCubeStatesController = ({
                     )
                     if (middlePhaseElapsed >= LIFT_DURATION_S) {
                         middleLiftProgress = 1
-                        rotationAxes = shuffleAxes()
+                        rotationAxes = shuffleAxes(random)
                         rotationIndex = 0
                         beginRotation()
                     }
@@ -203,56 +194,42 @@ const createThreeCubeStatesController = ({
 }
 
 /** Three cubes contrast growth, reduction, and elevated random face changes. */
-export const ThreeCubeStatesScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const controllerRef = useRef<ThreeCubeStatesController | null>(null)
-
-    const onSetup = useCallback(
-        (context: SimpleCubeSetupContext): (() => void) => {
-            context.runtime.addCube({
-                id: LEFT_CUBE_ID,
-                position: { column: -2, row: 0 },
-                faceLabels,
-            })
-            context.runtime.addCube({
-                id: RIGHT_CUBE_ID,
-                position: { column: 2, row: 0 },
-                faceLabels,
-            })
-
-            const controller = createThreeCubeStatesController(context)
-            controllerRef.current = controller
-            return () => {
-                if (controllerRef.current === controller) controllerRef.current = null
-            }
-        },
-        [faceLabels]
-    )
-
-    const onFrame = useCallback(({ delta }: SimpleCubeFrameContext): void => {
-        controllerRef.current?.update(delta)
-    }, [])
-
-    const onCubeHoverChange = useCallback((cube: GridSceneCubeEntry | null): void => {
-        controllerRef.current?.setHoveredCube(cube?.id ?? null)
-    }, [])
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const ThreeCubeStatesScene = defineScene<
+    CubeSceneProps,
+    ThreeCubeStatesController
+>({
+    metadata: {
+        id: 'three-states',
+        title: 'Three States',
+        tags: ['form', 'contrast', 'transformation'],
+        description: 'Growth, reduction and elevation shown side by side.',
+    },
+    view: {
         cubeSize: CUBE_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: 9,
         cameraAzimuthDeg: 0,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onCubeHoverChange,
-        onSetup,
-        onFrame,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+    },
+    setup: (context) => {
+        const { runtime, props, random } = context
+        runtime.addCube({
+            id: LEFT_CUBE_ID,
+            position: { column: -2, row: 0 },
+            faceLabels: props.faceLabels,
+        })
+        runtime.addCube({
+            id: RIGHT_CUBE_ID,
+            position: { column: 2, row: 0 },
+            faceLabels: props.faceLabels,
+        })
+        return createThreeCubeStatesController(context, random)
+    },
+    onFrame: ({ delta, state }) => {
+        state.update(delta)
+    },
+    onCubeHoverChange: ({ cube, state }) => {
+        state.setHoveredCube(cube?.id ?? null)
+    },
+})

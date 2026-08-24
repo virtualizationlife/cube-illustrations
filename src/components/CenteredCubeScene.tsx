@@ -1,15 +1,6 @@
-import { useCallback, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps, GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
-import type { GridCoordinate, GridSceneRuntime } from '../scenes/gridSceneRuntime'
-import { shuffle } from '../scenes/sceneRandom'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import type { GridCoordinate } from '../scenes/gridSceneRuntime'
+import type { SceneRandom } from '../scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.075
 const GRID_EDGE = 5
@@ -27,12 +18,12 @@ interface EntryPlan {
     readonly direction: CardinalDirection
 }
 
-interface PassingCubeAnimation {
-    readonly dispose: () => void
+interface CenteredCubeState {
+    waveCounter: number
 }
 
-const createEntryPlans = (): EntryPlan[] =>
-    shuffle(
+const createEntryPlans = (random: SceneRandom): EntryPlan[] =>
+    random.shuffle(
         PASSING_LANES.flatMap((lane): readonly EntryPlan[] => [
             {
                 start: { column: -GRID_EDGE, row: lane },
@@ -64,140 +55,25 @@ const getDistanceToExit = (
 }
 
 const turnPerpendicularly = (
-    direction: CardinalDirection
+    direction: CardinalDirection,
+    random: SceneRandom
 ): CardinalDirection => {
-    const turn: -1 | 1 = Math.random() >= 0.5 ? 1 : -1
+    const turn: -1 | 1 = random.next() >= 0.5 ? 1 : -1
     return direction.column === 0
         ? { column: turn, row: 0 }
         : { column: 0, row: turn }
 }
 
-const createPassingCubeAnimation = (
-    runtime: GridSceneRuntime,
-    faceLabels: GridCubeFaceLabelInput | undefined
-): PassingCubeAnimation => {
-    let cancelled = false
-    let waveCounter = 0
-    const delay = createCancellableDelay()
-
-    const movePasser = async (
-        id: string,
-        entryPlan: EntryPlan,
-        opacity: number
-    ): Promise<void> => {
-        let position = entryPlan.start
-        let direction = entryPlan.direction
-        let moveCount = 0
-        let hasTurned = false
-        let hasEntered = false
-
-        while (!cancelled && moveCount < 30) {
-            const isInsideTurnZone =
-                Math.abs(position.column) <= 3 && Math.abs(position.row) <= 3
-            if (
-                !hasTurned &&
-                moveCount >= 2 &&
-                isInsideTurnZone &&
-                Math.random() < TURN_CHANCE_PER_MOVE
-            ) {
-                direction = turnPerpendicularly(direction)
-                hasTurned = true
-            }
-
-            const distanceToExit = getDistanceToExit(position, direction)
-            if (distanceToExit <= 0) break
-            const stepLength = Math.min(
-                1 + Math.floor(Math.random() * 3),
-                distanceToExit
-            )
-            const destination = {
-                column: position.column + direction.column * stepLength,
-                row: position.row + direction.row * stepLength,
-            }
-            const movement = runtime.moveCubeTo(id, destination, {
-                duration: MOVE_DURATION_PER_CELL_S * stepLength,
-                easing: 'easeInOutCubic',
-            })
-            if (!hasEntered) {
-                await Promise.all([
-                    movement,
-                    runtime.fadeCubeTo(id, opacity, {
-                        duration: 0.36,
-                        easing: 'easeOutCubic',
-                    }),
-                ])
-                hasEntered = true
-            } else {
-                await movement
-            }
-            position = runtime.getCubePosition(id) ?? position
-            moveCount += 1
-        }
-
-        if (!cancelled) {
-            await runtime.fadeCubeTo(id, 0, {
-                duration: 0.5,
-                easing: 'easeOutCubic',
-            })
-        }
-    }
-
-    const play = async (): Promise<void> => {
-        await delay.wait(1.1)
-        while (!cancelled) {
-            const waveSize = 1 + Math.floor(Math.random() * 3)
-            const entryPlans = createEntryPlans().slice(0, waveSize)
-            const passers = entryPlans.map((entryPlan, index) => {
-                const id = `center-passer-${waveCounter}-${index}`
-                runtime.addCube({
-                    id,
-                    position: entryPlan.start,
-                    opacity: 0,
-                    faceLabels,
-                })
-                return { id, entryPlan }
-            })
-
-            await Promise.all(
-                passers.map(({ id, entryPlan }) =>
-                    movePasser(
-                        id,
-                        entryPlan,
-                        0.22 + Math.random() * 0.26
-                    )
-                )
-            )
-            passers.forEach(({ id }) => runtime.removeCube(id))
-            waveCounter += 1
-            if (!cancelled) await delay.wait(1.2 + Math.random() * 1.4)
-        }
-    }
-
-    void startSceneAnimation('Main Cube', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
 /** A fixed main cube remains centered while translucent groups occasionally pass nearby. */
-export const CenteredCubeScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            const animation = createPassingCubeAnimation(runtime, faceLabels)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const CenteredCubeScene = defineScene<CubeSceneProps, CenteredCubeState>({
+    metadata: {
+        id: 'main-cube',
+        title: 'Main Cube',
+        tags: ['identity', 'focus'],
+        description: 'The protagonist holds the centre while others pass through.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: 15,
         gridFadeInnerRadiusCells: 2,
@@ -205,11 +81,92 @@ export const CenteredCubeScene = ({
         cameraAzimuthDeg: 45,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
+    },
+    setup: () => ({ waveCounter: 0 }),
+    script: async ({ runtime, timeline, random, props, state }) => {
+        const movePasser = async (
+            id: string,
+            entryPlan: EntryPlan,
+            opacity: number
+        ): Promise<void> => {
+            let position = entryPlan.start
+            let direction = entryPlan.direction
+            let moveCount = 0
+            let hasTurned = false
+            let hasEntered = false
 
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+            while (moveCount < 30) {
+                const isInsideTurnZone =
+                    Math.abs(position.column) <= 3 && Math.abs(position.row) <= 3
+                if (
+                    !hasTurned &&
+                    moveCount >= 2 &&
+                    isInsideTurnZone &&
+                    random.next() < TURN_CHANCE_PER_MOVE
+                ) {
+                    direction = turnPerpendicularly(direction, random)
+                    hasTurned = true
+                }
+
+                const distanceToExit = getDistanceToExit(position, direction)
+                if (distanceToExit <= 0) break
+                const stepLength = Math.min(
+                    1 + Math.floor(random.next() * 3),
+                    distanceToExit
+                )
+                const destination = {
+                    column: position.column + direction.column * stepLength,
+                    row: position.row + direction.row * stepLength,
+                }
+                const movement = runtime.moveCubeTo(id, destination, {
+                    duration: MOVE_DURATION_PER_CELL_S * stepLength,
+                    easing: 'easeInOutCubic',
+                })
+                if (!hasEntered) {
+                    await Promise.all([
+                        movement,
+                        runtime.fadeCubeTo(id, opacity, {
+                            duration: 0.36,
+                            easing: 'easeOutCubic',
+                        }),
+                    ])
+                    hasEntered = true
+                } else {
+                    await movement
+                }
+                position = runtime.getCubePosition(id) ?? position
+                moveCount += 1
+            }
+
+            await runtime.fadeCubeTo(id, 0, {
+                duration: 0.5,
+                easing: 'easeOutCubic',
+            })
+        }
+
+        await timeline.wait(1.1)
+        await timeline.loop(async () => {
+            const waveSize = 1 + Math.floor(random.next() * 3)
+            const entryPlans = createEntryPlans(random).slice(0, waveSize)
+            const passers = entryPlans.map((entryPlan, index) => {
+                const id = `center-passer-${state.waveCounter}-${index}`
+                runtime.addCube({
+                    id,
+                    position: entryPlan.start,
+                    opacity: 0,
+                    faceLabels: props.faceLabels,
+                })
+                return { id, entryPlan }
+            })
+
+            await Promise.all(
+                passers.map(({ id, entryPlan }) =>
+                    movePasser(id, entryPlan, 0.22 + random.next() * 0.26)
+                )
+            )
+            passers.forEach(({ id }) => runtime.removeCube(id))
+            state.waveCounter += 1
+            await timeline.wait(1.2 + random.next() * 1.4)
+        })
+    },
+})

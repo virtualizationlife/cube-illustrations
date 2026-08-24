@@ -1,18 +1,5 @@
-import { useCallback, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.04
 const GRID_CELL_COUNT = 21
@@ -34,134 +21,25 @@ const QUEUE_CUBE_IDS = [
     'queue-cube-5',
 ] as const
 
-interface QueueAnimationController {
-    readonly dispose: () => void
-}
-
 const getInitialQueuePosition = (index: number): GridCoordinate => ({
     column: QUEUE_COLUMN,
     row: QUEUE_HEAD_EXIT_ROW - QUEUE_SPACING_CELLS - index * QUEUE_SPACING_CELLS,
 })
 
-const createQueueAnimation = (
-    runtime: GridSceneRuntime,
-    cubeIds: readonly string[]
-): QueueAnimationController => {
-    let cancelled = false
-    const delay = createCancellableDelay()
-    const queue = [...cubeIds]
-
-    const moveForward = async (cubeId: string, fadeOut: boolean): Promise<void> => {
-        const source = runtime.getCubePosition(cubeId)
-        if (source === undefined) return
-        const destination = {
-            column: source.column,
-            row: source.row + QUEUE_SPACING_CELLS,
-        }
-        const movement = runtime.moveCubeTo(cubeId, destination, {
-            duration: QUEUE_MOVE_DURATION_S,
-            easing: 'easeInOutCubic',
-        })
-        if (fadeOut) {
-            await Promise.all([
-                movement,
-                runtime.fadeCubeTo(cubeId, 0, {
-                    duration: QUEUE_MOVE_DURATION_S,
-                    easing: 'easeInOutCubic',
-                }),
-            ])
-        } else {
-            await movement
-        }
-    }
-
-    const stageCubeBesideTail = async (cubeId: string): Promise<void> => {
-        const approachFromRight = Math.random() >= 0.5
-        const waitingColumn = approachFromRight ? 6 : -6
-        runtime.setCubePosition(cubeId, {
-            column: waitingColumn,
-            row: QUEUE_TAIL_ROW,
-        })
-        runtime.setCubeOpacity(cubeId, 0)
-        await runtime.fadeCubeTo(cubeId, 0.42, {
-            duration: 0.34,
-            easing: 'easeOutCubic',
-        })
-    }
-
-    const bringCubeToTail = async (cubeId: string): Promise<void> => {
-        await Promise.all([
-            runtime.moveCubeTo(
-                cubeId,
-                { column: QUEUE_COLUMN, row: QUEUE_TAIL_ROW },
-                { duration: NEW_CUBE_MOVE_DURATION_S, easing: 'easeInOutCubic' }
-            ),
-            runtime.fadeCubeTo(cubeId, 1, {
-                duration: NEW_CUBE_MOVE_DURATION_S,
-                easing: 'easeOutCubic',
-            }),
-        ])
-    }
-
-    const play = async (): Promise<void> => {
-        await delay.wait(0.8)
-        while (!cancelled) {
-            const departingCubeId = queue[0]
-            if (departingCubeId === undefined) return
-
-            await moveForward(departingCubeId, true)
-            if (cancelled) return
-            await stageCubeBesideTail(departingCubeId)
-            if (cancelled) return
-
-            for (let index = 1; index < queue.length; index += 1) {
-                const cubeId = queue[index]
-                if (cubeId === undefined) continue
-                await moveForward(cubeId, false)
-                if (cancelled) return
-                await delay.wait(QUEUE_MOVE_PAUSE_S)
-            }
-
-            await bringCubeToTail(departingCubeId)
-            queue.shift()
-            queue.push(departingCubeId)
-            if (!cancelled) await delay.wait(CYCLE_PAUSE_S)
-        }
-    }
-
-    void startSceneAnimation('Continuous Queue', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
+interface ContinuousQueueState {
+    readonly queue: string[]
 }
 
 /** A waiting arrival joins only after every queue element advances one by one. */
-export const ContinuousQueueScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            for (let index = 0; index < QUEUE_CUBE_IDS.length; index += 1) {
-                const cubeId = QUEUE_CUBE_IDS[index]
-                if (cubeId === undefined) continue
-                const position = getInitialQueuePosition(index)
-                if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
-                else runtime.addCube({ id: cubeId, position, faceLabels })
-            }
-
-            const animation = createQueueAnimation(runtime, QUEUE_CUBE_IDS)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const ContinuousQueueScene = defineScene<CubeSceneProps, ContinuousQueueState>({
+    metadata: {
+        id: 'continuous-queue',
+        title: 'Continuous Queue',
+        tags: ['continuity', 'renewal'],
+        description: 'The queue renews itself without ever emptying.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
         gridFadeInnerRadiusCells: 3,
@@ -169,11 +47,91 @@ export const ContinuousQueueScene = ({
         cameraAzimuthDeg: 45,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
+    },
+    setup: ({ runtime, props }) => {
+        for (let index = 0; index < QUEUE_CUBE_IDS.length; index += 1) {
+            const cubeId = QUEUE_CUBE_IDS[index]
+            if (cubeId === undefined) continue
+            const position = getInitialQueuePosition(index)
+            if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
+            else runtime.addCube({ id: cubeId, position, faceLabels: props.faceLabels })
+        }
+        return { queue: [...QUEUE_CUBE_IDS] }
+    },
+    script: async ({ runtime, timeline, random, state }) => {
+        const { queue } = state
 
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+        const moveForward = async (cubeId: string, fadeOut: boolean): Promise<void> => {
+            const source = runtime.getCubePosition(cubeId)
+            if (source === undefined) return
+            const destination = {
+                column: source.column,
+                row: source.row + QUEUE_SPACING_CELLS,
+            }
+            const movement = runtime.moveCubeTo(cubeId, destination, {
+                duration: QUEUE_MOVE_DURATION_S,
+                easing: 'easeInOutCubic',
+            })
+            if (fadeOut) {
+                await Promise.all([
+                    movement,
+                    runtime.fadeCubeTo(cubeId, 0, {
+                        duration: QUEUE_MOVE_DURATION_S,
+                        easing: 'easeInOutCubic',
+                    }),
+                ])
+            } else {
+                await movement
+            }
+        }
+
+        const stageCubeBesideTail = async (cubeId: string): Promise<void> => {
+            const approachFromRight = random.next() >= 0.5
+            const waitingColumn = approachFromRight ? 6 : -6
+            runtime.setCubePosition(cubeId, {
+                column: waitingColumn,
+                row: QUEUE_TAIL_ROW,
+            })
+            runtime.setCubeOpacity(cubeId, 0)
+            await runtime.fadeCubeTo(cubeId, 0.42, {
+                duration: 0.34,
+                easing: 'easeOutCubic',
+            })
+        }
+
+        const bringCubeToTail = async (cubeId: string): Promise<void> => {
+            await Promise.all([
+                runtime.moveCubeTo(
+                    cubeId,
+                    { column: QUEUE_COLUMN, row: QUEUE_TAIL_ROW },
+                    { duration: NEW_CUBE_MOVE_DURATION_S, easing: 'easeInOutCubic' }
+                ),
+                runtime.fadeCubeTo(cubeId, 1, {
+                    duration: NEW_CUBE_MOVE_DURATION_S,
+                    easing: 'easeOutCubic',
+                }),
+            ])
+        }
+
+        await timeline.wait(0.8)
+        await timeline.loop(async () => {
+            const departingCubeId = queue[0]
+            if (departingCubeId === undefined) return
+
+            await moveForward(departingCubeId, true)
+            await stageCubeBesideTail(departingCubeId)
+
+            for (let index = 1; index < queue.length; index += 1) {
+                const cubeId = queue[index]
+                if (cubeId === undefined) continue
+                await moveForward(cubeId, false)
+                await timeline.wait(QUEUE_MOVE_PAUSE_S)
+            }
+
+            await bringCubeToTail(departingCubeId)
+            queue.shift()
+            queue.push(departingCubeId)
+            await timeline.wait(CYCLE_PAUSE_S)
+        })
+    },
+})

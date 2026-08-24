@@ -1,20 +1,8 @@
-import { useCallback, type JSX } from 'react'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '../scenes/motion'
+import { defineScene } from '../sdk/defineScene'
 
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
-
-const GRID_CELL_SIZE = 0.05
+const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 const ONCOMING_CUBE_ID = 'corridor-oncoming'
 const CORRIDOR_ROW = 0
 const LEFT_ENTRY: GridCoordinate = { column: -7, row: CORRIDOR_ROW }
@@ -29,161 +17,121 @@ const MIRRORED_ATTEMPTS = 3
 const SIDESTEP_ROWS = [-1, 1, -1] as const
 const STEP_DURATION_S = 0.3
 
-interface CorridorDanceController {
-    readonly dispose: () => void
-}
-
-const createCorridorDanceAnimation = (
-    runtime: GridSceneRuntime
-): CorridorDanceController => {
-    let cancelled = false
-    const delay = createCancellableDelay()
-
-    const moveBoth = (
-        leftPosition: GridCoordinate,
-        rightPosition: GridCoordinate,
-        duration: number
-    ): Promise<unknown> =>
-        Promise.all([
-            runtime.moveCubeTo(MAIN_CUBE_ID, leftPosition, {
-                duration,
-                easing: 'easeInOutCubic',
-            }),
-            runtime.moveCubeTo(ONCOMING_CUBE_ID, rightPosition, {
-                duration,
-                easing: 'easeInOutCubic',
-            }),
-        ])
-
-    const enterCorridor = async (): Promise<void> => {
-        // After a pass the two cubes hold each other's entry, so the swap needs a
-        // free cell in between: no cube may ever be placed on an occupied one.
-        runtime.setCubePosition(ONCOMING_CUBE_ID, PARKING)
-        runtime.setCubePosition(MAIN_CUBE_ID, LEFT_ENTRY)
-        runtime.setCubePosition(ONCOMING_CUBE_ID, RIGHT_ENTRY)
-        await Promise.all([
-            runtime.fadeCubeTo(MAIN_CUBE_ID, 1, { duration: 0.6 }),
-            runtime.fadeCubeTo(ONCOMING_CUBE_ID, 1, { duration: 0.6 }),
-            moveBoth(
-                { column: LEFT_FACING_COLUMN, row: CORRIDOR_ROW },
-                { column: RIGHT_FACING_COLUMN, row: CORRIDOR_ROW },
-                1.5
-            ),
-        ])
-    }
-
-    /** The polite deadlock: both yield at the same moment and to the same side. */
-    const mirroredSidestep = async (row: number): Promise<void> => {
-        await moveBoth(
-            { column: LEFT_FACING_COLUMN, row },
-            { column: RIGHT_FACING_COLUMN, row },
-            STEP_DURATION_S
-        )
-        if (cancelled) return
-        await delay.wait(0.4)
-        if (cancelled) return
-        await moveBoth(
-            { column: LEFT_FACING_COLUMN, row: CORRIDOR_ROW },
-            { column: RIGHT_FACING_COLUMN, row: CORRIDOR_ROW },
-            STEP_DURATION_S
-        )
-        if (cancelled) return
-        await delay.wait(0.35)
-    }
-
-    /** One of them stops moving, which is the only thing that resolves the symmetry. */
-    const resolveAndPass = async (): Promise<void> => {
-        await delay.wait(0.5)
-        if (cancelled) return
-        await runtime.moveCubeTo(
-            ONCOMING_CUBE_ID,
-            { column: RIGHT_FACING_COLUMN, row: BYPASS_ROW },
-            { duration: STEP_DURATION_S, easing: 'easeInOutCubic' }
-        )
-        if (cancelled) return
-        await runtime.moveCubeTo(
-            ONCOMING_CUBE_ID,
-            { column: LEFT_FACING_COLUMN - 2, row: BYPASS_ROW },
-            { duration: 0.75, easing: 'easeInOutCubic' }
-        )
-        if (cancelled) return
-        await runtime.moveCubeTo(
-            ONCOMING_CUBE_ID,
-            { column: LEFT_FACING_COLUMN - 2, row: CORRIDOR_ROW },
-            { duration: STEP_DURATION_S, easing: 'easeInOutCubic' }
-        )
-        if (cancelled) return
-        await delay.wait(0.3)
-        await Promise.all([
-            runtime.fadeCubeTo(MAIN_CUBE_ID, 0, { duration: 1.1 }),
-            runtime.fadeCubeTo(ONCOMING_CUBE_ID, 0, { duration: 1.1 }),
-            moveBoth(RIGHT_ENTRY, LEFT_ENTRY, 1.4),
-        ])
-    }
-
-    const play = async (): Promise<void> => {
-        await delay.wait(0.7)
-        while (!cancelled) {
-            await enterCorridor()
-            if (cancelled) return
-            await delay.wait(0.45)
-            for (let attempt = 0; attempt < MIRRORED_ATTEMPTS; attempt += 1) {
-                const row = SIDESTEP_ROWS[attempt]
-                if (row === undefined || cancelled) break
-                await mirroredSidestep(row)
-            }
-            if (cancelled) return
-            await resolveAndPass()
-            if (cancelled) return
-            await delay.wait(0.6)
-        }
-    }
-
-    void startSceneAnimation('Corridor Dance', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
 /** Two cubes yield to each other simultaneously until one of them holds still. */
-export const CorridorDanceScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            runtime.setCubePosition(MAIN_CUBE_ID, LEFT_ENTRY)
-            runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
-            runtime.addCube({
-                id: ONCOMING_CUBE_ID,
-                position: RIGHT_ENTRY,
-                opacity: 0,
-                faceLabels,
-            })
-            const animation = createCorridorDanceAnimation(runtime)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const CorridorDanceScene = defineScene({
+    metadata: {
+        id: 'corridor-dance',
+        title: 'Corridor Dance',
+        tags: ['relation', 'symmetry'],
+        description: 'Mirrored politeness deadlocks until one cube holds still.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 17,
+        gridCellCount: GRID_PRESETS.corridor.gridCellCount,
         gridFadeInnerRadiusCells: 3,
         gridFadeOuterRadiusCells: 9,
         cameraAzimuthDeg: 0,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
+    },
+    setup: ({ runtime, props }) => {
+        runtime.setCubePosition(MAIN_CUBE_ID, LEFT_ENTRY)
+        runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
+        runtime.addCube({
+            id: ONCOMING_CUBE_ID,
+            position: RIGHT_ENTRY,
+            opacity: 0,
+            faceLabels: props.faceLabels,
+        })
+    },
+    script: async ({ runtime, timeline }) => {
+        const moveBoth = (
+            leftPosition: GridCoordinate,
+            rightPosition: GridCoordinate,
+            duration: number
+        ): Promise<unknown> =>
+            Promise.all([
+                runtime.moveCubeTo(MAIN_CUBE_ID, leftPosition, {
+                    duration,
+                    easing: 'easeInOutCubic',
+                }),
+                runtime.moveCubeTo(ONCOMING_CUBE_ID, rightPosition, {
+                    duration,
+                    easing: 'easeInOutCubic',
+                }),
+            ])
 
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+        const enterCorridor = async (): Promise<void> => {
+            // After a pass the two cubes hold each other's entry, so the swap needs a
+            // free cell in between: no cube may ever be placed on an occupied one.
+            runtime.setCubePosition(ONCOMING_CUBE_ID, PARKING)
+            runtime.setCubePosition(MAIN_CUBE_ID, LEFT_ENTRY)
+            runtime.setCubePosition(ONCOMING_CUBE_ID, RIGHT_ENTRY)
+            await Promise.all([
+                runtime.fadeCubeTo(MAIN_CUBE_ID, 1, { duration: 0.6 }),
+                runtime.fadeCubeTo(ONCOMING_CUBE_ID, 1, { duration: 0.6 }),
+                moveBoth(
+                    { column: LEFT_FACING_COLUMN, row: CORRIDOR_ROW },
+                    { column: RIGHT_FACING_COLUMN, row: CORRIDOR_ROW },
+                    1.5
+                ),
+            ])
+        }
+
+        /** The polite deadlock: both yield at the same moment and to the same side. */
+        const mirroredSidestep = async (row: number): Promise<void> => {
+            await moveBoth(
+                { column: LEFT_FACING_COLUMN, row },
+                { column: RIGHT_FACING_COLUMN, row },
+                STEP_DURATION_S
+            )
+            await timeline.wait(0.4)
+            await moveBoth(
+                { column: LEFT_FACING_COLUMN, row: CORRIDOR_ROW },
+                { column: RIGHT_FACING_COLUMN, row: CORRIDOR_ROW },
+                STEP_DURATION_S
+            )
+            await timeline.wait(0.35)
+        }
+
+        /** One of them stops moving, which is the only thing that resolves the symmetry. */
+        const resolveAndPass = async (): Promise<void> => {
+            await timeline.wait(0.5)
+            await runtime.moveCubeTo(
+                ONCOMING_CUBE_ID,
+                { column: RIGHT_FACING_COLUMN, row: BYPASS_ROW },
+                { duration: STEP_DURATION_S, easing: 'easeInOutCubic' }
+            )
+            await runtime.moveCubeTo(
+                ONCOMING_CUBE_ID,
+                { column: LEFT_FACING_COLUMN - 2, row: BYPASS_ROW },
+                { duration: 0.75, easing: 'easeInOutCubic' }
+            )
+            await runtime.moveCubeTo(
+                ONCOMING_CUBE_ID,
+                { column: LEFT_FACING_COLUMN - 2, row: CORRIDOR_ROW },
+                { duration: STEP_DURATION_S, easing: 'easeInOutCubic' }
+            )
+            await timeline.wait(0.3)
+            await Promise.all([
+                runtime.fadeCubeTo(MAIN_CUBE_ID, 0, { duration: 1.1 }),
+                runtime.fadeCubeTo(ONCOMING_CUBE_ID, 0, { duration: 1.1 }),
+                moveBoth(RIGHT_ENTRY, LEFT_ENTRY, 1.4),
+            ])
+        }
+
+        await timeline.wait(0.7)
+        await timeline.loop(async () => {
+            await enterCorridor()
+            await timeline.wait(0.45)
+            for (let attempt = 0; attempt < MIRRORED_ATTEMPTS; attempt += 1) {
+                const row = SIDESTEP_ROWS[attempt]
+                if (row === undefined) break
+                await mirroredSidestep(row)
+            }
+            await resolveAndPass()
+            await timeline.wait(0.6)
+        })
+    },
+})

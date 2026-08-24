@@ -1,6 +1,12 @@
 export * from './choreography'
 export * from './defineScene'
 export * from '../scenes/runSceneScript'
+export { MOTION, GRID_PRESETS } from '../scenes/motion'
+export {
+    getSceneTimeScale,
+    setSceneTimeScale,
+    scaleSceneDuration,
+} from '../scenes/timeScale'
 export {
     createSceneRandom,
     createSeededRandom,

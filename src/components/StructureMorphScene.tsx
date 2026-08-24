@@ -1,23 +1,11 @@
-import { useCallback, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
 import { getGridCellKey, isSameGridCell } from '../scenes/gridPathfinding'
 import {
     MAIN_CUBE_ID,
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
-import {
-    getDifferentRandomIndex,
-    getRandomItem,
-} from '../scenes/sceneRandom'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import type { SceneRandom } from '../scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.035
 const GRID_CELL_COUNT = 19
@@ -49,8 +37,8 @@ interface StructureShape {
     readonly positions: readonly GridCoordinate[]
 }
 
-interface StructureAnimationController {
-    readonly dispose: () => void
+interface StructureMorphState {
+    currentShapeIndex: number
 }
 
 const prioritizeOrigin = (positions: readonly GridCoordinate[]): GridCoordinate[] =>
@@ -185,7 +173,7 @@ const moveCube = async (
 const moveToShape = async (
     runtime: GridSceneRuntime,
     shape: StructureShape,
-    isCancelled: () => boolean,
+    random: SceneRandom,
     waitBetweenMoves: () => Promise<void>
 ): Promise<void> => {
     const assignments = assignNearestTargets(runtime, shape.positions)
@@ -194,7 +182,7 @@ const moveToShape = async (
         const target = assignments.get(cubeId)
         return source !== undefined && target !== undefined && !isSameGridCell(source, target)
     })
-    const seedCubeId = getRandomItem(pendingCubeIds)
+    const seedCubeId = random.item(pendingCubeIds)
     const seedPosition =
         seedCubeId === undefined ? undefined : runtime.getCubePosition(seedCubeId)
     if (seedCubeId !== undefined && seedPosition !== undefined) {
@@ -211,14 +199,13 @@ const moveToShape = async (
             duration: 0.16,
             easing: 'easeOutCubic',
         })
-        if (isCancelled()) return
         await runtime.fadeCubeTo(seedCubeId, 1, {
             duration: 0.18,
             easing: 'easeOutCubic',
         })
     }
 
-    while (pendingCubeIds.length > 0 && !isCancelled()) {
+    while (pendingCubeIds.length > 0) {
         const occupiedCells = new Map<string, string>()
         for (const cubeId of CUBE_IDS) {
             const position = runtime.getCubePosition(cubeId)
@@ -237,7 +224,7 @@ const moveToShape = async (
             const target = cubeId === undefined ? undefined : assignments.get(cubeId)
             if (cubeId !== undefined && target !== undefined) {
                 await moveCube(runtime, cubeId, target)
-                if (!isCancelled()) await waitBetweenMoves()
+                await waitBetweenMoves()
             }
             continue
         }
@@ -254,71 +241,20 @@ const moveToShape = async (
         )
         if (temporaryPosition === undefined) return
         await moveCube(runtime, cubeId, temporaryPosition)
-        if (!isCancelled()) await waitBetweenMoves()
-    }
-}
-
-const createStructureAnimation = (runtime: GridSceneRuntime): StructureAnimationController => {
-    let cancelled = false
-    let currentShapeIndex = 0
-    const delay = createCancellableDelay()
-
-    const play = async (): Promise<void> => {
-        await delay.wait(SHAPE_HOLD_DURATION_S)
-        while (!cancelled) {
-            const nextShapeIndex = getDifferentRandomIndex(
-                STRUCTURE_SHAPES.length,
-                currentShapeIndex
-            )
-            const nextShape = STRUCTURE_SHAPES[nextShapeIndex]
-            if (nextShape === undefined) return
-            await moveToShape(
-                runtime,
-                nextShape,
-                () => cancelled,
-                () => delay.wait(MOVE_PAUSE_DURATION_S)
-            )
-            currentShapeIndex = nextShapeIndex
-            if (!cancelled) await delay.wait(SHAPE_HOLD_DURATION_S)
-        }
-    }
-
-    void startSceneAnimation('Structure Morph', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
+        await waitBetweenMoves()
     }
 }
 
 /** A random seed cube starts each spatial chain reaction into a new group form. */
-export const StructureMorphScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            const initialShape = STRUCTURE_SHAPES[0]
-            if (initialShape === undefined) return () => undefined
-
-            for (let index = 0; index < CUBE_IDS.length; index += 1) {
-                const cubeId = CUBE_IDS[index]
-                const position = initialShape.positions[index]
-                if (cubeId === undefined || position === undefined) continue
-                if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
-                else runtime.addCube({ id: cubeId, position, faceLabels })
-            }
-
-            const animation = createStructureAnimation(runtime)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const StructureMorphScene = defineScene<CubeSceneProps, StructureMorphState>({
+    metadata: {
+        id: 'random-structure',
+        title: 'Random Structure',
+        tags: ['form', 'reconfiguration'],
+        description: 'A seed cube starts each reconfiguration into a new form.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: GRID_CELL_COUNT,
         gridFadeInnerRadiusCells: 3,
@@ -326,11 +262,34 @@ export const StructureMorphScene = ({
         cameraAzimuthDeg: 45,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+    },
+    setup: ({ runtime, props }) => {
+        const initialShape = STRUCTURE_SHAPES[0]
+        if (initialShape !== undefined) {
+            for (let index = 0; index < CUBE_IDS.length; index += 1) {
+                const cubeId = CUBE_IDS[index]
+                const position = initialShape.positions[index]
+                if (cubeId === undefined || position === undefined) continue
+                if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
+                else runtime.addCube({ id: cubeId, position, faceLabels: props.faceLabels })
+            }
+        }
+        return { currentShapeIndex: 0 }
+    },
+    script: async ({ runtime, timeline, random, state }) => {
+        await timeline.wait(SHAPE_HOLD_DURATION_S)
+        await timeline.loop(async () => {
+            const nextShapeIndex = random.differentIndex(
+                STRUCTURE_SHAPES.length,
+                state.currentShapeIndex
+            )
+            const nextShape = STRUCTURE_SHAPES[nextShapeIndex]
+            if (nextShape === undefined) return
+            await moveToShape(runtime, nextShape, random, () =>
+                timeline.wait(MOVE_PAUSE_DURATION_S)
+            )
+            state.currentShapeIndex = nextShapeIndex
+            await timeline.wait(SHAPE_HOLD_DURATION_S)
+        })
+    },
+})

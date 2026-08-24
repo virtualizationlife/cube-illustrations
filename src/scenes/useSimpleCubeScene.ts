@@ -2,36 +2,40 @@ import { useEffect, useRef, useState, type RefObject } from 'react'
 
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
-import type { GridCubeFaceLabelInput } from './cubeFaceLabels'
+import {
+    getCubeFaceLabelsKey,
+    type GridCubeFaceLabelInput,
+} from './cubeFaceLabels'
+import { createDisposerStack } from './createDisposerStack'
+import {
+    createSceneLoopController,
+} from './createSceneLoopController'
+import {
+    createSceneWorld,
+    DEFAULT_CAMERA_ELEVATION_DEG,
+} from './createSceneWorld'
+import { createStandaloneRenderer } from './createStandaloneRenderer'
 import { getWideGridFadeRadii } from './gridFade'
+import { getSceneTimeScale } from './timeScale'
 import {
     bindGridCubeHover,
     type GridCubeHoverController,
 } from './bindGridCubeHover'
-import {
-    createGridSceneRuntime,
-    type GridSceneCubeEntry,
-    type GridSceneRuntime,
-} from './gridSceneRuntime'
+import type { GridSceneCubeEntry, GridSceneRuntime } from './gridSceneRuntime'
 import {
     useSceneRenderHost,
     type CubeRendererStatus,
 } from './SceneRenderHost'
-import { getSharedGpuDevice } from './sharedGpuDevice'
 
 export type { CubeRendererStatus } from './SceneRenderHost'
+export { ILLUSTRATION_VIEWPORT } from './createStandaloneRenderer'
 
-type WebGpuRenderer = InstanceType<typeof ThreeWebGpuNamespace.WebGPURenderer>
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 type Scene = InstanceType<typeof ThreeWebGpuNamespace.Scene>
 type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCamera>
 
-/** Fallback drawing-buffer size, used only while the canvas has no laid-out box yet. */
-export const ILLUSTRATION_VIEWPORT = 300
-
-/** Camera distance from look-at; elevation defaults to 35° above the horizon. */
-const CAMERA_DISTANCE = 1.05
-const DEFAULT_CAMERA_ELEVATION_DEG = 35
+/** Frames longer than this are clamped, so a stalled tab cannot jump the animation. */
+const MAX_FRAME_DELTA_S = 0.05
 
 export interface SimpleCubeFrameContext {
     readonly mesh: Object3D
@@ -83,6 +87,12 @@ export interface IllustrationSceneSizeProps {
 }
 
 export interface UseSimpleCubeSceneOptions extends IllustrationSceneSizeProps {
+    /**
+     * Changing this value tears the scene down and builds it again. `onSetup` is held in a
+     * ref, so a new callback identity alone never restarts anything — callers that need a
+     * restart have to say so here.
+     */
+    readonly lifecycleKey?: unknown
     readonly enableCubeHover?: boolean
     readonly onCubeHoverChange?: (cube: GridSceneCubeEntry | null) => void
     readonly onSetup?: (context: SimpleCubeSetupContext) => (() => void) | undefined
@@ -108,6 +118,7 @@ export const useSimpleCubeScene = ({
     viewOffsetY,
     hoverCells,
     mainCubeFaceLabels,
+    lifecycleKey,
     enableCubeHover = false,
     onCubeHoverChange,
     onSetup,
@@ -123,6 +134,14 @@ export const useSimpleCubeScene = ({
         gridFadeOuterRadiusCells ?? defaultGridFadeRadii.outerRadiusCells
     const resolvedGridFadeInnerRadiusCells =
         gridFadeInnerRadiusCells ?? defaultGridFadeRadii.innerRadiusCells
+    // Labels are compared by value, so a caller passing an object literal does not tear the
+    // scene down on every render. A genuine change does rebuild it: the labels reach cubes
+    // the scene adds itself, and those are not this hook's to reconcile — `mainCubeFaceLabels`
+    // describes the main cube, while a scene may give its other cubes labels of their own.
+    const faceLabelsKey = getCubeFaceLabelsKey(mainCubeFaceLabels)
+    const runtimeRef = useRef<GridSceneRuntime | null>(null)
+    const mainCubeFaceLabelsRef = useRef(mainCubeFaceLabels)
+    mainCubeFaceLabelsRef.current = mainCubeFaceLabels
     const onFrameRef = useRef(onFrame)
     const onSetupRef = useRef(onSetup)
     const onCubeHoverChangeRef = useRef(onCubeHoverChange)
@@ -141,113 +160,64 @@ export const useSimpleCubeScene = ({
               : null
         if (!hostMode && standaloneCanvas === null) return
 
-        // Keep bottom face just above the grid plane so edges don't z-fight and vanish.
-        const cubeCenterY = hoverCells * gridCellSize + cubeSize / 2 + gridCellSize * 0.02
-        const lookAtY = cubeCenterY + viewOffsetY
-        const cameraAzimuth = (cameraAzimuthDeg * Math.PI) / 180
-        const cameraElevation = (cameraElevationDeg * Math.PI) / 180
-
-        let disposed = false
-        let renderer: WebGpuRenderer | null = null
-        let disconnectTimer: (() => void) | null = null
-        let disconnectResizeObserver: (() => void) | null = null
-        let stopLoop: (() => void) | null = null
-        let unregisterHost: (() => void) | null = null
-        let teardownSetup: (() => void) | null = null
-        let runtime: GridSceneRuntime | null = null
-        let hoverController: GridCubeHoverController | null = null
+        // Every acquired resource is registered here, so teardown is one call from anywhere
+        // and a resource acquired after teardown is released the moment it appears.
+        const disposers = createDisposerStack()
 
         const setup = async (): Promise<void> => {
             const THREE = await import('three/webgpu')
+            // Every await below is a point where the component may already have unmounted.
+            // The disposer stack releases what was registered; these checks stop the setup
+            // itself from carrying on with a world that is already torn down.
+            if (disposers.isDisposed()) return
 
-            const scene = new THREE.Scene()
-            const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100)
-            const horizontal = CAMERA_DISTANCE * Math.cos(cameraElevation)
-            camera.position.set(
-                horizontal * Math.sin(cameraAzimuth),
-                lookAtY + CAMERA_DISTANCE * Math.sin(cameraElevation),
-                horizontal * Math.cos(cameraAzimuth)
-            )
-            camera.lookAt(0, lookAtY, 0)
-
-            runtime = createGridSceneRuntime({
-                scene,
+            const world = createSceneWorld({
                 THREE,
+                cubeSize,
+                cubeCornerRadius,
                 gridCellSize,
                 gridCellCount,
                 gridOpacity,
                 gridFadeInnerRadiusCells: resolvedGridFadeInnerRadiusCells,
                 gridFadeOuterRadiusCells: resolvedGridFadeOuterRadiusCells,
-                mainCubeSize: cubeSize,
-                mainCubeHoverCells: hoverCells,
-                cubeCornerRadius,
-                mainCubeFaceLabels,
+                cameraAzimuthDeg,
+                cameraElevationDeg,
+                viewOffsetY,
+                hoverCells,
+                mainCubeFaceLabels: mainCubeFaceLabelsRef.current,
             })
-            const mesh = runtime.mainCube
+            if (disposers.isDisposed()) {
+                world.dispose()
+                return
+            }
+            disposers.add(() => {
+                runtimeRef.current = null
+                world.dispose()
+            })
+            runtimeRef.current = world.runtime
+            const { scene, camera, runtime, mesh } = world
 
-            if (!hostMode) {
-                const device = await getSharedGpuDevice()
-                if (disposed || standaloneCanvas === null) {
-                    runtime.dispose()
-                    runtime = null
+            let renderer: InstanceType<typeof THREE.WebGPURenderer> | null = null
+            if (standaloneCanvas !== null) {
+                const standalone = await createStandaloneRenderer({
+                    THREE,
+                    canvas: standaloneCanvas,
+                    camera,
+                })
+                if (disposers.isDisposed()) {
+                    standalone?.dispose()
                     return
                 }
-
-                renderer = new THREE.WebGPURenderer(
-                    device === null
-                        ? { canvas: standaloneCanvas, antialias: true, alpha: true }
-                        : { canvas: standaloneCanvas, antialias: true, alpha: true, device }
-                )
-                renderer.setClearColor(0x000000, 0)
-
-                try {
-                    await renderer.init()
-                } catch {
-                    if (!disposed) setStatus('unsupported')
-                    renderer.dispose()
-                    renderer = null
-                    runtime.dispose()
-                    runtime = null
+                if (standalone === null) {
+                    setStatus('unsupported')
+                    disposers.dispose()
                     return
                 }
-
-                if (disposed) {
-                    renderer.dispose()
-                    runtime.dispose()
-                    runtime = null
-                    return
-                }
-
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-                // Standalone scenes retain their own appropriately sized backbuffer.
-                let appliedWidth = 0
-                let appliedHeight = 0
-                const applyViewportSize = (): void => {
-                    if (renderer === null || standaloneCanvas === null) return
-                    const width = Math.max(
-                        1,
-                        Math.round(standaloneCanvas.clientWidth) || ILLUSTRATION_VIEWPORT
-                    )
-                    const height = Math.max(
-                        1,
-                        Math.round(standaloneCanvas.clientHeight) || ILLUSTRATION_VIEWPORT
-                    )
-                    if (width === appliedWidth && height === appliedHeight) return
-                    appliedWidth = width
-                    appliedHeight = height
-                    renderer.setSize(width, height, false)
-                    camera.aspect = width / height
-                    camera.updateProjectionMatrix()
-                }
-                applyViewportSize()
-
-                const resizeObserver = new ResizeObserver(applyViewportSize)
-                resizeObserver.observe(standaloneCanvas)
-                disconnectResizeObserver = () => resizeObserver.disconnect()
+                disposers.add(standalone.dispose)
+                renderer = standalone.renderer
             }
 
-            const setupResult = onSetupRef.current?.({
+            const teardownSetup = onSetupRef.current?.({
                 mesh,
                 runtime,
                 scene,
@@ -255,8 +225,9 @@ export const useSimpleCubeScene = ({
                 canvas: element,
                 THREE,
             })
-            if (typeof setupResult === 'function') teardownSetup = setupResult
+            if (typeof teardownSetup === 'function') disposers.add(teardownSetup)
 
+            let hoverController: GridCubeHoverController | null = null
             if (enableCubeHover) {
                 hoverController = bindGridCubeHover({
                     runtime,
@@ -267,28 +238,27 @@ export const useSimpleCubeScene = ({
                         onCubeHoverChangeRef.current?.(cube)
                     },
                 })
+                disposers.add(hoverController.dispose)
             }
 
-            if (disposed) {
-                teardownSetup?.()
-                teardownSetup = null
-                hoverController?.dispose()
-                hoverController = null
-                renderer?.dispose()
-                renderer = null
-                runtime.dispose()
-                runtime = null
-                return
-            }
-
-            let intersecting = false
             let elapsed = 0
-            const updateScene = (rawDelta: number): void => {
-                const delta = Math.min(rawDelta, 0.05)
-                elapsed += delta
-                runtime?.update(delta)
-                hoverController?.update()
-                if (runtime !== null) {
+            const loop = createSceneLoopController({
+                THREE,
+                element,
+                scene,
+                camera,
+                renderer,
+                registerWithHost,
+                wakeHost,
+                onStatusChange: setStatus,
+                update: (rawDelta) => {
+                    // The clamp guards against a stalled tab; the scale is what makes the
+                    // whole scene — transitions, physics and elapsed alike — run faster.
+                    const delta =
+                        Math.min(rawDelta, MAX_FRAME_DELTA_S) * getSceneTimeScale()
+                    elapsed += delta
+                    runtime.update(delta)
+                    hoverController?.update()
                     onFrameRef.current({
                         mesh,
                         runtime,
@@ -298,91 +268,23 @@ export const useSimpleCubeScene = ({
                         canvas: element,
                         THREE,
                     })
-                }
-            }
-
-            let syncLoopState: (() => void) | null = null
-            const intersectionObserver = new IntersectionObserver(
-                (entries) => {
-                    const entry = entries[entries.length - 1]
-                    if (entry !== undefined) {
-                        intersecting = entry.isIntersecting
-                        syncLoopState?.()
-                        wakeHost?.()
-                    }
                 },
-                // Start a scene slightly before it scrolls in so it is already running.
-                { rootMargin: '128px' }
-            )
-            intersectionObserver.observe(element)
-
-            if (hostMode && registerWithHost !== undefined) {
-                unregisterHost = registerWithHost({
-                    element,
-                    scene,
-                    camera,
-                    update: updateScene,
-                    isActive: () => intersecting,
-                    onStatusChange: setStatus,
-                })
-                stopLoop = () => {
-                    intersectionObserver.disconnect()
-                    unregisterHost?.()
-                    unregisterHost = null
-                }
-            } else {
-                const timer = new THREE.Timer()
-                timer.connect(document)
-                disconnectTimer = () => timer.disconnect()
-
-                const renderFrame = (timestamp?: number): void => {
-                    timer.update(timestamp)
-                    updateScene(timer.getDelta())
-                    renderer?.render(scene, camera)
-                }
-
-                let loopRunning = false
-                const setLoopRunning = (shouldRun: boolean): void => {
-                    if (renderer === null || shouldRun === loopRunning) return
-                    loopRunning = shouldRun
-                    void renderer.setAnimationLoop(shouldRun ? renderFrame : null)
-                }
-                syncLoopState = (): void => {
-                    setLoopRunning(intersecting && !document.hidden)
-                }
-                const standaloneSyncLoopState = syncLoopState
-                if (standaloneSyncLoopState === null) return
-                document.addEventListener('visibilitychange', standaloneSyncLoopState)
-                stopLoop = () => {
-                    intersectionObserver.disconnect()
-                    document.removeEventListener('visibilitychange', standaloneSyncLoopState)
-                    setLoopRunning(false)
-                }
-            }
+            })
+            disposers.add(loop.dispose)
 
             if (!hostMode) setStatus('ready')
         }
 
-        void setup()
+        // Without this a failure inside the asynchronous setup becomes a silent unhandled
+        // rejection, which is exactly the class of problem this lifecycle is meant to surface.
+        // Whatever was acquired before the failure is released straight away rather than
+        // being held until the component happens to unmount.
+        void setup().catch((error: unknown) => {
+            disposers.dispose()
+            console.error('[cube-illustrations] scene setup failed', error)
+        })
 
-        return () => {
-            disposed = true
-            stopLoop?.()
-            stopLoop = null
-            teardownSetup?.()
-            teardownSetup = null
-            hoverController?.dispose()
-            hoverController = null
-            disconnectResizeObserver?.()
-            disconnectResizeObserver = null
-            disconnectTimer?.()
-            disconnectTimer = null
-            void renderer?.setAnimationLoop(null)
-            renderer?.dispose()
-            renderer = null
-            runtime?.dispose()
-            runtime = null
-        }
+        return () => disposers.dispose()
     }, [
         cubeSize,
         cubeCornerRadius,
@@ -396,7 +298,8 @@ export const useSimpleCubeScene = ({
         cameraElevationDeg,
         viewOffsetY,
         hoverCells,
-        mainCubeFaceLabels,
+        faceLabelsKey,
+        lifecycleKey,
         registerWithHost,
         wakeHost,
     ])

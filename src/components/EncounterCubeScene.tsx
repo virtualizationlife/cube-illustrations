@@ -11,6 +11,7 @@ import {
     type GridCoordinate,
     type GridSceneCubeDefinition,
 } from '../scenes/gridSceneRuntime'
+import { attachSceneMetadata } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.04
 const ENCOUNTER_CUBE_IDS = ['encounter-1', 'encounter-2', 'encounter-3'] as const
@@ -87,7 +88,7 @@ const PROXIMITY_OPACITY: GridProximityOpacityConfig = {
 }
 
 /** A moving main cube that reveals randomly placed cubes as it approaches them. */
-export const EncounterCubeScene = ({
+const EncounterCubeSceneComponent = ({
     faceLabels,
     cubeCornerRadius,
 }: CubeFaceLabelsProps): JSX.Element => {
@@ -115,3 +116,10 @@ export const EncounterCubeScene = ({
         />
     )
 }
+
+export const EncounterCubeScene = attachSceneMetadata(EncounterCubeSceneComponent, {
+    id: 'discovery',
+    title: 'Discovery',
+    tags: ['space', 'perception'],
+    description: 'Cubes are revealed as the traveller comes near them.',
+})

@@ -3,6 +3,7 @@ import type { JSX } from 'react'
 import { GridPathCubeScene } from '../scenes/GridPathCubeScene'
 import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
 import type { GridRandomWalkConfig } from '../scenes/gridSceneAnimation'
+import { attachSceneMetadata } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.085
 
@@ -22,7 +23,7 @@ const RANDOM_WALK: GridRandomWalkConfig = {
 }
 
 /** A fixed central cube explores a moving world; an occasional encounter follows briefly. */
-export const MovingGridScene = ({
+const MovingGridSceneComponent = ({
     faceLabels,
     cubeCornerRadius,
 }: CubeFaceLabelsProps): JSX.Element => (
@@ -42,3 +43,10 @@ export const MovingGridScene = ({
         mainCubeFaceLabels={faceLabels}
     />
 )
+
+export const MovingGridScene = attachSceneMetadata(MovingGridSceneComponent, {
+    id: 'moving-world',
+    title: 'Moving World',
+    tags: ['space', 'navigation'],
+    description: 'The world moves under a cube that holds the centre.',
+})

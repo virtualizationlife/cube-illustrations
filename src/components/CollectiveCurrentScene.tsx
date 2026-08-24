@@ -1,24 +1,6 @@
-import { useCallback, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
 import { getGridCellKey } from '../scenes/gridPathfinding'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import {
-    getDifferentRandomIndex,
-    getRandomItem,
-    shuffle,
-} from '../scenes/sceneRandom'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.038
 const FIELD_RADIUS = 6
@@ -39,96 +21,119 @@ const DIRECTIONS: readonly GridCoordinate[] = [
     { column: 0, row: -1 },
 ]
 
-interface CollectiveCurrentController {
-    readonly dispose: () => void
+interface CollectiveCurrentState {
+    previousDirectionIndex: number
 }
 
-const createCollectiveCurrentAnimation = (
-    runtime: GridSceneRuntime
-): CollectiveCurrentController => {
-    let cancelled = false
-    let previousDirectionIndex = -1
-    const delay = createCancellableDelay()
-
-    const moveOneCell = async (
-        cubeId: string,
-        preferredDirection?: GridCoordinate
-    ): Promise<void> => {
-        const source = runtime.getCubePosition(cubeId)
-        if (source === undefined) return
-        const occupied = new Set(
-            CURRENT_CUBE_IDS.flatMap((id) => {
-                if (id === cubeId) return []
-                const position = runtime.getCubePosition(id)
-                return position === undefined ? [] : [getGridCellKey(position)]
-            })
-        )
-        const directions = preferredDirection === undefined
-            ? shuffle(DIRECTIONS)
-            : [preferredDirection, ...shuffle(DIRECTIONS).filter(
-                  (direction) => direction !== preferredDirection
-              )]
-
-        for (const direction of directions) {
-            const destination = {
-                column: source.column + direction.column,
-                row: source.row + direction.row,
-            }
-            if (
-                Math.abs(destination.column) > FIELD_RADIUS ||
-                Math.abs(destination.row) > FIELD_RADIUS ||
-                occupied.has(getGridCellKey(destination))
-            ) continue
-
-            await runtime.moveCubeTo(cubeId, destination, {
-                duration: 0.16,
-                easing: 'easeInOutCubic',
-            })
-            return
-        }
-    }
-
-    const moveDisordered = async (): Promise<void> => {
-        for (const cubeId of shuffle(CURRENT_CUBE_IDS)) {
-            await moveOneCell(cubeId)
-            if (cancelled) return
-            await delay.wait(0.018)
-        }
-    }
-
-    const moveAsCurrent = async (direction: GridCoordinate): Promise<void> => {
-        const orderedIds = [...CURRENT_CUBE_IDS].sort((leftId, rightId) => {
-            const left = runtime.getCubePosition(leftId)
-            const right = runtime.getCubePosition(rightId)
-            if (left === undefined || right === undefined) return 0
-            const leftProjection = left.column * direction.column + left.row * direction.row
-            const rightProjection = right.column * direction.column + right.row * direction.row
-            return rightProjection - leftProjection
+/** Independent cubes repeatedly form and lose a shared direction of travel. */
+export const CollectiveCurrentScene = defineScene<CubeSceneProps, CollectiveCurrentState>({
+    metadata: {
+        id: 'collective-current',
+        title: 'Collective Current',
+        tags: ['coordination', 'emergence'],
+        description: 'A shared direction forms out of independent movement.',
+    },
+    view: {
+        cubeSize: GRID_CELL_SIZE,
+        gridCellSize: GRID_CELL_SIZE,
+        gridCellCount: 19,
+        gridFadeInnerRadiusCells: 3.5,
+        gridFadeOuterRadiusCells: 10,
+        cameraAzimuthDeg: 40,
+        viewOffsetY: 0,
+        hoverCells: 0,
+    },
+    setup: ({ runtime, props }) => {
+        CURRENT_CUBE_IDS.forEach((cubeId, index) => {
+            const position = INITIAL_POSITIONS[index]
+            if (position === undefined) return
+            if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
+            else runtime.addCube({ id: cubeId, position, faceLabels: props.faceLabels })
         })
-        for (const cubeId of orderedIds) {
-            await moveOneCell(cubeId, direction)
-            if (cancelled) return
-            await delay.wait(0.012)
-        }
-    }
+        return { previousDirectionIndex: -1 }
+    },
+    script: async ({ runtime, timeline, random, state }) => {
+        const moveOneCell = async (
+            cubeId: string,
+            preferredDirection?: GridCoordinate
+        ): Promise<void> => {
+            const source = runtime.getCubePosition(cubeId)
+            if (source === undefined) return
+            const occupied = new Set(
+                CURRENT_CUBE_IDS.flatMap((id) => {
+                    if (id === cubeId) return []
+                    const position = runtime.getCubePosition(id)
+                    return position === undefined ? [] : [getGridCellKey(position)]
+                })
+            )
+            const directions =
+                preferredDirection === undefined
+                    ? random.shuffle(DIRECTIONS)
+                    : [
+                          preferredDirection,
+                          ...random
+                              .shuffle(DIRECTIONS)
+                              .filter((direction) => direction !== preferredDirection),
+                      ]
 
-    const play = async (): Promise<void> => {
-        await delay.wait(0.8)
-        while (!cancelled) {
+            for (const direction of directions) {
+                const destination = {
+                    column: source.column + direction.column,
+                    row: source.row + direction.row,
+                }
+                if (
+                    Math.abs(destination.column) > FIELD_RADIUS ||
+                    Math.abs(destination.row) > FIELD_RADIUS ||
+                    occupied.has(getGridCellKey(destination))
+                ) continue
+
+                await runtime.moveCubeTo(cubeId, destination, {
+                    duration: 0.16,
+                    easing: 'easeInOutCubic',
+                })
+                return
+            }
+        }
+
+        const moveDisordered = async (): Promise<void> => {
+            for (const cubeId of random.shuffle(CURRENT_CUBE_IDS)) {
+                await moveOneCell(cubeId)
+                await timeline.wait(0.018)
+            }
+        }
+
+        const moveAsCurrent = async (direction: GridCoordinate): Promise<void> => {
+            const orderedIds = [...CURRENT_CUBE_IDS].sort((leftId, rightId) => {
+                const left = runtime.getCubePosition(leftId)
+                const right = runtime.getCubePosition(rightId)
+                if (left === undefined || right === undefined) return 0
+                const leftProjection =
+                    left.column * direction.column + left.row * direction.row
+                const rightProjection =
+                    right.column * direction.column + right.row * direction.row
+                return rightProjection - leftProjection
+            })
+            for (const cubeId of orderedIds) {
+                await moveOneCell(cubeId, direction)
+                await timeline.wait(0.012)
+            }
+        }
+
+        await timeline.wait(0.8)
+        await timeline.loop(async () => {
             for (let round = 0; round < 3; round += 1) {
                 await moveDisordered()
-                if (cancelled) return
             }
 
-            const directionIndex = getDifferentRandomIndex(
+            const directionIndex = random.differentIndex(
                 DIRECTIONS.length,
-                previousDirectionIndex
+                state.previousDirectionIndex
             )
-            previousDirectionIndex = directionIndex
-            const direction = DIRECTIONS[directionIndex] ?? getRandomItem(DIRECTIONS)
+            state.previousDirectionIndex = directionIndex
+            const direction = DIRECTIONS[directionIndex] ?? random.item(DIRECTIONS)
             if (direction === undefined) return
 
-            const initiatorId = getRandomItem(CURRENT_CUBE_IDS)
+            const initiatorId = random.item(CURRENT_CUBE_IDS)
             if (initiatorId !== undefined) {
                 await runtime.fadeCubeTo(initiatorId, 0.3, {
                     duration: 0.2,
@@ -142,55 +147,8 @@ const createCollectiveCurrentAnimation = (
 
             for (let wave = 0; wave < 4; wave += 1) {
                 await moveAsCurrent(direction)
-                if (cancelled) return
             }
-            await delay.wait(0.7)
-        }
-    }
-
-    void startSceneAnimation('Collective Current', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
-/** Independent cubes repeatedly form and lose a shared direction of travel. */
-export const CollectiveCurrentScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            CURRENT_CUBE_IDS.forEach((cubeId, index) => {
-                const position = INITIAL_POSITIONS[index]
-                if (position === undefined) return
-                if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
-                else runtime.addCube({ id: cubeId, position, faceLabels })
-            })
-            const animation = createCollectiveCurrentAnimation(runtime)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
-        cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
-        gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 19,
-        gridFadeInnerRadiusCells: 3.5,
-        gridFadeOuterRadiusCells: 10,
-        cameraAzimuthDeg: 40,
-        viewOffsetY: 0,
-        hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+            await timeline.wait(0.7)
+        })
+    },
+})

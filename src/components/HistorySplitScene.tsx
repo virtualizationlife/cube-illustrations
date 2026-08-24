@@ -4,13 +4,16 @@ import {
     type GridCoordinate,
     type GridSceneRuntime,
 } from '../scenes/gridSceneRuntime'
-import {
-    createScenePresentation,
-    type ScenePresentationController,
-} from '../scenes/scenePresentation'
+import type { ScenePresentationController } from '../scenes/scenePresentation'
 import { defineScene } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.032
+const BASE_PRESENTATION = {
+    zoom: 0.96,
+    gridOpacity: 0.52,
+    gridFadeInnerRadiusCells: 4,
+    gridFadeOuterRadiusCells: 17,
+} as const
 const ORIGIN: GridCoordinate = { column: 0, row: 0 }
 const PREVIEW_CUBE_ID = 'history-preview'
 const COMPANION_CUBE_ID = 'history-companion'
@@ -78,14 +81,10 @@ const STORY_TRACES: readonly (readonly GridCoordinate[])[] = [
     ],
 ]
 
-interface HistorySplitState {
-    readonly presentation: ScenePresentationController
-}
-
 const runHistorySplit = async (
     runtime: GridSceneRuntime,
     delay: (durationSeconds: number) => Promise<void>,
-    presentation: ScenePresentationController
+    presentation: ScenePresentationController | null
 ): Promise<void> => {
     const move = (cubeId: string, position: GridCoordinate, duration = 0.52): Promise<void> =>
         runtime.moveCubeTo(cubeId, position, {
@@ -302,7 +301,7 @@ const runHistorySplit = async (
             duration: 0.9,
             easing: 'easeInOutCubic',
         })
-        presentation.setTarget({
+        presentation?.setTarget({
             zoom: 0.62,
             gridOpacity: 0.42,
             gridFadeInnerRadiusCells: 6,
@@ -318,7 +317,7 @@ const runHistorySplit = async (
     const play = async (): Promise<void> => {
         await delay(0.9)
         for (;;) {
-            presentation.setTarget({
+            presentation?.setTarget({
                 zoom: 0.96,
                 gridOpacity: 0.52,
                 gridFadeInnerRadiusCells: 4,
@@ -367,7 +366,8 @@ export const HistorySplitScene = defineScene({
         viewOffsetY: 0,
         hoverCells: 0,
     },
-    setup: ({ runtime, props }): HistorySplitState => {
+    presentation: BASE_PRESENTATION,
+    setup: ({ runtime, props }) => {
         const { faceLabels } = props
         runtime.setCubePosition(MAIN_CUBE_ID, ORIGIN)
         runtime.addCube({
@@ -414,18 +414,7 @@ export const HistorySplitScene = defineScene({
             })
         })
 
-        return {
-            presentation: createScenePresentation({
-                zoom: 0.96,
-                gridOpacity: 0.52,
-                gridFadeInnerRadiusCells: 4,
-                gridFadeOuterRadiusCells: 17,
-            }),
-        }
     },
-    script: ({ runtime, timeline, state }) =>
-        runHistorySplit(runtime, timeline.wait, state.presentation),
-    onFrame: ({ delta, camera, runtime, state }) => {
-        state.presentation.update(delta, camera, runtime)
-    },
+    script: ({ runtime, timeline, presentation }) =>
+        runHistorySplit(runtime, timeline.wait, presentation),
 })

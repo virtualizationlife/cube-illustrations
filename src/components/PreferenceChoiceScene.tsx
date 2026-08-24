@@ -1,21 +1,8 @@
-import { useCallback, type JSX } from 'react'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '../scenes/motion'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import { getDifferentRandomIndex } from '../scenes/sceneRandom'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
-
-const GRID_CELL_SIZE = 0.05
+const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 const START_POSITIONS: readonly GridCoordinate[] = [
     { column: 0, row: -4 },
     { column: 0, row: 0 },
@@ -53,61 +40,87 @@ const getLinePositions = (anchorColumn: number): readonly GridCoordinate[] =>
         row: 1,
     }))
 
-interface PreferenceAnimationController {
-    readonly dispose: () => void
+interface PreferenceChoiceState {
+    previousStartIndex: number
+    preferredOnLeft: boolean
 }
 
-const createPreferenceAnimation = (runtime: GridSceneRuntime): PreferenceAnimationController => {
-    let cancelled = false
-    let previousStartIndex = 0
-    let preferredOnLeft = true
-    const delay = createCancellableDelay()
-
-    const moveGroup = async (
-        cubeIds: readonly string[],
-        positions: readonly GridCoordinate[]
-    ): Promise<void> => {
-        for (let index = 0; index < cubeIds.length; index += 1) {
-            const cubeId = cubeIds[index]
-            const position = positions[index]
-            if (cubeId === undefined || position === undefined) continue
-            await runtime.moveCubeTo(cubeId, position, {
-                duration: 0.34,
-                easing: 'easeInOutCubic',
-            })
-            if (cancelled) return
-            await delay.wait(0.04)
+/** A cube follows its preferred shape even when the two destination shapes swap sides. */
+export const PreferenceChoiceScene = defineScene<CubeSceneProps, PreferenceChoiceState>({
+    metadata: {
+        id: 'repeated-preference',
+        title: 'Repeated Preference',
+        tags: ['mind', 'preference'],
+        description: 'The same shape is chosen however the options are arranged.',
+    },
+    view: {
+        cubeSize: GRID_CELL_SIZE,
+        gridCellSize: GRID_CELL_SIZE,
+        gridCellCount: GRID_PRESETS.corridor.gridCellCount,
+        cameraAzimuthDeg: 0,
+        viewOffsetY: 0,
+        hoverCells: 0,
+    },
+    setup: ({ runtime, props }) => {
+        const start = START_POSITIONS[0]
+        if (start !== undefined) runtime.setCubePosition(MAIN_CUBE_ID, start)
+        const preferredPositions = getFramePositions(-3)
+        const alternativePositions = getLinePositions(3)
+        PREFERRED_CUBE_IDS.forEach((id, index) => {
+            const position = preferredPositions[index]
+            if (position !== undefined) {
+                runtime.addCube({ id, position, faceLabels: props.faceLabels })
+            }
+        })
+        ALTERNATIVE_CUBE_IDS.forEach((id, index) => {
+            const position = alternativePositions[index]
+            if (position !== undefined) {
+                runtime.addCube({ id, position, faceLabels: props.faceLabels })
+            }
+        })
+        return { previousStartIndex: 0, preferredOnLeft: true }
+    },
+    script: async ({ runtime, timeline, random, state }) => {
+        const moveGroup = async (
+            cubeIds: readonly string[],
+            positions: readonly GridCoordinate[]
+        ): Promise<void> => {
+            for (let index = 0; index < cubeIds.length; index += 1) {
+                const cubeId = cubeIds[index]
+                const position = positions[index]
+                if (cubeId === undefined || position === undefined) continue
+                await runtime.moveCubeTo(cubeId, position, {
+                    duration: 0.34,
+                    easing: 'easeInOutCubic',
+                })
+                await timeline.wait(0.04)
+            }
         }
-    }
 
-    const swapDestinations = async (): Promise<void> => {
-        const preferredTargetColumn = preferredOnLeft ? 3 : -3
-        const alternativeTargetColumn = preferredOnLeft ? -3 : 3
-        await moveGroup(ALTERNATIVE_CUBE_IDS, SWAP_STAGING_POSITIONS)
-        if (cancelled) return
-        await moveGroup(PREFERRED_CUBE_IDS, getFramePositions(preferredTargetColumn))
-        if (cancelled) return
-        await moveGroup(ALTERNATIVE_CUBE_IDS, getLinePositions(alternativeTargetColumn))
-        preferredOnLeft = !preferredOnLeft
-    }
+        const swapDestinations = async (): Promise<void> => {
+            const preferredTargetColumn = state.preferredOnLeft ? 3 : -3
+            const alternativeTargetColumn = state.preferredOnLeft ? -3 : 3
+            await moveGroup(ALTERNATIVE_CUBE_IDS, SWAP_STAGING_POSITIONS)
+            await moveGroup(PREFERRED_CUBE_IDS, getFramePositions(preferredTargetColumn))
+            await moveGroup(ALTERNATIVE_CUBE_IDS, getLinePositions(alternativeTargetColumn))
+            state.preferredOnLeft = !state.preferredOnLeft
+        }
 
-    const play = async (): Promise<void> => {
-        await delay.wait(0.9)
-        while (!cancelled) {
+        await timeline.wait(0.9)
+        await timeline.loop(async () => {
             const preferredPosition = {
-                column: preferredOnLeft ? -3 : 3,
+                column: state.preferredOnLeft ? -3 : 3,
                 row: 0,
             }
             await runtime.moveCubeTo(MAIN_CUBE_ID, preferredPosition, {
                 duration: 0.85,
                 easing: 'easeInOutCubic',
             })
-            if (cancelled) return
-            await delay.wait(1.15)
+            await timeline.wait(1.15)
 
-            const nextStartIndex = getDifferentRandomIndex(
+            const nextStartIndex = random.differentIndex(
                 START_POSITIONS.length,
-                previousStartIndex
+                state.previousStartIndex
             )
             const nextStart = START_POSITIONS[nextStartIndex]
             if (nextStart === undefined) return
@@ -115,61 +128,10 @@ const createPreferenceAnimation = (runtime: GridSceneRuntime): PreferenceAnimati
                 duration: 0.9,
                 easing: 'easeInOutCubic',
             })
-            previousStartIndex = nextStartIndex
-            if (cancelled) return
-            await delay.wait(0.55)
+            state.previousStartIndex = nextStartIndex
+            await timeline.wait(0.55)
             await swapDestinations()
-            if (!cancelled) await delay.wait(0.9)
-        }
-    }
-
-    void startSceneAnimation('Preference Choice', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
-/** A cube follows its preferred shape even when the two destination shapes swap sides. */
-export const PreferenceChoiceScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            const start = START_POSITIONS[0]
-            if (start !== undefined) runtime.setCubePosition(MAIN_CUBE_ID, start)
-            const preferredPositions = getFramePositions(-3)
-            const alternativePositions = getLinePositions(3)
-            PREFERRED_CUBE_IDS.forEach((id, index) => {
-                const position = preferredPositions[index]
-                if (position !== undefined) runtime.addCube({ id, position, faceLabels })
-            })
-            ALTERNATIVE_CUBE_IDS.forEach((id, index) => {
-                const position = alternativePositions[index]
-                if (position !== undefined) runtime.addCube({ id, position, faceLabels })
-            })
-            const animation = createPreferenceAnimation(runtime)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
-        cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
-        gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 17,
-        cameraAzimuthDeg: 0,
-        viewOffsetY: 0,
-        hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+            await timeline.wait(0.9)
+        })
+    },
+})

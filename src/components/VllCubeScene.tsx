@@ -7,6 +7,7 @@ import {
     type GridCubeFaceLabels,
 } from '../scenes/cubeFaceLabels'
 import { getRandomIndex } from '../scenes/sceneRandom'
+import { attachSceneMetadata } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.1
 const LETTERS = Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -26,9 +27,9 @@ export interface VllCubeSceneProps {
 }
 
 /** A rotating identity cube receives distinct random letters after every turn. */
-export const VllCubeScene = ({
+const VllCubeSceneComponent = ({
     cubeCornerRadius,
-}: VllCubeSceneProps = {}): JSX.Element => {
+}: VllCubeSceneProps): JSX.Element => {
     const labelsRef = useRef<GridCubeFaceLabels>({ ...INITIAL_FACE_LABELS })
     const updateHiddenFaceLabels = useCallback(
         (hiddenFaces: readonly GridCubeFace[]): GridCubeFaceLabels => {
@@ -69,3 +70,10 @@ export const VllCubeScene = ({
         />
     )
 }
+
+export const VllCubeScene = attachSceneMetadata(VllCubeSceneComponent, {
+    id: 'vll-cube',
+    title: 'VLL Cube',
+    tags: ['identity', 'symbol'],
+    description: 'An identity cube relettering its hidden faces.',
+})

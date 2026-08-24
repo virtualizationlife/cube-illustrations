@@ -1,14 +1,5 @@
-import { useCallback, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
-import { MAIN_CUBE_ID, type GridSceneRuntime } from '../scenes/gridSceneRuntime'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.06
 const PARTNER_CUBE_ID = 'metronome-partner'
@@ -33,8 +24,9 @@ interface Pendulum {
     columnIndex: number
 }
 
-interface MetronomePairController {
-    readonly dispose: () => void
+interface MetronomePairState {
+    readonly pendulums: readonly [Pendulum, Pendulum]
+    syncedSwings: number
 }
 
 const createPendulum = (
@@ -43,60 +35,87 @@ const createPendulum = (
     period: number
 ): Pendulum => ({ id, columns, period, timeToSwing: period, columnIndex: 0 })
 
-const createMetronomePairAnimation = (
-    runtime: GridSceneRuntime
-): MetronomePairController => {
-    let cancelled = false
-    const delay = createCancellableDelay()
-    const [leftPeriod = 0.5, rightPeriod = 0.75] = INITIAL_PERIODS_S
-    const pendulums: readonly [Pendulum, Pendulum] = [
-        createPendulum(MAIN_CUBE_ID, LEFT_COLUMNS, leftPeriod),
-        createPendulum(PARTNER_CUBE_ID, RIGHT_COLUMNS, rightPeriod),
-    ]
-    let syncedSwings = 0
+/** Two pendulums with different periods pull each other into a shared rhythm. */
+export const MetronomePairScene = defineScene<CubeSceneProps, MetronomePairState>({
+    metadata: {
+        id: 'two-metronomes',
+        title: 'Two Metronomes',
+        tags: ['rhythm', 'synchrony'],
+        description: 'Two detuned pendulums pull each other into one rhythm.',
+    },
+    view: {
+        cubeSize: GRID_CELL_SIZE,
+        gridCellSize: GRID_CELL_SIZE,
+        gridCellCount: 15,
+        gridFadeInnerRadiusCells: 2.5,
+        gridFadeOuterRadiusCells: 8,
+        cameraAzimuthDeg: 0,
+        viewOffsetY: 0,
+        hoverCells: 0,
+    },
+    setup: ({ runtime, props }) => {
+        const [leftColumn] = LEFT_COLUMNS
+        const [rightColumn] = RIGHT_COLUMNS
+        runtime.setCubePosition(MAIN_CUBE_ID, { column: leftColumn, row: SWING_ROW })
+        runtime.addCube({
+            id: PARTNER_CUBE_ID,
+            position: { column: rightColumn, row: SWING_ROW },
+            faceLabels: props.faceLabels,
+        })
 
-    const swing = (pendulum: Pendulum): void => {
-        pendulum.columnIndex = pendulum.columnIndex === 0 ? 1 : 0
-        const column = pendulum.columns[pendulum.columnIndex]
-        if (column === undefined) return
-        void runtime.moveCubeTo(
-            pendulum.id,
-            { column, row: SWING_ROW },
-            {
-                duration: pendulum.period * SWING_DURATION_RATIO,
-                easing: 'easeInOutCubic',
-            }
-        )
-    }
+        const [leftPeriod = 0.5, rightPeriod = 0.75] = INITIAL_PERIODS_S
+        return {
+            pendulums: [
+                createPendulum(MAIN_CUBE_ID, LEFT_COLUMNS, leftPeriod),
+                createPendulum(PARTNER_CUBE_ID, RIGHT_COLUMNS, rightPeriod),
+            ],
+            syncedSwings: 0,
+        }
+    },
+    script: async ({ runtime, timeline, state }) => {
+        const [leftPeriod = 0.5, rightPeriod = 0.75] = INITIAL_PERIODS_S
+        const { pendulums } = state
 
-    /** A swinging pendulum drags its neighbour's period and phase towards its own. */
-    const couple = (source: Pendulum, target: Pendulum): void => {
-        target.period += (source.period - target.period) * PERIOD_COUPLING
-        target.timeToSwing =
-            target.timeToSwing < target.period / 2
-                ? target.timeToSwing * (1 - PHASE_COUPLING)
-                : target.timeToSwing +
-                  (target.period - target.timeToSwing) * PHASE_COUPLING
-    }
+        const swing = (pendulum: Pendulum): void => {
+            pendulum.columnIndex = pendulum.columnIndex === 0 ? 1 : 0
+            const column = pendulum.columns[pendulum.columnIndex]
+            if (column === undefined) return
+            void runtime.moveCubeTo(
+                pendulum.id,
+                { column, row: SWING_ROW },
+                {
+                    duration: pendulum.period * SWING_DURATION_RATIO,
+                    easing: 'easeInOutCubic',
+                }
+            )
+        }
 
-    const restartDetuned = (): void => {
+        /** A swinging pendulum drags its neighbour's period and phase towards its own. */
+        const couple = (source: Pendulum, target: Pendulum): void => {
+            target.period += (source.period - target.period) * PERIOD_COUPLING
+            target.timeToSwing =
+                target.timeToSwing < target.period / 2
+                    ? target.timeToSwing * (1 - PHASE_COUPLING)
+                    : target.timeToSwing +
+                      (target.period - target.timeToSwing) * PHASE_COUPLING
+        }
+
+        const restartDetuned = (): void => {
+            const [first, second] = pendulums
+            first.period = leftPeriod
+            second.period = rightPeriod
+            first.timeToSwing = first.period
+            second.timeToSwing = second.period * INITIAL_PHASE_OFFSET_RATIO
+            state.syncedSwings = 0
+        }
+
+        await timeline.wait(0.7)
         const [first, second] = pendulums
-        first.period = leftPeriod
-        second.period = rightPeriod
-        first.timeToSwing = first.period
-        second.timeToSwing = second.period * INITIAL_PHASE_OFFSET_RATIO
-        syncedSwings = 0
-    }
-
-    const play = async (): Promise<void> => {
-        await delay.wait(0.7)
-        const [first, second] = pendulums
         second.timeToSwing = second.period * INITIAL_PHASE_OFFSET_RATIO
 
-        while (!cancelled) {
+        await timeline.loop(async () => {
             const step = Math.min(first.timeToSwing, second.timeToSwing)
-            await delay.wait(step)
-            if (cancelled) return
+            await timeline.wait(step)
 
             first.timeToSwing -= step
             second.timeToSwing -= step
@@ -111,66 +130,15 @@ const createMetronomePairAnimation = (
 
             if (firstFired !== secondFired) {
                 couple(firstFired ? first : second, firstFired ? second : first)
-                syncedSwings = 0
-                continue
+                state.syncedSwings = 0
+                return
             }
 
-            syncedSwings =
+            state.syncedSwings =
                 Math.abs(first.period - second.period) < SYNC_TOLERANCE_S
-                    ? syncedSwings + 1
+                    ? state.syncedSwings + 1
                     : 0
-            if (syncedSwings >= SYNCED_SWINGS_BEFORE_RESET) restartDetuned()
-        }
-    }
-
-    void startSceneAnimation('Two Metronomes', play)
-    return {
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
-}
-
-/** Two pendulums with different periods pull each other into a shared rhythm. */
-export const MetronomePairScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            const [leftColumn] = LEFT_COLUMNS
-            const [rightColumn] = RIGHT_COLUMNS
-            runtime.setCubePosition(MAIN_CUBE_ID, {
-                column: leftColumn,
-                row: SWING_ROW,
-            })
-            runtime.addCube({
-                id: PARTNER_CUBE_ID,
-                position: { column: rightColumn, row: SWING_ROW },
-                faceLabels,
-            })
-            const animation = createMetronomePairAnimation(runtime)
-            return () => animation.dispose()
-        },
-        [faceLabels]
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
-        cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
-        gridCellSize: GRID_CELL_SIZE,
-        gridCellCount: 15,
-        gridFadeInnerRadiusCells: 2.5,
-        gridFadeOuterRadiusCells: 8,
-        cameraAzimuthDeg: 0,
-        viewOffsetY: 0,
-        hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame: () => undefined,
-    })
-
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+            if (state.syncedSwings >= SYNCED_SWINGS_BEFORE_RESET) restartDetuned()
+        })
+    },
+})

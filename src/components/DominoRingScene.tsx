@@ -1,18 +1,9 @@
-import { useCallback, useRef, type JSX } from 'react'
+import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
-import type { Vector3 } from 'three'
+import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
 
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-} from '../scenes/gridSceneRuntime'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeFrameContext,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+type Vector3 = InstanceType<typeof ThreeWebGpuNamespace.Vector3>
 
 const GRID_CELL_SIZE = 0.055
 const RING_POSITIONS: readonly GridCoordinate[] = [
@@ -77,67 +68,22 @@ const getToppleProgress = (elapsed: number, index: number): number => {
     return 0
 }
 
+interface DominoRingState {
+    readonly axis: Vector3
+    readonly pivotOffset: Vector3
+    readonly rotatedPivotOffset: Vector3
+}
+
 /** A topple that runs around a closed ring reaches its own start and never ends. */
-export const DominoRingScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) | undefined => {
-            RING_CUBE_IDS.forEach((cubeId, index) => {
-                const position = RING_POSITIONS[index]
-                if (position === undefined) return
-                if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
-                else runtime.addCube({ id: cubeId, position, faceLabels })
-            })
-            return undefined
-        },
-        [faceLabels]
-    )
-
-    const axisRef = useRef<Vector3 | null>(null)
-    const pivotOffsetRef = useRef<Vector3 | null>(null)
-    const rotatedPivotOffsetRef = useRef<Vector3 | null>(null)
-
-    const onFrame = useCallback(
-        ({ runtime, elapsed, THREE }: SimpleCubeFrameContext): void => {
-            const axis = axisRef.current ?? new THREE.Vector3()
-            axisRef.current = axis
-            const pivotOffset = pivotOffsetRef.current ?? new THREE.Vector3()
-            pivotOffsetRef.current = pivotOffset
-            const rotatedPivotOffset = rotatedPivotOffsetRef.current ?? new THREE.Vector3()
-            rotatedPivotOffsetRef.current = rotatedPivotOffset
-            const halfEdge = GRID_CELL_SIZE / 2
-            const floorY = GRID_CELL_SIZE * 0.02
-
-            RING_CUBE_IDS.forEach((cubeId, index) => {
-                const object = runtime.getCube(cubeId)
-                const direction = OUTWARD_DIRECTIONS[index]
-                const position = RING_POSITIONS[index]
-                if (object === undefined || direction === undefined || position === undefined) return
-
-                const angle = getToppleProgress(elapsed, index) * TOPPLE_ANGLE
-                // This tangent axis and sign tip the upper face away from the ring.
-                axis.set(-direction.z, 0, direction.x)
-                object.quaternion.setFromAxisAngle(axis, -angle)
-
-                // Rotate the cube around its outer lower edge, not its centre. At 90° the
-                // centre is exactly one cardinal grid cell outwards and the cube lies flat.
-                pivotOffset.set(direction.x * halfEdge, -halfEdge, direction.z * halfEdge)
-                rotatedPivotOffset.copy(pivotOffset).applyAxisAngle(axis, -angle)
-                object.position.set(
-                    position.column * GRID_CELL_SIZE + pivotOffset.x - rotatedPivotOffset.x,
-                    floorY + halfEdge + pivotOffset.y - rotatedPivotOffset.y,
-                    position.row * GRID_CELL_SIZE + pivotOffset.z - rotatedPivotOffset.z
-                )
-            })
-        },
-        []
-    )
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const DominoRingScene = defineScene<CubeSceneProps, DominoRingState>({
+    metadata: {
+        id: 'domino-ring',
+        title: 'Domino Ring',
+        tags: ['causality', 'recurrence'],
+        description: 'A topple travels a closed ring and meets its own start.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: 15,
         gridFadeInnerRadiusCells: 3,
@@ -145,11 +91,47 @@ export const DominoRingScene = ({
         cameraAzimuthDeg: 35,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame,
-    })
+    },
+    setup: ({ runtime, props, THREE }) => {
+        RING_CUBE_IDS.forEach((cubeId, index) => {
+            const position = RING_POSITIONS[index]
+            if (position === undefined) return
+            if (cubeId === MAIN_CUBE_ID) runtime.setCubePosition(cubeId, position)
+            else runtime.addCube({ id: cubeId, position, faceLabels: props.faceLabels })
+        })
 
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+        // Reused every frame so the topple does not allocate three vectors per cube.
+        return {
+            axis: new THREE.Vector3(),
+            pivotOffset: new THREE.Vector3(),
+            rotatedPivotOffset: new THREE.Vector3(),
+        }
+    },
+    onFrame: ({ runtime, elapsed, state }) => {
+        const { axis, pivotOffset, rotatedPivotOffset } = state
+        const halfEdge = GRID_CELL_SIZE / 2
+        const floorY = GRID_CELL_SIZE * 0.02
+
+        RING_CUBE_IDS.forEach((cubeId, index) => {
+            const object = runtime.getCube(cubeId)
+            const direction = OUTWARD_DIRECTIONS[index]
+            const position = RING_POSITIONS[index]
+            if (object === undefined || direction === undefined || position === undefined) return
+
+            const angle = getToppleProgress(elapsed, index) * TOPPLE_ANGLE
+            // This tangent axis and sign tip the upper face away from the ring.
+            axis.set(-direction.z, 0, direction.x)
+            object.quaternion.setFromAxisAngle(axis, -angle)
+
+            // Rotate the cube around its outer lower edge, not its centre. At 90° the
+            // centre is exactly one cardinal grid cell outwards and the cube lies flat.
+            pivotOffset.set(direction.x * halfEdge, -halfEdge, direction.z * halfEdge)
+            rotatedPivotOffset.copy(pivotOffset).applyAxisAngle(axis, -angle)
+            object.position.set(
+                position.column * GRID_CELL_SIZE + pivotOffset.x - rotatedPivotOffset.x,
+                floorY + halfEdge + pivotOffset.y - rotatedPivotOffset.y,
+                position.row * GRID_CELL_SIZE + pivotOffset.z - rotatedPivotOffset.z
+            )
+        })
+    },
+})

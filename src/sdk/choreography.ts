@@ -1,3 +1,4 @@
+import { MOTION } from '../scenes/motion'
 import type {
     GridCoordinate,
     GridSceneRuntime,
@@ -82,9 +83,9 @@ export const createSceneChoreography = (
             },
             pulse: async ({
                 opacity = 0.28,
-                downDuration = 0.12,
-                upDuration = 0.16,
-                easing = 'easeOutCubic',
+                downDuration = MOTION.pulseDown.duration,
+                upDuration = MOTION.pulseUp.duration,
+                easing = MOTION.pulseDown.easing,
             } = {}) => {
                 await runtime.fadeCubeTo(id, opacity, {
                     duration: downDuration,
