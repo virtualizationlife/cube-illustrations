@@ -1,0 +1,13 @@
+:root {
+    /* Surface */
+    --cube-illustrations-background: #ffffff;
+
+    /* Text */
+    --cube-illustrations-label-color: #8b919a;
+    --cube-illustrations-tag-color: #a0a5ad;
+    --cube-illustrations-muted-color: #6b7280;
+
+    /* Scene group switcher */
+    --cube-illustrations-scene-switcher-color: var(--cube-illustrations-muted-color);
+    --cube-illustrations-scene-switcher-active-color: var(--cube-illustrations-label-color);
+}

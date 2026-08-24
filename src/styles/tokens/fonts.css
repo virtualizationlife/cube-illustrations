@@ -1,0 +1,21 @@
+:root {
+    --cube-illustrations-font-family: 'Open Sans', arial, helvetica, sans-serif;
+    --cube-illustrations-font-weight: 300;
+    --cube-illustrations-label-font-size: 16px;
+    --cube-illustrations-label-line-height: 1;
+    --cube-illustrations-label-phone-line-height: 1.2;
+    --cube-illustrations-label-letter-spacing: 0.04em;
+    --cube-illustrations-tag-font-size: 11px;
+    --cube-illustrations-tag-line-height: 1.2;
+    --cube-illustrations-tag-letter-spacing: 0.02em;
+    --cube-illustrations-fallback-font-size: 14px;
+
+    /* Scene group switcher */
+    --cube-illustrations-scene-switcher-font-family: var(--cube-illustrations-font-family);
+    --cube-illustrations-scene-switcher-font-weight: var(--cube-illustrations-font-weight);
+    --cube-illustrations-scene-switcher-font-size: var(--cube-illustrations-tag-font-size);
+    --cube-illustrations-scene-switcher-letter-spacing: var(
+        --cube-illustrations-tag-letter-spacing
+    );
+    --cube-illustrations-scene-switcher-line-height: 1;
+}

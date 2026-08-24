@@ -1,0 +1,35 @@
+:root {
+    --cube-illustrations-full-size: 100%;
+    --cube-illustrations-zero: 0;
+
+    /* Scene group switcher */
+    --cube-illustrations-scene-switcher-gap: 8px;
+    --cube-illustrations-scene-switcher-item-padding: 8px 12px;
+    --cube-illustrations-scene-switcher-focus-outline-width: 1px;
+    --cube-illustrations-scene-switcher-focus-outline-offset: 2px;
+
+    /* Scene */
+    --cube-illustrations-scene-min-size: 240px;
+    --cube-illustrations-scene-size: 280px;
+    --cube-illustrations-scene-aspect-ratio: 1 / 1;
+    --cube-illustrations-scene-fallback-padding: 16px;
+    --cube-illustrations-scene-fade-duration: 0.4s;
+    --cube-illustrations-scene-fade-easing: ease-out;
+    --cube-illustrations-scene-fade-hidden-opacity: 0;
+    --cube-illustrations-scene-fade-visible-opacity: 1;
+
+    /* Page */
+    --cube-illustrations-page-padding: 24px;
+    --cube-illustrations-page-min-height: 100dvh;
+    --cube-illustrations-page-phone-columns: 2;
+    --cube-illustrations-page-phone-padding: 12px;
+    --cube-illustrations-page-phone-gap: 16px 8px;
+    --cube-illustrations-grid-flexible-track: 1fr;
+    --cube-illustrations-no-shrink: 0;
+    --cube-illustrations-gap: 0;
+    --cube-illustrations-border: 0;
+
+    /* Layers */
+    --cube-illustrations-render-host-layer: 1;
+    --cube-illustrations-label-layer: 2;
+}

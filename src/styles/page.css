@@ -8,11 +8,15 @@
             var(--cube-illustrations-scene-size)
         )
     );
-    place-content: center center;
+    place-content: start center;
     min-height: var(--cube-illustrations-page-min-height);
     padding: var(--cube-illustrations-page-padding);
     gap: var(--cube-illustrations-gap);
     background: var(--cube-illustrations-background);
+}
+
+.cube_illustrations__page > .cube_illustrations__scene_group_switcher {
+    grid-column: 1 / -1;
 }
 
 /* Phones: two equal columns that never overflow a narrow viewport. */
