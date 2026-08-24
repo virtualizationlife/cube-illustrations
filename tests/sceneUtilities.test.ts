@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { getCubeFaceLabelsKey } from '../src/scenes/cubeFaceLabels'
 import { getWideGridFadeRadii } from '../src/scenes/gridFade'
 import {
     createSceneRandom,
@@ -276,5 +277,39 @@ describe('scene definitions', () => {
             'move',
             'fade:0',
         ])
+    })
+})
+
+describe('getCubeFaceLabelsKey', () => {
+    it('gives two distinct objects with the same labels one key', () => {
+        expect(getCubeFaceLabelsKey({ front: 'A', top: 'B' })).toBe(
+            getCubeFaceLabelsKey({ front: 'A', top: 'B' })
+        )
+    })
+
+    it('separates labels that differ', () => {
+        expect(getCubeFaceLabelsKey({ front: 'A' })).not.toBe(
+            getCubeFaceLabelsKey({ front: 'B' })
+        )
+        expect(getCubeFaceLabelsKey({ front: 'A' })).not.toBe(
+            getCubeFaceLabelsKey({ back: 'A' })
+        )
+    })
+
+    it('treats a bare string and the equivalent record alike', () => {
+        expect(getCubeFaceLabelsKey('AB')).toBe(
+            getCubeFaceLabelsKey({
+                front: 'AB',
+                back: 'AB',
+                left: 'AB',
+                right: 'AB',
+                top: 'AB',
+                bottom: 'AB',
+            })
+        )
+    })
+
+    it('gives absent labels an empty key', () => {
+        expect(getCubeFaceLabelsKey(undefined)).toBe('')
     })
 })
