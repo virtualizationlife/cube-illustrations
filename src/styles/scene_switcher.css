@@ -1,10 +1,16 @@
 .cube_illustrations_scene_group_switcher {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    width: var(--cube_illustrations_full_size);
+    font-family: var(--cube_illustrations_scene_switcher_font_family);
+}
+
+.cube_illustrations_scene_group_tabs {
+    display: flex;
     justify-content: center;
     width: var(--cube_illustrations_full_size);
     gap: var(--cube_illustrations_scene_switcher_gap);
-    font-family: var(--cube_illustrations_scene_switcher_font_family);
 }
 
 .cube_illustrations_scene_group_switcher_item {
@@ -30,8 +36,17 @@
     outline-offset: var(--cube_illustrations_scene_switcher_focus_outline_offset);
 }
 
+.cube_illustrations_scene_group_description {
+    max-width: 720px;
+    margin: 12px var(--cube_illustrations_zero) var(--cube_illustrations_zero);
+    color: var(--cube_illustrations_scene_switcher_color);
+    font-size: var(--cube_illustrations_scene_switcher_font_size);
+    line-height: 1.5;
+    text-align: center;
+}
+
 @media (width <= 520px) {
-    .cube_illustrations_scene_group_switcher {
+    .cube_illustrations_scene_group_tabs {
         justify-content: flex-start;
         overflow-x: auto;
     }
