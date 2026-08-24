@@ -1,5 +1,10 @@
 [
     {
+        "id": "world-grid",
+        "title": "World Grid",
+        "tags": ["world", "space"]
+    },
+    {
         "id": "rolling-cube",
         "title": "Rolling Cube",
         "tags": ["movement", "rotation"]

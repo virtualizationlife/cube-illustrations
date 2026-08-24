@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import * as publicApi from '@app/index'
-import { SCENE_CATALOG } from '@app/sceneCatalog'
+import { getSceneCatalogEntries, SCENE_CATALOG } from '@app/sceneCatalog'
 
 import catalogSnapshot from '../support/catalogSnapshot.json'
 
@@ -28,6 +28,11 @@ describe('SCENE_CATALOG', () => {
     it('has no duplicate ids', () => {
         const ids = SCENE_CATALOG.map((entry) => entry.id)
         expect(new Set(ids).size).toBe(ids.length)
+    })
+
+    it('keeps the world grid out of the combined view while retaining it in world', () => {
+        expect(getSceneCatalogEntries(null).map(({ id }) => id)).not.toContain('world-grid')
+        expect(getSceneCatalogEntries('world').map(({ id }) => id)).toEqual(['world-grid'])
     })
 
     /**

@@ -86,6 +86,7 @@ import {
     TrailingShadowScene,
     VllCubeScene,
     ValenceFieldScene,
+    WorldGridScene,
 } from 'cube-illustrations'
 
 export const Scene = () => (
@@ -115,6 +116,7 @@ export const Scene = () => (
         <PredictedPathsScene />
         <LearnedRhythmScene />
         <ValenceFieldScene />
+        <WorldGridScene />
         <MovingBridgeScene />
         <BecomingSignScene />
         <SignalRelayScene />

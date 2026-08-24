@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { WorldGridScene } from '@gallery/world/WorldGridScene'
 import {
     SIGN_DIRECTIONS,
     SIGN_SYMBOLS,
@@ -214,6 +215,13 @@ describe('background scene animations', () => {
 })
 
 describe('scene definitions', () => {
+    it('uses metadata as the single source of truth for a panoramic world layout', () => {
+        expect(WorldGridScene.scene).toMatchObject({
+            primaryCategory: 'world',
+            layout: 'panoramic',
+        })
+    })
+
     it('attaches serializable metadata to generated scene components', () => {
         const Scene = defineScene({
             metadata: {

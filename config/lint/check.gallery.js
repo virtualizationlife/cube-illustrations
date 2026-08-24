@@ -13,6 +13,7 @@ const categories = new Set([
     'continuity',
     'interaction',
     'cycles',
+    'world',
 ])
 const errors = []
 

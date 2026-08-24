@@ -406,6 +406,12 @@ The cube rises one cell above the grid, travels forward by two cells at that hei
 
 A successor cube is chosen at a random grid position within a five-cell radius. It fades in as the current cube fades out; the opacity transition lasts three seconds by default and can be changed with the `transparencyDuration` parameter. Once the crossfade completes, the camera moves to the successor and the former cube is removed before the next transfer.
 
+## 46. World Grid (`WorldGridScene`)
+
+**Tags:** `world`, `space`
+
+An empty panoramic grid is shown in a viewport three times as wide and twice as tall as a regular scene. Its visible area is a softly fading rounded rectangle rather than the gallery's usual radial field. No cubes are present yet: this scene establishes the world-scale stage for a future composition.
+
 ## Proposed Scenes
 
 The eight scenes below are design briefs, not implementations. They are absent from the gallery and from the package exports. Each description uses the same catalogue format as the scenes above so they can be copied into this list if they are built.

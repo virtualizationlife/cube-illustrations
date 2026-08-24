@@ -44,8 +44,9 @@ import { StructureMorphScene } from '@gallery/structure/StructureMorphScene'
 import { CursorRepulsionScene, ThreeCubesScene } from '@gallery/structure/ThreeCubesScene'
 import { ThreeCubeStatesScene } from '@gallery/structure/ThreeCubeStatesScene'
 import { VllCubeScene } from '@gallery/structure/VllCubeScene'
+import { WorldGridScene } from '@gallery/world/WorldGridScene'
 import type { CubeFaceLabelsProps } from '@runtime/grid/cubeFaceLabels'
-import type { SceneMetadata } from '@sdk/defineScene'
+import type { SceneCategory, SceneMetadata } from '@sdk/defineScene'
 
 export type SceneCatalogEntry = {
     readonly component: ComponentType<CubeFaceLabelsProps>
@@ -61,6 +62,7 @@ const orderScenes = <Scenes extends readonly { readonly scene: SceneMetadata }[]
  * only: the sequence the scenes are shown in.
  */
 const ORDERED_SCENES = orderScenes([
+    WorldGridScene,
     RollingCubeScene,
     SlidingCubeScene,
     JumpingCubeScene,
@@ -113,3 +115,11 @@ export const SCENE_CATALOG: readonly SceneCatalogEntry[] = ORDERED_SCENES.map((c
     component: component as ComponentType<CubeFaceLabelsProps>,
     ...component.scene,
 }))
+
+/** Selects either the combined gallery or one canonical scene category. */
+export const getSceneCatalogEntries = (
+    category: SceneCategory | null
+): readonly SceneCatalogEntry[] =>
+    category === null
+        ? SCENE_CATALOG.filter(({ includeInAll = true }) => includeInAll)
+        : SCENE_CATALOG.filter(({ primaryCategory }) => primaryCategory === category)

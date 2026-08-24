@@ -14,6 +14,7 @@ const GROUP_LABELS: Readonly<Record<SceneGroup, string>> = {
     continuity: 'continuity',
     interaction: 'interaction',
     cycles: 'cycles',
+    world: 'world',
 }
 
 const activateGroupOnKeyDown = (

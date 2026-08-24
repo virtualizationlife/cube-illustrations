@@ -13,4 +13,5 @@ export const SCENE_GROUP_DESCRIPTIONS: Record<SceneGroup, string> = {
     interaction:
         'Scenes shaped by perception, response, communication, influence, and the dynamic relationship between objects and their environment.',
     cycles: 'Scenes built around rhythm, repetition, recurrence, synchronization, and patterns that evolve through continuous motion.',
+    world: 'Large-scale scenes where the surrounding space becomes an active part of what is seen.',
 }
