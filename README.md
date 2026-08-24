@@ -1,13 +1,19 @@
-# cube-illustrations
+# Cube Illustrations
 
 Standalone React/WebGPU package containing the animated cube illustrations page and its reusable scene runtime.
 
-## Local installation
+Repository: [github.com/virtualizationlife/cube-illustrations](https://github.com/virtualizationlife/cube-illustrations)
 
-From another project in the same parent directory:
+<img src="docs/assets/nested-cube.png" alt="Nested Cube" width="180" />
+<img src="docs/assets/three-cubes.png" alt="Three Cubes" width="180" />
+<img src="docs/assets/collective-current.png" alt="Collective Current" width="180" />
+
+## Installation
+
+Install directly from GitHub:
 
 ```bash
-npm install ../cube-illustrations
+npm install github:virtualizationlife/cube-illustrations
 ```
 
 Or add it to `package.json`:
@@ -15,19 +21,28 @@ Or add it to `package.json`:
 ```json
 {
     "dependencies": {
-        "cube-illustrations": "file:../cube-illustrations"
+        "cube-illustrations": "github:virtualizationlife/cube-illustrations"
     }
 }
 ```
 
+For local development, install from a sibling checkout:
+
+```bash
+npm install ../cube-illustrations
+```
+
 The consuming project must provide `react`, `react-dom`, and `three`.
+
+Scenes require a browser with WebGPU support. When WebGPU is unavailable, the page renders a
+`WebGPU unavailable` fallback instead of starting the renderer.
 
 The package has two supported entry points:
 
 - `cube-illustrations` for built-in scene components and the gallery;
 - `cube-illustrations/sdk` for authoring custom scenes.
 
-## Usage
+## Quick start
 
 ```tsx
 import { IllustrationsPage } from 'cube-illustrations'
@@ -37,109 +52,23 @@ export const App = () => <IllustrationsPage />
 
 The main package entry imports its stylesheet automatically. It can also be imported explicitly as `cube-illustrations/styles.css`.
 
-Each ready-to-use scene is a separate component:
+## Built-in scenes
+
+Each ready-to-use scene is a separate component. Render only the scenes needed by your page:
 
 ```tsx
-import {
-    AnticipatoryReturnScene,
-    BoundaryRepairScene,
-    BecomingSignScene,
-    CenteredCubeScene,
-    CollectiveCurrentScene,
-    ContinuousQueueScene,
-    CorridorDanceScene,
-    CrossingFlowsScene,
-    CursorRepulsionScene,
-    DominoRingScene,
-    DynamicBalanceScene,
-    EncounterCubeScene,
-    FlippingCubeScene,
-    GuardChangeScene,
-    HistorySplitScene,
-    JumpingCubeScene,
-    LearnedDetourScene,
-    LearnedRhythmScene,
-    MemoryReplayScene,
-    MetronomePairScene,
-    MovingGridScene,
-    MovingBridgeScene,
-    NestedCubeScene,
-    PhaseChangeScene,
-    PolarityScene,
-    PredictedPathsScene,
-    PreferenceChoiceScene,
-    RecursiveFrameScene,
-    RaisedStrideCubeScene,
-    RecognizedPartnerScene,
-    RememberedThresholdScene,
-    ReunitingPairScene,
-    RollingCubeScene,
-    SevenCubesScene,
-    SharedLoadScene,
-    SignalRelayScene,
-    SlidingCubeScene,
-    StructureMorphScene,
-    ThinningClockScene,
-    TeleportingCubeScene,
-    ThreeCubeStatesScene,
-    ThreeCubesScene,
-    TrailingShadowScene,
-    VllCubeScene,
-    ValenceFieldScene,
-    WorldGridScene,
-} from 'cube-illustrations'
+import { CenteredCubeScene, WorldGridScene } from 'cube-illustrations'
 
 export const Scene = () => (
     <>
-        <RollingCubeScene />
-        <SlidingCubeScene />
-        <JumpingCubeScene />
-        <RaisedStrideCubeScene />
-        <TeleportingCubeScene transparencyDuration={3} />
         <CenteredCubeScene />
-        <MovingGridScene />
-        <FlippingCubeScene />
-        <EncounterCubeScene />
-        <ThreeCubesScene />
-        <VllCubeScene />
-        <SevenCubesScene />
-        <StructureMorphScene />
-        <ThreeCubeStatesScene />
-        <ContinuousQueueScene />
-        <CrossingFlowsScene />
-        <CursorRepulsionScene />
-        <LearnedDetourScene />
-        <MemoryReplayScene />
-        <BoundaryRepairScene />
-        <ReunitingPairScene />
-        <PreferenceChoiceScene />
-        <PredictedPathsScene />
-        <LearnedRhythmScene />
-        <ValenceFieldScene />
         <WorldGridScene />
-        <MovingBridgeScene />
-        <BecomingSignScene />
-        <SignalRelayScene />
-        <CollectiveCurrentScene />
-        <SharedLoadScene />
-        <PhaseChangeScene />
-        <DynamicBalanceScene />
-        <MetronomePairScene />
-        <TrailingShadowScene />
-        <PolarityScene />
-        <GuardChangeScene />
-        <CorridorDanceScene />
-        <DominoRingScene />
-        <ThinningClockScene />
-        <RememberedThresholdScene />
-        <RecursiveFrameScene />
-        <NestedCubeScene />
-        <HistorySplitScene />
-        <RecognizedPartnerScene />
-        <AnticipatoryReturnScene />
     </>
 )
 ```
+
+The complete scene catalogue, including descriptions and tags, is available in
+[`docs/SCENES.md`](docs/SCENES.md).
 
 `RollingCubeScene`, `SlidingCubeScene`, `JumpingCubeScene`, and `RaisedStrideCubeScene` are
 single-cube movement studies: respectively a one-cell edge roll, a one-cell slide, a two-cell jump
@@ -150,6 +79,8 @@ sets the concurrent fade-out/fade-in duration in seconds and defaults to `3`.
 
 `MovingGridScene` occasionally lets a randomly selected encounter follow the main cube for a few
 steps. `FlippingCubeScene` mixes its regular rotations with short rapid face sequences.
+`WorldGridScene` shows the larger world-scale stage as a wide, softly fading panoramic grid without
+cubes.
 `CenteredCubeScene` remains fixed while translucent groups of one to three slow cubes enter from
 random sides, with some changing direction once before they leave.
 `CursorRepulsionScene` continuously pushes each of its three cubes away from an approaching pointer;
@@ -299,7 +230,9 @@ facade in `setup`, `script`, or `onFrame` instead of `Math.random`; the same see
 same sequence of `random.next()`, `random.item()`, and `random.shuffle()` results.
 
 `SCENE_CATALOG` is the ordered source of built-in component metadata used by
-`IllustrationsPage`; consumers can use it to build their own gallery or filtering UI.
+`IllustrationsPage`; consumers can use it to build their own gallery or filtering UI. The built-in
+gallery also groups scenes by structure, movement, flow, mind, continuity, interaction, cycles, and
+world.
 
 ## Camera angle
 
@@ -321,6 +254,12 @@ Override these custom properties on a parent element or `:root`:
 - `--cube_illustrations_background` (default `#fff`)
 - `--cube_illustrations_border` (default `0`; for example `1px solid rgb(0 0 0 / 10%)`)
 
+## Further documentation
+
+- [Scene catalogue](docs/SCENES.md) — animation descriptions and scene tags.
+- [Scene feature matrix](docs/SCENE-FEATURES.md) — a compact comparison of scene capabilities.
+- [Cube concept](docs/CUBE.md) — the conceptual and narrative relationship between Cube and the illustrations.
+
 ## Development
 
 Start the local playground and open the URL printed by Vite:
@@ -329,10 +268,19 @@ Start the local playground and open the URL printed by Vite:
 npm run demo
 ```
 
+To open one scene by itself, use the permanent demo route:
+
+```text
+http://localhost:5173/scene/rolling-cube
+```
+
+Replace `rolling-cube` with any scene id from [`docs/SCENES.md`](docs/SCENES.md). This is useful
+for inspecting a scene or capturing screenshots and animations without rendering the full gallery.
+
 Run verification:
 
 ```bash
 npm install
 npm run check
-npm test
+npm run lint
 ```
