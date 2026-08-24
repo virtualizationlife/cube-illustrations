@@ -7,7 +7,11 @@ const injectLibraryCss = (): Plugin => ({
     name: 'inject-cube-illustrations-css',
     generateBundle(_options, bundle): void {
         for (const output of Object.values(bundle)) {
-            if (output.type === 'chunk' && output.isEntry) {
+            if (
+                output.type === 'chunk' &&
+                output.isEntry &&
+                output.fileName === 'index.js'
+            ) {
                 output.code = `import './styles.css';\n${output.code}`
             }
         }
@@ -18,9 +22,12 @@ export default defineConfig({
     plugins: [react(), injectLibraryCss()],
     build: {
         lib: {
-            entry: fileURLToPath(new URL('./src/bundle.ts', import.meta.url)),
+            entry: {
+                index: fileURLToPath(new URL('./src/bundle.ts', import.meta.url)),
+                'sdk/index': fileURLToPath(new URL('./src/sdk/index.ts', import.meta.url)),
+            },
             formats: ['es'],
-            fileName: 'index',
+            fileName: (_format, entryName) => `${entryName}.js`,
             cssFileName: 'styles',
         },
         rollupOptions: {
