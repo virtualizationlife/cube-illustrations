@@ -1,6 +1,6 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { GRID_PRESETS } from '../scenes/motion'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '@scenes/motion'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 const ENTRY: GridCoordinate = { column: -6, row: 0 }
@@ -10,11 +10,7 @@ const EXIT: GridCoordinate = { column: 6, row: 0 }
 const DIRECT_APPROACH: GridCoordinate = { column: -1, row: 0 }
 const TOP_BLOCKED_APPROACH: GridCoordinate = { column: -1, row: 2 }
 const BOTTOM_BLOCKED_APPROACH: GridCoordinate = { column: -1, row: -2 }
-const TOP_ROUTE: readonly GridCoordinate[] = [
-    { column: -2, row: 2 },
-    { column: 2, row: 2 },
-    TARGET,
-]
+const TOP_ROUTE: readonly GridCoordinate[] = [{ column: -2, row: 2 }, { column: 2, row: 2 }, TARGET]
 const BOTTOM_ROUTE: readonly GridCoordinate[] = [
     { column: -2, row: -2 },
     { column: 2, row: -2 },

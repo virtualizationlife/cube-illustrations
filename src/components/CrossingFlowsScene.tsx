@@ -1,12 +1,8 @@
-import type { GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
-import { getGridCellKey } from '../scenes/gridPathfinding'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import type { SceneRandom } from '../scenes/sceneRandom'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import type { GridCubeFaceLabelInput } from '@scenes/cubeFaceLabels'
+import { getGridCellKey } from '@scenes/gridPathfinding'
+import { MAIN_CUBE_ID, type GridCoordinate, type GridSceneRuntime } from '@scenes/gridSceneRuntime'
+import type { SceneRandom } from '@scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.045
 const GRID_CELL_COUNT = 14
@@ -24,7 +20,7 @@ const MAIN_CUBE_PARKING_POSITION: GridCoordinate = { column: 100, row: 100 }
 
 type FlowDirection = -1 | 1
 
-interface FlowCube {
+type FlowCube = {
     readonly id: string
     readonly direction: FlowDirection
     readonly homeRow: number
@@ -32,7 +28,7 @@ interface FlowCube {
 }
 
 /** Everything the tick loop and the per-frame opacity pass share. */
-interface FlowModel {
+type FlowModel = {
     readonly cubes: Map<string, FlowCube>
     cubeCounter: number
     priorityDirection: FlowDirection | null
@@ -55,10 +51,7 @@ const getEdgeOpacity = (column: number): number => {
     return progress * progress * (3 - 2 * progress)
 }
 
-const getOccupiedCells = (
-    runtime: GridSceneRuntime,
-    model: FlowModel
-): Map<string, string> => {
+const getOccupiedCells = (runtime: GridSceneRuntime, model: FlowModel): Map<string, string> => {
     const occupied = new Map<string, string>()
     for (const cube of model.cubes.values()) {
         const position = runtime.getCubePosition(cube.id)
@@ -101,8 +94,7 @@ const spawnCube = (
             : availableRows[0]
     if (row === undefined) return null
 
-    const canReuseMainCube =
-        !model.cubes.has(MAIN_CUBE_ID) && runtime.hasCube(MAIN_CUBE_ID)
+    const canReuseMainCube = !model.cubes.has(MAIN_CUBE_ID) && runtime.hasCube(MAIN_CUBE_ID)
     const id =
         requestedId ??
         (canReuseMainCube ? MAIN_CUBE_ID : `crossing-flow-cube-${model.cubeCounter++}`)
@@ -191,10 +183,7 @@ export const CrossingFlowsScene = defineScene<CubeSceneProps, FlowModel>({
     script: async ({ runtime, timeline, random, props, state: model }) => {
         const maybeSpawnCubes = (): void => {
             for (const direction of [1, -1] as const) {
-                if (
-                    model.cubes.size < MAX_ACTIVE_CUBES &&
-                    random.next() < SPAWN_CHANCE_PER_SIDE
-                ) {
+                if (model.cubes.size < MAX_ACTIVE_CUBES && random.next() < SPAWN_CHANCE_PER_SIDE) {
                     spawnCube(runtime, model, random, props.faceLabels, direction)
                 }
             }

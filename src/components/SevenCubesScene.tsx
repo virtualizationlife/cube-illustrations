@@ -1,7 +1,7 @@
-import { findGridPath, getGridCellKey } from '../scenes/gridPathfinding'
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import type { SceneRandom } from '../scenes/sceneRandom'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { findGridPath, getGridCellKey } from '@scenes/gridPathfinding'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import type { SceneRandom } from '@scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.027
 const GRID_CELL_COUNT = 23
@@ -30,12 +30,12 @@ const CARDINAL_DIRECTIONS: readonly GridCoordinate[] = [
     { column: 0, row: -1 },
 ]
 
-interface CubeLayoutEntry {
+type CubeLayoutEntry = {
     readonly id: (typeof CUBE_IDS)[number]
     readonly scatteredPosition: GridCoordinate
 }
 
-interface SevenCubesState {
+type SevenCubesState = {
     readonly layout: readonly CubeLayoutEntry[]
 }
 

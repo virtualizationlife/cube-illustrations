@@ -1,7 +1,7 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 type Vector3 = InstanceType<typeof ThreeWebGpuNamespace.Vector3>
 
@@ -22,10 +22,7 @@ const RING_POSITIONS: readonly GridCoordinate[] = [
 ]
 const RING_CUBE_IDS: readonly string[] = [
     MAIN_CUBE_ID,
-    ...Array.from(
-        { length: RING_POSITIONS.length - 1 },
-        (_, index) => `domino-ring-${index}`
-    ),
+    ...Array.from({ length: RING_POSITIONS.length - 1 }, (_, index) => `domino-ring-${index}`),
 ]
 /** A full quarter-turn makes a cube finish exactly on the neighbouring outer tile. */
 const TOPPLE_ANGLE = Math.PI / 2
@@ -48,8 +45,7 @@ const WAVE_HOLD_S = (WAVE_WIDTH - 1) * WAVE_STEP_S
 const WAVE_CYCLE_S = RING_POSITIONS.length * WAVE_STEP_S
 
 /** Smoothly travels from 0 to 1, with zero velocity at both exact tile positions. */
-const easeHalfCosine = (progress: number): number =>
-    0.5 - 0.5 * Math.cos(Math.PI * progress)
+const easeHalfCosine = (progress: number): number => 0.5 - 0.5 * Math.cos(Math.PI * progress)
 
 /**
  * A cube has an exact upright plateau, a full quarter-turn plateau, and a smooth return.
@@ -57,18 +53,16 @@ const easeHalfCosine = (progress: number): number =>
  */
 const getToppleProgress = (elapsed: number, index: number): number => {
     const offset = index * WAVE_STEP_S
-    const localTime = ((elapsed - offset) % WAVE_CYCLE_S + WAVE_CYCLE_S) % WAVE_CYCLE_S
+    const localTime = (((elapsed - offset) % WAVE_CYCLE_S) + WAVE_CYCLE_S) % WAVE_CYCLE_S
     if (localTime < TOPPLE_DURATION_S) return easeHalfCosine(localTime / TOPPLE_DURATION_S)
     if (localTime < TOPPLE_DURATION_S + WAVE_HOLD_S) return 1
     if (localTime < TOPPLE_DURATION_S * 2 + WAVE_HOLD_S) {
-        return easeHalfCosine(
-            1 - (localTime - TOPPLE_DURATION_S - WAVE_HOLD_S) / TOPPLE_DURATION_S
-        )
+        return easeHalfCosine(1 - (localTime - TOPPLE_DURATION_S - WAVE_HOLD_S) / TOPPLE_DURATION_S)
     }
     return 0
 }
 
-interface DominoRingState {
+type DominoRingState = {
     readonly axis: Vector3
     readonly pivotOffset: Vector3
     readonly rotatedPivotOffset: Vector3

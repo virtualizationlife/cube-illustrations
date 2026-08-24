@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.045
 const MEMORY_ECHO_OPACITIES = [0.38, 0.27, 0.18] as const
@@ -14,7 +14,7 @@ const JOURNEY: readonly GridCoordinate[] = [
 ]
 const OBSERVER_POSITION: GridCoordinate = { column: 4, row: 4 }
 
-interface MemoryEcho {
+type MemoryEcho = {
     readonly id: string
     pathIndex: number
 }

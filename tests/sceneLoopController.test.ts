@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createSceneLoopController } from '../src/scenes/createSceneLoopController'
+import { createSceneLoopController } from '@scenes/createSceneLoopController'
 
 type IntersectionCallback = (entries: { isIntersecting: boolean }[]) => void
 

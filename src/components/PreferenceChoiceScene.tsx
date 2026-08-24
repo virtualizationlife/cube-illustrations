@@ -1,6 +1,6 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { GRID_PRESETS } from '../scenes/motion'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '@scenes/motion'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 const START_POSITIONS: readonly GridCoordinate[] = [
@@ -40,7 +40,7 @@ const getLinePositions = (anchorColumn: number): readonly GridCoordinate[] =>
         row: 1,
     }))
 
-interface PreferenceChoiceState {
+type PreferenceChoiceState = {
     previousStartIndex: number
     preferredOnLeft: boolean
 }

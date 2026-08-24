@@ -1,11 +1,7 @@
-import type { GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import type { ScenePresentationController } from '../scenes/scenePresentation'
-import { defineScene } from '../sdk/defineScene'
+import type { GridCubeFaceLabelInput } from '@scenes/cubeFaceLabels'
+import { MAIN_CUBE_ID, type GridCoordinate, type GridSceneRuntime } from '@scenes/gridSceneRuntime'
+import type { ScenePresentationController } from '@scenes/scenePresentation'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.032
 const BASE_PRESENTATION = {
@@ -413,7 +409,6 @@ export const HistorySplitScene = defineScene({
                 faceLabels,
             })
         })
-
     },
     script: ({ runtime, timeline, presentation }) =>
         runHistorySplit(runtime, timeline.wait, presentation),

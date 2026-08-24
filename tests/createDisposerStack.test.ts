@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createDisposerStack } from '../src/scenes/createDisposerStack'
+import { createDisposerStack } from '@scenes/createDisposerStack'
 
 describe('createDisposerStack', () => {
     it('releases in reverse order of registration', () => {

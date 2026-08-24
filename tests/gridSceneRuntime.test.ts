@@ -1,19 +1,15 @@
+import * as THREE from 'three/webgpu'
 import { describe, expect, it } from 'vitest'
 
-import * as THREE from 'three/webgpu'
-
-import { normalizeCubeFaceLabel, resolveCubeFaceLabels } from '../src/scenes/cubeFaceLabels'
-import { findGridPath, getGridCellKey } from '../src/scenes/gridPathfinding'
-import {
-    getProximityOpacity,
-    type GridProximityOpacityConfig,
-} from '../src/scenes/gridSceneAnimation'
+import { normalizeCubeFaceLabel, resolveCubeFaceLabels } from '@scenes/cubeFaceLabels'
+import { findGridPath, getGridCellKey } from '@scenes/gridPathfinding'
+import { getProximityOpacity, type GridProximityOpacityConfig } from '@scenes/gridSceneAnimation'
 import {
     createGridSceneRuntime,
     DEFAULT_CUBE_CORNER_RADIUS_RATIO,
     getGridDistance,
     MAIN_CUBE_ID,
-} from '../src/scenes/gridSceneRuntime'
+} from '@scenes/gridSceneRuntime'
 
 const createRuntime = () => {
     const scene = new THREE.Scene()
@@ -130,12 +126,12 @@ describe('grid scene runtime', () => {
         const { runtime } = createRuntime()
         runtime.addCube({ id: 'blocker', position: { column: 1, row: 0 } })
 
-        expect(() =>
-            runtime.addCube({ id: 'duplicate', position: { column: 1, row: 0 } })
-        ).toThrow(/already occupied/)
-        expect(() => runtime.setCubePosition(MAIN_CUBE_ID, { column: 1, row: 0 })).toThrow(
+        expect(() => runtime.addCube({ id: 'duplicate', position: { column: 1, row: 0 } })).toThrow(
             /already occupied/
         )
+        expect(() => {
+            runtime.setCubePosition(MAIN_CUBE_ID, { column: 1, row: 0 })
+        }).toThrow(/already occupied/)
 
         await runtime.moveCubeTo(MAIN_CUBE_ID, { column: 1, row: 0 }, { duration: 1 })
         expect(runtime.getCubePosition(MAIN_CUBE_ID)).toEqual({ column: 0, row: 0 })

@@ -1,9 +1,9 @@
 import type { JSX } from 'react'
 
-import { GridPathCubeScene } from '../scenes/GridPathCubeScene'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import type { GridRandomWalkConfig } from '../scenes/gridSceneAnimation'
-import { attachSceneMetadata } from '../sdk/defineScene'
+import type { CubeFaceLabelsProps } from '@scenes/cubeFaceLabels'
+import { GridPathCubeScene } from '@scenes/GridPathCubeScene'
+import type { GridRandomWalkConfig } from '@scenes/gridSceneAnimation'
+import { attachSceneMetadata } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.085
 

@@ -1,11 +1,7 @@
-import { getGridCellKey, isSameGridCell } from '../scenes/gridPathfinding'
-import {
-    MAIN_CUBE_ID,
-    type GridCoordinate,
-    type GridSceneRuntime,
-} from '../scenes/gridSceneRuntime'
-import type { SceneRandom } from '../scenes/sceneRandom'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { getGridCellKey, isSameGridCell } from '@scenes/gridPathfinding'
+import { MAIN_CUBE_ID, type GridCoordinate, type GridSceneRuntime } from '@scenes/gridSceneRuntime'
+import type { SceneRandom } from '@scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.035
 const GRID_CELL_COUNT = 19
@@ -32,12 +28,12 @@ const CUBE_IDS = [
     'structure-cube-15',
 ] as const
 
-interface StructureShape {
+type StructureShape = {
     readonly name: string
     readonly positions: readonly GridCoordinate[]
 }
 
-interface StructureMorphState {
+type StructureMorphState = {
     currentShapeIndex: number
 }
 
@@ -183,8 +179,7 @@ const moveToShape = async (
         return source !== undefined && target !== undefined && !isSameGridCell(source, target)
     })
     const seedCubeId = random.item(pendingCubeIds)
-    const seedPosition =
-        seedCubeId === undefined ? undefined : runtime.getCubePosition(seedCubeId)
+    const seedPosition = seedCubeId === undefined ? undefined : runtime.getCubePosition(seedCubeId)
     if (seedCubeId !== undefined && seedPosition !== undefined) {
         pendingCubeIds.sort((leftId, rightId) => {
             const leftPosition = runtime.getCubePosition(leftId)

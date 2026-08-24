@@ -1,17 +1,14 @@
 import { useCallback, type JSX } from 'react'
 
-import { GridPathCubeScene } from '../scenes/GridPathCubeScene'
-import type {
-    CubeFaceLabelsProps,
-    GridCubeFaceLabelInput,
-} from '../scenes/cubeFaceLabels'
-import type { GridProximityOpacityConfig } from '../scenes/gridSceneAnimation'
+import type { CubeFaceLabelsProps, GridCubeFaceLabelInput } from '@scenes/cubeFaceLabels'
+import { GridPathCubeScene } from '@scenes/GridPathCubeScene'
+import type { GridProximityOpacityConfig } from '@scenes/gridSceneAnimation'
 import {
     getGridDistance,
     type GridCoordinate,
     type GridSceneCubeDefinition,
-} from '../scenes/gridSceneRuntime'
-import { attachSceneMetadata } from '../sdk/defineScene'
+} from '@scenes/gridSceneRuntime'
+import { attachSceneMetadata } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.04
 const ENCOUNTER_CUBE_IDS = ['encounter-1', 'encounter-2', 'encounter-3'] as const
@@ -63,12 +60,10 @@ const createEncounterCubes = (
                 row: Math.floor(Math.random() * GRID_CELL_COUNT) - TERRITORY_RADIUS_CELLS,
             }
         } while (
-            getGridDistance({ column: 0, row: 0 }, position) <
-                ENCOUNTER_SCENE_MIN_CUBE_DISTANCE ||
+            getGridDistance({ column: 0, row: 0 }, position) < ENCOUNTER_SCENE_MIN_CUBE_DISTANCE ||
             positions.some(
                 (placedPosition) =>
-                    getGridDistance(placedPosition, position) <
-                    ENCOUNTER_SCENE_MIN_CUBE_DISTANCE
+                    getGridDistance(placedPosition, position) < ENCOUNTER_SCENE_MIN_CUBE_DISTANCE
             )
         )
         positions.push(position)
@@ -92,10 +87,7 @@ const EncounterCubeSceneComponent = ({
     faceLabels,
     cubeCornerRadius,
 }: CubeFaceLabelsProps): JSX.Element => {
-    const additionalCubesFactory = useCallback(
-        () => createEncounterCubes(faceLabels),
-        [faceLabels]
-    )
+    const additionalCubesFactory = useCallback(() => createEncounterCubes(faceLabels), [faceLabels])
 
     return (
         <GridPathCubeScene

@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.043
 const ORIGIN: GridCoordinate = { column: 0, row: 0 }
@@ -107,10 +107,7 @@ export const AnticipatoryReturnScene = defineScene({
             })
         }
 
-        const travelBody = async (
-            position: GridCoordinate,
-            duration = 0.72
-        ): Promise<void> => {
+        const travelBody = async (position: GridCoordinate, duration = 0.72): Promise<void> => {
             await Promise.all([
                 runtime.travelWithCube(MAIN_CUBE_ID, position, {
                     duration,

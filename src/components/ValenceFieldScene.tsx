@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.065
 const CENTER: GridCoordinate = { column: 0, row: 0 }
@@ -36,7 +36,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 9,
 } as const
 
-interface ValenceFieldState {
+type ValenceFieldState = {
     attractionOnLeft: boolean
 }
 
@@ -98,7 +98,9 @@ export const ValenceFieldScene = defineScene<CubeSceneProps, ValenceFieldState>(
         }
 
         const removeGroup = (ids: readonly string[]): void => {
-            ids.forEach((id) => runtime.removeCube(id))
+            ids.forEach((id) => {
+                runtime.removeCube(id)
+            })
         }
 
         const swapGroups = async (): Promise<void> => {

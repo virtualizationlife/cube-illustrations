@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import * as publicApi from '../src/index'
-import { SCENE_CATALOG } from '../src/sceneCatalog'
+import * as publicApi from '@app/index'
+import { SCENE_CATALOG } from '@app/sceneCatalog'
+
 import catalogSnapshot from './support/catalogSnapshot.json'
 
 /**

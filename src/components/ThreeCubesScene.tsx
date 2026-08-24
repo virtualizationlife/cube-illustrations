@@ -1,13 +1,10 @@
 import type { JSX } from 'react'
 
-import { GridPathCubeScene } from '../scenes/GridPathCubeScene'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import {
-    MAIN_CUBE_ID,
-    type GridSceneCubeDefinition,
-} from '../scenes/gridSceneRuntime'
-import type { SimpleCubeSetupContext } from '../scenes/useSimpleCubeScene'
-import { attachSceneMetadata, defineScene } from '../sdk/defineScene'
+import type { CubeFaceLabelsProps } from '@scenes/cubeFaceLabels'
+import { GridPathCubeScene } from '@scenes/GridPathCubeScene'
+import { MAIN_CUBE_ID, type GridSceneCubeDefinition } from '@scenes/gridSceneRuntime'
+import type { SimpleCubeSetupContext } from '@scenes/useSimpleCubeScene'
+import { attachSceneMetadata, defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.1
 const CUBE_SIZE = GRID_CELL_SIZE
@@ -28,7 +25,7 @@ const CUBE_DEFINITIONS = [
     { id: RIGHT_CUBE_ID, column: 2, row: 0, fallbackX: 1, fallbackZ: 0 },
 ] as const
 
-interface RepelledCubeState {
+type RepelledCubeState = {
     readonly object: SimpleCubeSetupContext['mesh']
     readonly anchorX: number
     readonly anchorZ: number
@@ -40,7 +37,7 @@ interface RepelledCubeState {
     velocityZ: number
 }
 
-interface PointerRepulsionController {
+type PointerRepulsionController = {
     readonly update: (delta: number) => void
     readonly dispose: () => void
 }
@@ -73,10 +70,8 @@ const separateCubes = (cubes: readonly RepelledCubeState[]): void => {
                 const second = cubes[secondIndex]
                 if (second === undefined) continue
 
-                const deltaX =
-                    second.anchorX + second.offsetX - (first.anchorX + first.offsetX)
-                const deltaZ =
-                    second.anchorZ + second.offsetZ - (first.anchorZ + first.offsetZ)
+                const deltaX = second.anchorX + second.offsetX - (first.anchorX + first.offsetX)
+                const deltaZ = second.anchorZ + second.offsetZ - (first.anchorZ + first.offsetZ)
                 const distance = Math.hypot(deltaX, deltaZ)
                 if (distance >= MIN_CUBE_SEPARATION) continue
 
@@ -202,10 +197,7 @@ const createPointerRepulsionController = ({
 }
 
 /** Three anchored cubes that physically move away whenever the pointer approaches them. */
-export const CursorRepulsionScene = defineScene<
-    CubeFaceLabelsProps,
-    PointerRepulsionController
->({
+export const CursorRepulsionScene = defineScene<CubeFaceLabelsProps, PointerRepulsionController>({
     metadata: {
         id: 'cursor-repulsion',
         title: 'Cursor Repulsion',

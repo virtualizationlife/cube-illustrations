@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.05
 const PARTNER_CUBE_ID = 'relationship-partner'

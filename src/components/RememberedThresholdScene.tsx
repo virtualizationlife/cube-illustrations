@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.045
 const THRESHOLD_CUBE_ID = 'remembered-threshold'
@@ -21,15 +21,12 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 10,
 } as const
 
-interface RememberedThresholdState {
+type RememberedThresholdState = {
     thresholdIndex: number
 }
 
 /** A cube keeps stepping around a cell whose obstacle disappeared long ago. */
-export const RememberedThresholdScene = defineScene<
-    CubeSceneProps,
-    RememberedThresholdState
->({
+export const RememberedThresholdScene = defineScene<CubeSceneProps, RememberedThresholdState>({
     metadata: {
         id: 'remembered-threshold',
         title: 'Remembered Threshold',
@@ -93,10 +90,7 @@ export const RememberedThresholdScene = defineScene<
             await walkTo({ column: thresholdColumn + 1, row: CORRIDOR_ROW }, 1)
         }
 
-        const runPass = async (
-            thresholdColumn: number,
-            hesitation: number
-        ): Promise<void> => {
+        const runPass = async (thresholdColumn: number, hesitation: number): Promise<void> => {
             await enterCorridor()
             await walkTo(
                 { column: thresholdColumn - 1, row: CORRIDOR_ROW },

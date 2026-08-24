@@ -1,7 +1,7 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import type { SceneRandom } from '../scenes/sceneRandom'
-import type { SimpleCubeSetupContext } from '../scenes/useSimpleCubeScene'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import type { SceneRandom } from '@scenes/sceneRandom'
+import type { SimpleCubeSetupContext } from '@scenes/useSimpleCubeScene'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.1
 const CUBE_SIZE = GRID_CELL_SIZE
@@ -20,7 +20,7 @@ const QUARTER_TURN = Math.PI / 2
 
 type RotationAxis = 'x' | 'y' | 'z'
 
-interface ThreeCubeStatesController {
+type ThreeCubeStatesController = {
     readonly update: (delta: number) => void
     readonly setHoveredCube: (cubeId: string | null) => void
 }
@@ -106,25 +106,16 @@ const createThreeCubeStatesController = (
                 hoveredCubeId === RIGHT_CUBE_ID ? 1 : 0,
                 scaleStep
             )
-            leftCube.scale.setScalar(
-                1 + (GROWN_SCALE - 1) * easeInOutCubic(leftHoverProgress)
-            )
-            rightCube.scale.setScalar(
-                1 + (SHRUNK_SCALE - 1) * easeInOutCubic(rightHoverProgress)
-            )
+            leftCube.scale.setScalar(1 + (GROWN_SCALE - 1) * easeInOutCubic(leftHoverProgress))
+            rightCube.scale.setScalar(1 + (SHRUNK_SCALE - 1) * easeInOutCubic(rightHoverProgress))
 
             switch (middlePhase) {
                 case 'idle':
                     middleLiftProgress = 0
                     break
                 case 'lifting': {
-                    middlePhaseElapsed = Math.min(
-                        LIFT_DURATION_S,
-                        middlePhaseElapsed + delta
-                    )
-                    middleLiftProgress = easeInOutCubic(
-                        middlePhaseElapsed / LIFT_DURATION_S
-                    )
+                    middlePhaseElapsed = Math.min(LIFT_DURATION_S, middlePhaseElapsed + delta)
+                    middleLiftProgress = easeInOutCubic(middlePhaseElapsed / LIFT_DURATION_S)
                     if (middlePhaseElapsed >= LIFT_DURATION_S) {
                         middleLiftProgress = 1
                         rotationAxes = shuffleAxes(random)
@@ -135,13 +126,8 @@ const createThreeCubeStatesController = (
                 }
                 case 'rotating': {
                     middleLiftProgress = 1
-                    rotationElapsed = Math.min(
-                        ROTATION_DURATION_S,
-                        rotationElapsed + delta
-                    )
-                    const rotationProgress = easeInOutCubic(
-                        rotationElapsed / ROTATION_DURATION_S
-                    )
+                    rotationElapsed = Math.min(ROTATION_DURATION_S, rotationElapsed + delta)
+                    const rotationProgress = easeInOutCubic(rotationElapsed / ROTATION_DURATION_S)
                     middleCube.quaternion.slerpQuaternions(
                         rotationStart,
                         rotationTarget,
@@ -152,9 +138,7 @@ const createThreeCubeStatesController = (
                         rotationIndex += 1
                         middlePhaseElapsed = 0
                         middlePhase =
-                            rotationIndex < rotationAxes.length
-                                ? 'rotation-hold'
-                                : 'top-hold'
+                            rotationIndex < rotationAxes.length ? 'rotation-hold' : 'top-hold'
                     }
                     break
                 }
@@ -172,12 +156,8 @@ const createThreeCubeStatesController = (
                     }
                     break
                 case 'lowering':
-                    middlePhaseElapsed = Math.min(
-                        LOWER_DURATION_S,
-                        middlePhaseElapsed + delta
-                    )
-                    middleLiftProgress =
-                        1 - easeInOutCubic(middlePhaseElapsed / LOWER_DURATION_S)
+                    middlePhaseElapsed = Math.min(LOWER_DURATION_S, middlePhaseElapsed + delta)
+                    middleLiftProgress = 1 - easeInOutCubic(middlePhaseElapsed / LOWER_DURATION_S)
                     if (middlePhaseElapsed >= LOWER_DURATION_S) {
                         middleLiftProgress = 0
                         middlePhase = 'idle'
@@ -194,10 +174,7 @@ const createThreeCubeStatesController = (
 }
 
 /** Three cubes contrast growth, reduction, and elevated random face changes. */
-export const ThreeCubeStatesScene = defineScene<
-    CubeSceneProps,
-    ThreeCubeStatesController
->({
+export const ThreeCubeStatesScene = defineScene<CubeSceneProps, ThreeCubeStatesController>({
     metadata: {
         id: 'three-states',
         title: 'Three States',

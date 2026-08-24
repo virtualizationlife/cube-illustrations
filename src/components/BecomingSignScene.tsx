@@ -1,10 +1,6 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import {
-    SIGN_SYMBOLS,
-    rotateSignSymbol,
-    type SignDirection,
-} from '../scenes/signSymbols'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { SIGN_SYMBOLS, rotateSignSymbol, type SignDirection } from '@scenes/signSymbols'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.047
 const SIGN_CUBE_IDS = Array.from({ length: 9 }, (_, index) => `meaning-sign-${index}`)
@@ -19,7 +15,7 @@ const SCATTER_POSITIONS: readonly GridCoordinate[] = [
     { column: -3, row: 5 },
     { column: 3, row: 5 },
 ]
-interface SignDirectionDefinition {
+type SignDirectionDefinition = {
     readonly direction: SignDirection
     readonly entry: GridCoordinate
     readonly visibleEntry: GridCoordinate
@@ -65,7 +61,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 12,
 } as const
 
-interface BecomingSignState {
+type BecomingSignState = {
     previousDirectionIndex: number
     previousSymbolIndex: number
 }
@@ -102,9 +98,7 @@ export const BecomingSignScene = defineScene<CubeSceneProps, BecomingSignState>(
         return { previousDirectionIndex: -1, previousSymbolIndex: -1 }
     },
     script: async ({ runtime, timeline, random, state, presentation }) => {
-        const moveSignCubes = async (
-            positions: readonly GridCoordinate[]
-        ): Promise<void> => {
+        const moveSignCubes = async (positions: readonly GridCoordinate[]): Promise<void> => {
             for (let index = 0; index < SIGN_CUBE_IDS.length; index += 1) {
                 const id = SIGN_CUBE_IDS[index]
                 const position = positions[index]
@@ -117,9 +111,7 @@ export const BecomingSignScene = defineScene<CubeSceneProps, BecomingSignState>(
             }
         }
 
-        const enterMainCube = async (
-            definition: SignDirectionDefinition
-        ): Promise<void> => {
+        const enterMainCube = async (definition: SignDirectionDefinition): Promise<void> => {
             runtime.setCubePosition(MAIN_CUBE_ID, definition.entry)
             runtime.setCubeOpacity(MAIN_CUBE_ID, 0)
             await Promise.all([

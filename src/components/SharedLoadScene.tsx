@@ -1,13 +1,13 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import { GRID_PRESETS } from '../scenes/motion'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '@scenes/motion'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 /** Every carrier that can ever be under the load; only a phase's crew exists at a time. */
 const CARRIER_IDS = Array.from({ length: 5 }, (_, index) => `shared-carrier-${index}`)
 const INITIAL_CREW_SIZE = 3
 
-interface CarrierPace {
+type CarrierPace = {
     /** Carriers that leave the line together, which is also the load's step per cycle. */
     readonly relocations: number
     readonly stepAside: number
@@ -48,7 +48,7 @@ const getPace = (crewSize: number): CarrierPace => {
     return STEADY_PACE
 }
 
-interface CrewPhase {
+type CrewPhase = {
     readonly crewSize: number
     readonly cycles: number
 }
@@ -68,7 +68,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 9,
 } as const
 
-interface SharedLoadState {
+type SharedLoadState = {
     /** Carriers on consecutive columns of row 0, ordered from the rear to the front. */
     readonly crew: string[]
     frontColumn: number
@@ -115,8 +115,7 @@ export const SharedLoadScene = defineScene<CubeSceneProps, SharedLoadState>({
          * of it that never empties: as many cells behind the leader as there are carriers
          * relocating in one cycle.
          */
-        const getLoadColumn = (pace: CarrierPace): number =>
-            state.frontColumn - pace.relocations
+        const getLoadColumn = (pace: CarrierPace): number => state.frontColumn - pace.relocations
 
         /** Deliberately not awaited: the load travels while the crew keeps moving. */
         const carryLoadTo = (column: number, duration: number): void => {

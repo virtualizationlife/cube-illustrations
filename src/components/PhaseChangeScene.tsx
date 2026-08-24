@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.035
 const PHASE_CUBE_IDS = [
@@ -7,16 +7,24 @@ const PHASE_CUBE_IDS = [
     ...Array.from({ length: 11 }, (_, index) => `phase-change-${index}`),
 ] as const
 const SCATTER_POSITIONS: readonly GridCoordinate[] = [
-    { column: -7, row: -5 }, { column: -4, row: -7 }, { column: 0, row: -6 },
-    { column: 4, row: -7 }, { column: 7, row: -4 }, { column: 6, row: 1 },
-    { column: 7, row: 5 }, { column: 3, row: 7 }, { column: -1, row: 6 },
-    { column: -5, row: 7 }, { column: -7, row: 3 }, { column: -6, row: -1 },
+    { column: -7, row: -5 },
+    { column: -4, row: -7 },
+    { column: 0, row: -6 },
+    { column: 4, row: -7 },
+    { column: 7, row: -4 },
+    { column: 6, row: 1 },
+    { column: 7, row: 5 },
+    { column: 3, row: 7 },
+    { column: -1, row: 6 },
+    { column: -5, row: 7 },
+    { column: -7, row: 3 },
+    { column: -6, row: -1 },
 ]
 const CRYSTAL_POSITIONS: readonly GridCoordinate[] = [-1, 0, 1].flatMap((row) =>
     [-2, -1, 0, 1].map((column) => ({ column, row }))
 )
 
-interface PhaseChangeState {
+type PhaseChangeState = {
     previousSeedIndex: number
 }
 

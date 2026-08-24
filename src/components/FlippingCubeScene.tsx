@@ -1,8 +1,8 @@
 import type { JSX } from 'react'
 
-import { FaceFlipCubeScene } from '../scenes/FaceFlipCubeScene'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
-import { attachSceneMetadata } from '../sdk/defineScene'
+import type { CubeFaceLabelsProps } from '@scenes/cubeFaceLabels'
+import { FaceFlipCubeScene } from '@scenes/FaceFlipCubeScene'
+import { attachSceneMetadata } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.13
 const GRID_CELL_COUNT = 11

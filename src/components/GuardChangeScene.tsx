@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.06
 const RELIEF_CUBE_ID = 'guard-relief'
@@ -23,7 +23,7 @@ const EMPTY_PRESENTATION = {
     gridFadeOuterRadiusCells: 9,
 } as const
 
-interface GuardChangeState {
+type GuardChangeState = {
     onPostId: string
     reliefId: string
     handoverCount: number

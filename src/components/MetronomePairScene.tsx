@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.06
 const PARTNER_CUBE_ID = 'metronome-partner'
@@ -16,7 +16,7 @@ const SYNC_TOLERANCE_S = 0.03
 const SYNCED_SWINGS_BEFORE_RESET = 8
 const INITIAL_PHASE_OFFSET_RATIO = 0.55
 
-interface Pendulum {
+type Pendulum = {
     readonly id: string
     readonly columns: readonly [number, number]
     period: number
@@ -24,7 +24,7 @@ interface Pendulum {
     columnIndex: number
 }
 
-interface MetronomePairState {
+type MetronomePairState = {
     readonly pendulums: readonly [Pendulum, Pendulum]
     syncedSwings: number
 }
@@ -63,7 +63,7 @@ export const MetronomePairScene = defineScene<CubeSceneProps, MetronomePairState
             faceLabels: props.faceLabels,
         })
 
-        const [leftPeriod = 0.5, rightPeriod = 0.75] = INITIAL_PERIODS_S
+        const [leftPeriod, rightPeriod] = INITIAL_PERIODS_S
         return {
             pendulums: [
                 createPendulum(MAIN_CUBE_ID, LEFT_COLUMNS, leftPeriod),
@@ -73,7 +73,7 @@ export const MetronomePairScene = defineScene<CubeSceneProps, MetronomePairState
         }
     },
     script: async ({ runtime, timeline, state }) => {
-        const [leftPeriod = 0.5, rightPeriod = 0.75] = INITIAL_PERIODS_S
+        const [leftPeriod, rightPeriod] = INITIAL_PERIODS_S
         const { pendulums } = state
 
         const swing = (pendulum: Pendulum): void => {
@@ -96,8 +96,7 @@ export const MetronomePairScene = defineScene<CubeSceneProps, MetronomePairState
             target.timeToSwing =
                 target.timeToSwing < target.period / 2
                     ? target.timeToSwing * (1 - PHASE_COUPLING)
-                    : target.timeToSwing +
-                      (target.period - target.timeToSwing) * PHASE_COUPLING
+                    : target.timeToSwing + (target.period - target.timeToSwing) * PHASE_COUPLING
         }
 
         const restartDetuned = (): void => {

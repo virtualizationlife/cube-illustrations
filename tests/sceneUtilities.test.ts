@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { getCubeFaceLabelsKey } from '../src/scenes/cubeFaceLabels'
-import { getWideGridFadeRadii } from '../src/scenes/gridFade'
+import { getCubeFaceLabelsKey } from '@scenes/cubeFaceLabels'
+import { getWideGridFadeRadii } from '@scenes/gridFade'
+import type { GridSceneRuntime } from '@scenes/gridSceneRuntime'
+import { runSceneScript, SceneCancelledError } from '@scenes/runSceneScript'
 import {
     createSceneRandom,
     createSeededRandom,
@@ -9,22 +11,17 @@ import {
     getRandomIndex,
     getRandomItem,
     shuffle,
-} from '../src/scenes/sceneRandom'
+} from '@scenes/sceneRandom'
+import { getSceneRenderRect } from '@scenes/SceneRenderHost'
 import {
     SIGN_DIRECTIONS,
     SIGN_SYMBOLS,
     getSignSymbolValidationErrors,
     rotateSignSymbol,
-} from '../src/scenes/signSymbols'
-import { getSceneRenderRect } from '../src/scenes/SceneRenderHost'
-import {
-    runSceneScript,
-    SceneCancelledError,
-} from '../src/scenes/runSceneScript'
-import { startSceneAnimation } from '../src/scenes/startSceneAnimation'
-import type { GridSceneRuntime } from '../src/scenes/gridSceneRuntime'
-import { defineScene } from '../src/sdk/defineScene'
-import { createSceneChoreography } from '../src/sdk/choreography'
+} from '@scenes/signSymbols'
+import { startSceneAnimation } from '@scenes/startSceneAnimation'
+import { createSceneChoreography } from '@sdk/choreography'
+import { defineScene } from '@sdk/defineScene'
 
 describe('scene random utilities', () => {
     it('shuffles a copy without modifying the source', () => {
@@ -121,9 +118,7 @@ describe('sign symbol catalog', () => {
         for (const symbol of SIGN_SYMBOLS) {
             for (const direction of SIGN_DIRECTIONS) {
                 const rotated = rotateSignSymbol(symbol.positions, direction)
-                const uniqueCells = new Set(
-                    rotated.map(({ column, row }) => `${column},${row}`)
-                )
+                const uniqueCells = new Set(rotated.map(({ column, row }) => `${column},${row}`))
                 expect(rotated).toHaveLength(symbol.positions.length)
                 expect(uniqueCells.size).toBe(symbol.positions.length)
             }
@@ -136,11 +131,7 @@ describe('background scene animations', () => {
         const error = new Error('animation failed')
         const onError = vi.fn()
 
-        await startSceneAnimation(
-            'Test Scene',
-            async () => Promise.reject(error),
-            onError
-        )
+        await startSceneAnimation('Test Scene', async () => Promise.reject(error), onError)
 
         expect(onError).toHaveBeenCalledOnce()
         expect(onError).toHaveBeenCalledWith(error, 'Test Scene')
@@ -263,20 +254,9 @@ describe('scene definitions', () => {
         await timeline.sequence(['first', 'second'], async (id) => {
             await cubes.get(id).pulse()
         })
-        await cubes.main.moveAndFade(
-            { column: 1, row: 0 },
-            0,
-            { duration: 0.4 }
-        )
+        await cubes.main.moveAndFade({ column: 1, row: 0 }, 0, { duration: 0.4 })
 
-        expect(calls).toEqual([
-            'fade:0.28',
-            'fade:1',
-            'fade:0.28',
-            'fade:1',
-            'move',
-            'fade:0',
-        ])
+        expect(calls).toEqual(['fade:0.28', 'fade:1', 'fade:0.28', 'fade:1', 'move', 'fade:0'])
     })
 })
 
@@ -288,12 +268,8 @@ describe('getCubeFaceLabelsKey', () => {
     })
 
     it('separates labels that differ', () => {
-        expect(getCubeFaceLabelsKey({ front: 'A' })).not.toBe(
-            getCubeFaceLabelsKey({ front: 'B' })
-        )
-        expect(getCubeFaceLabelsKey({ front: 'A' })).not.toBe(
-            getCubeFaceLabelsKey({ back: 'A' })
-        )
+        expect(getCubeFaceLabelsKey({ front: 'A' })).not.toBe(getCubeFaceLabelsKey({ front: 'B' }))
+        expect(getCubeFaceLabelsKey({ front: 'A' })).not.toBe(getCubeFaceLabelsKey({ back: 'A' }))
     })
 
     it('treats a bare string and the equivalent record alike', () => {

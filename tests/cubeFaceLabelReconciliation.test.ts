@@ -1,11 +1,7 @@
+import * as THREE from 'three/webgpu'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import * as THREE from 'three/webgpu'
-
-import {
-    createGridSceneRuntime,
-    MAIN_CUBE_ID,
-} from '../src/scenes/gridSceneRuntime'
+import { createGridSceneRuntime, MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
 
 /**
  * Label textures are painted on a 2D canvas, which node has no notion of. The stub gives

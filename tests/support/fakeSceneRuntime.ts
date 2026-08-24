@@ -1,14 +1,11 @@
-import type {
-    GridCoordinate,
-    GridSceneRuntime,
-} from '../../src/scenes/gridSceneRuntime'
+import type { GridCoordinate, GridSceneRuntime } from '@scenes/gridSceneRuntime'
 
-export interface RecordedCall {
+export type RecordedCall = {
     readonly method: string
     readonly args: readonly unknown[]
 }
 
-export interface FakeSceneRuntime {
+export type FakeSceneRuntime = {
     readonly runtime: GridSceneRuntime
     /** Every runtime method that actually ran, in order. */
     readonly calls: RecordedCall[]
@@ -97,8 +94,7 @@ export const createFakeSceneRuntime = (): FakeSceneRuntime => {
         setGridFocus: (position) => {
             record('setGridFocus', position)
         },
-        moveGridFocusTo: (position, options) =>
-            transition('moveGridFocusTo', position, options),
+        moveGridFocusTo: (position, options) => transition('moveGridFocusTo', position, options),
         setGridOpacity: (opacity) => {
             record('setGridOpacity', opacity)
         },

@@ -1,18 +1,18 @@
-import { MOTION } from '../scenes/motion'
 import type {
     GridCoordinate,
     GridSceneRuntime,
     GridSceneTransitionOptions,
-} from '../scenes/gridSceneRuntime'
+} from '@scenes/gridSceneRuntime'
+import { MOTION } from '@scenes/motion'
 
-export interface ScenePulseOptions {
+export type ScenePulseOptions = {
     readonly opacity?: number
     readonly downDuration?: number
     readonly upDuration?: number
     readonly easing?: GridSceneTransitionOptions['easing']
 }
 
-export interface SceneCubeActor {
+export type SceneCubeActor = {
     readonly id: string
     readonly setPosition: (position: GridCoordinate) => void
     readonly moveTo: (
@@ -20,10 +20,7 @@ export interface SceneCubeActor {
         options: GridSceneTransitionOptions
     ) => Promise<void>
     readonly setOpacity: (opacity: number) => void
-    readonly fadeTo: (
-        opacity: number,
-        options: GridSceneTransitionOptions
-    ) => Promise<void>
+    readonly fadeTo: (opacity: number, options: GridSceneTransitionOptions) => Promise<void>
     readonly moveAndFade: (
         position: GridCoordinate,
         opacity: number,
@@ -32,12 +29,12 @@ export interface SceneCubeActor {
     readonly pulse: (options?: ScenePulseOptions) => Promise<void>
 }
 
-export interface SceneCubeActors {
+export type SceneCubeActors = {
     readonly get: (id: string) => SceneCubeActor
     readonly main: SceneCubeActor
 }
 
-export interface SceneTimeline {
+export type SceneTimeline = {
     readonly wait: (durationSeconds: number) => Promise<void>
     readonly all: (tasks: Iterable<PromiseLike<unknown>>) => Promise<void>
     readonly sequence: <Item>(
@@ -54,7 +51,7 @@ export interface SceneTimeline {
     readonly loop: (task: (iteration: number) => Promise<void>) => Promise<never>
 }
 
-export interface SceneChoreography {
+export type SceneChoreography = {
     readonly cubes: SceneCubeActors
     readonly timeline: SceneTimeline
 }
@@ -71,9 +68,13 @@ export const createSceneChoreography = (
 
         const actor: SceneCubeActor = {
             id,
-            setPosition: (position) => runtime.setCubePosition(id, position),
+            setPosition: (position) => {
+                runtime.setCubePosition(id, position)
+            },
             moveTo: (position, options) => runtime.moveCubeTo(id, position, options),
-            setOpacity: (opacity) => runtime.setCubeOpacity(id, opacity),
+            setOpacity: (opacity) => {
+                runtime.setCubeOpacity(id, opacity)
+            },
             fadeTo: (opacity, options) => runtime.fadeCubeTo(id, opacity, options),
             moveAndFade: async (position, opacity, options) => {
                 await Promise.all([

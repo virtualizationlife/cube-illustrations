@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.07
 const RHYTHM_CUBE_ID = 'learned-rhythm-cube'
@@ -20,7 +20,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 8,
 } as const
 
-interface LearnedRhythmState {
+type LearnedRhythmState = {
     observedPassCount: number
 }
 
@@ -124,10 +124,14 @@ export const LearnedRhythmScene = defineScene<CubeSceneProps, LearnedRhythmState
                 easing: 'easeInOutCubic',
             })
             await exitCube(RHYTHM_CUBE_ID, RHYTHM_EXIT)
-            await runtime.moveCubeTo(MAIN_CUBE_ID, { column: 4, row: 0 }, {
-                duration: 0.72,
-                easing: 'easeInOutCubic',
-            })
+            await runtime.moveCubeTo(
+                MAIN_CUBE_ID,
+                { column: 4, row: 0 },
+                {
+                    duration: 0.72,
+                    easing: 'easeInOutCubic',
+                }
+            )
             await exitCube(MAIN_CUBE_ID, MAIN_EXIT)
         }
 
@@ -146,10 +150,14 @@ export const LearnedRhythmScene = defineScene<CubeSceneProps, LearnedRhythmState
 
             await timeline.wait(0.55)
             presentation?.setTarget({ zoom: 1.03, gridOpacity: 0.55 })
-            await runtime.moveCubeTo(MAIN_CUBE_ID, { column: 4, row: 0 }, {
-                duration: 0.8,
-                easing: 'easeInOutCubic',
-            })
+            await runtime.moveCubeTo(
+                MAIN_CUBE_ID,
+                { column: 4, row: 0 },
+                {
+                    duration: 0.8,
+                    easing: 'easeInOutCubic',
+                }
+            )
             await exitCube(MAIN_CUBE_ID, MAIN_EXIT)
             state.observedPassCount = state.observedPassCount === 2 ? 1 : 2
         }

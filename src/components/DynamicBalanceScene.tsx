@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.055
 const EDGE_DISTANCE = 7
@@ -23,8 +23,8 @@ const getEdgePosition = ({ column, row }: GridCoordinate): GridCoordinate => ({
     row: row * EDGE_DISTANCE,
 })
 
-interface DynamicBalanceState {
-    readonly assignments: Array<string | null>
+type DynamicBalanceState = {
+    readonly assignments: (string | null)[]
     carrierId: string
     gapIndex: number
 }
@@ -50,7 +50,7 @@ export const DynamicBalanceScene = defineScene<CubeSceneProps, DynamicBalanceSta
     setup: ({ runtime, props }) => {
         runtime.setCubePosition(MAIN_CUBE_ID, { column: 0, row: 0 })
         const gapIndex = 0
-        const assignments: Array<string | null> = Array.from(
+        const assignments: (string | null)[] = Array.from(
             { length: RING_POSITIONS.length },
             () => null
         )
@@ -101,11 +101,7 @@ export const DynamicBalanceScene = defineScene<CubeSceneProps, DynamicBalanceSta
             state.gapIndex = (state.gapIndex + 4) % RING_POSITIONS.length
             const outgoingId = assignments[state.gapIndex]
             const outgoingPosition = RING_POSITIONS[state.gapIndex]
-            if (
-                outgoingId === null ||
-                outgoingId === undefined ||
-                outgoingPosition === undefined
-            ) {
+            if (outgoingId === null || outgoingId === undefined || outgoingPosition === undefined) {
                 return
             }
             assignments[state.gapIndex] = null

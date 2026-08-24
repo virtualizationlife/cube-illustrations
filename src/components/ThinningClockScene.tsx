@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.042
 const DIAL_POSITIONS: readonly GridCoordinate[] = [
@@ -17,18 +17,17 @@ const DIAL_POSITIONS: readonly GridCoordinate[] = [
     { column: 2, row: -1 },
 ]
 /** Where the hand stands while it marks the hour opposite to it. */
-const HAND_POSITIONS: readonly GridCoordinate[] = DIAL_POSITIONS.map(
-    ({ column, row }) => ({ column: column * 2, row: row * 2 })
-)
-const DIAL_CUBE_IDS: readonly string[] = DIAL_POSITIONS.map(
-    (_, index) => `thinning-clock-${index}`
-)
+const HAND_POSITIONS: readonly GridCoordinate[] = DIAL_POSITIONS.map(({ column, row }) => ({
+    column: column * 2,
+    row: row * 2,
+}))
+const DIAL_CUBE_IDS: readonly string[] = DIAL_POSITIONS.map((_, index) => `thinning-clock-${index}`)
 const BEAT_START_S = 0.46
 const BEAT_DECAY = 0.82
 const MARKS_REMOVED_PER_LAP = 2
 const MARKS_LEFT_BEFORE_RESET = 2
 
-interface ThinningClockState {
+type ThinningClockState = {
     lap: number
     readonly lit: boolean[]
 }

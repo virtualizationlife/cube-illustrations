@@ -1,6 +1,6 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import { GRID_PRESETS } from '../scenes/motion'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '@scenes/motion'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 const SHADOW_CUBE_ID = 'trailing-shadow'
@@ -11,7 +11,7 @@ const STEP_DURATION_S = 0.34
 const SHADOW_OPACITY = 0.3
 const SHADOW_ALIGNED_OPACITY = 0.52
 
-interface WalkLeg {
+type WalkLeg = {
     readonly toColumn: number
     /** A leg that ends in a pause lets the shadow close the gap. */
     readonly pause: boolean
@@ -24,7 +24,7 @@ const WALK_LEGS: readonly WalkLeg[] = [
     { toColumn: START_COLUMN, pause: true },
 ]
 
-interface TrailingShadowState {
+type TrailingShadowState = {
     column: number
 }
 

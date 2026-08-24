@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.047
 const PARTNER_ID = 'recognized-partner'
@@ -27,7 +27,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 10,
 } as const
 
-interface PairedStep {
+type PairedStep = {
     readonly main: GridCoordinate
     readonly partner: GridCoordinate
 }
@@ -92,11 +92,7 @@ export const RecognizedPartnerScene = defineScene({
         })
     },
     script: async ({ runtime, timeline, presentation }) => {
-        const move = (
-            cubeId: string,
-            position: GridCoordinate,
-            duration = 0.44
-        ): Promise<void> =>
+        const move = (cubeId: string, position: GridCoordinate, duration = 0.44): Promise<void> =>
             runtime.moveCubeTo(cubeId, position, {
                 duration,
                 easing: 'easeInOutCubic',

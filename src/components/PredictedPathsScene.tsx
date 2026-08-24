@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.04
 const ENTRY: GridCoordinate = { column: -7, row: 0 }
@@ -7,12 +7,12 @@ const VISIBLE_START: GridCoordinate = { column: -5, row: 0 }
 const JUNCTION: GridCoordinate = { column: -3, row: 0 }
 const EXIT: GridCoordinate = { column: 7, row: 0 }
 
-interface PredictedBranch {
+type PredictedBranch = {
     readonly route: readonly GridCoordinate[]
     readonly successful: boolean
 }
 
-interface PredictionScenario {
+type PredictionScenario = {
     readonly obstacles: readonly GridCoordinate[]
     readonly branches: readonly PredictedBranch[]
 }
@@ -91,7 +91,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 12,
 } as const
 
-interface PredictedPathsState {
+type PredictedPathsState = {
     scenarioIndex: number
 }
 
@@ -137,7 +137,9 @@ export const PredictedPathsScene = defineScene<CubeSceneProps, PredictedPathsSta
                     runtime.fadeCubeTo(id, 0, { duration: 0.32, easing: 'easeOutCubic' })
                 )
             )
-            ids.forEach((id) => runtime.removeCube(id))
+            ids.forEach((id) => {
+                runtime.removeCube(id)
+            })
         }
 
         const playScenario = async (scenario: PredictionScenario): Promise<void> => {
@@ -197,9 +199,7 @@ export const PredictedPathsScene = defineScene<CubeSceneProps, PredictedPathsSta
             )
             await timeline.wait(0.75)
 
-            const successfulIndex = scenario.branches.findIndex(
-                (branch) => branch.successful
-            )
+            const successfulIndex = scenario.branches.findIndex((branch) => branch.successful)
             const successfulBranch = scenario.branches[successfulIndex]
             const successfulPredictionId = predictionIds[successfulIndex]
             const failedIds = predictionIds.filter((_, index) => index !== successfulIndex)
@@ -256,7 +256,9 @@ export const PredictedPathsScene = defineScene<CubeSceneProps, PredictedPathsSta
                     easing: 'easeOutCubic',
                 }),
             ])
-            obstacleIds.forEach((id) => runtime.removeCube(id))
+            obstacleIds.forEach((id) => {
+                runtime.removeCube(id)
+            })
             await timeline.wait(0.6)
         }
 

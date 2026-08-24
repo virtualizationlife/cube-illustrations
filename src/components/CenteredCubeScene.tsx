@@ -1,6 +1,6 @@
-import type { GridCoordinate } from '../scenes/gridSceneRuntime'
-import type { SceneRandom } from '../scenes/sceneRandom'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import type { GridCoordinate } from '@scenes/gridSceneRuntime'
+import type { SceneRandom } from '@scenes/sceneRandom'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.075
 const GRID_EDGE = 5
@@ -8,17 +8,17 @@ const PASSING_LANES = [-2, -1, 1, 2] as const
 const MOVE_DURATION_PER_CELL_S = 0.4
 const TURN_CHANCE_PER_MOVE = 0.22
 
-interface CardinalDirection {
+type CardinalDirection = {
     readonly column: -1 | 0 | 1
     readonly row: -1 | 0 | 1
 }
 
-interface EntryPlan {
+type EntryPlan = {
     readonly start: GridCoordinate
     readonly direction: CardinalDirection
 }
 
-interface CenteredCubeState {
+type CenteredCubeState = {
     waveCounter: number
 }
 
@@ -44,10 +44,7 @@ const createEntryPlans = (random: SceneRandom): EntryPlan[] =>
         ])
     )
 
-const getDistanceToExit = (
-    position: GridCoordinate,
-    direction: CardinalDirection
-): number => {
+const getDistanceToExit = (position: GridCoordinate, direction: CardinalDirection): number => {
     if (direction.column > 0) return GRID_EDGE - position.column
     if (direction.column < 0) return position.column + GRID_EDGE
     if (direction.row > 0) return GRID_EDGE - position.row
@@ -59,9 +56,7 @@ const turnPerpendicularly = (
     random: SceneRandom
 ): CardinalDirection => {
     const turn: -1 | 1 = random.next() >= 0.5 ? 1 : -1
-    return direction.column === 0
-        ? { column: turn, row: 0 }
-        : { column: 0, row: turn }
+    return direction.column === 0 ? { column: turn, row: 0 } : { column: 0, row: turn }
 }
 
 /** A fixed main cube remains centered while translucent groups occasionally pass nearby. */
@@ -110,10 +105,7 @@ export const CenteredCubeScene = defineScene<CubeSceneProps, CenteredCubeState>(
 
                 const distanceToExit = getDistanceToExit(position, direction)
                 if (distanceToExit <= 0) break
-                const stepLength = Math.min(
-                    1 + Math.floor(random.next() * 3),
-                    distanceToExit
-                )
+                const stepLength = Math.min(1 + Math.floor(random.next() * 3), distanceToExit)
                 const destination = {
                     column: position.column + direction.column * stepLength,
                     row: position.row + direction.row * stepLength,
@@ -164,7 +156,9 @@ export const CenteredCubeScene = defineScene<CubeSceneProps, CenteredCubeState>(
                     movePasser(id, entryPlan, 0.22 + random.next() * 0.26)
                 )
             )
-            passers.forEach(({ id }) => runtime.removeCube(id))
+            passers.forEach(({ id }) => {
+                runtime.removeCube(id)
+            })
             state.waveCounter += 1
             await timeline.wait(1.2 + random.next() * 1.4)
         })

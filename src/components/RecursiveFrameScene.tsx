@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.045
 const INNER_RADIUS = 2
@@ -24,9 +24,7 @@ const PROCESS_ROUTE: readonly GridCoordinate[] = [
     { column: -1, row: -1 },
 ]
 const FRAME_IDS = Array.from({ length: 3 }, (_, frameIndex) =>
-    FRAME_DIRECTIONS.map((_, directionIndex) =>
-        `recursive-frame-${frameIndex}-${directionIndex}`
-    )
+    FRAME_DIRECTIONS.map((_, directionIndex) => `recursive-frame-${frameIndex}-${directionIndex}`)
 )
 
 const BASE_PRESENTATION = {
@@ -36,14 +34,11 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 10,
 } as const
 
-interface RecursiveFrameState {
+type RecursiveFrameState = {
     frames: string[][]
 }
 
-const getFramePosition = (
-    direction: GridCoordinate,
-    radius: number
-): GridCoordinate => ({
+const getFramePosition = (direction: GridCoordinate, radius: number): GridCoordinate => ({
     column: direction.column * radius,
     row: direction.row * radius,
 })
@@ -132,11 +127,7 @@ export const RecursiveFrameScene = defineScene<CubeSceneProps, RecursiveFrameSta
             const innerFrame = state.frames[0]
             const middleFrame = state.frames[1]
             const outerFrame = state.frames[2]
-            if (
-                innerFrame === undefined ||
-                middleFrame === undefined ||
-                outerFrame === undefined
-            ) {
+            if (innerFrame === undefined || middleFrame === undefined || outerFrame === undefined) {
                 return
             }
 

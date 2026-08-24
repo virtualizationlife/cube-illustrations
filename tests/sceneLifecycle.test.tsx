@@ -1,22 +1,13 @@
 // @vitest-environment jsdom
 import { StrictMode, act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 
-import {
-    afterEach,
-    beforeEach,
-    describe,
-    expect,
-    it,
-    vi,
-    type MockInstance,
-} from 'vitest'
-
-import { IllustrationsPage } from '../src/IllustrationsPage'
-import { SCENE_CATALOG } from '../src/sceneCatalog'
-import type { GridCubeFaceLabels } from '../src/scenes/cubeFaceLabels'
-import { SceneRenderHost } from '../src/scenes/SceneRenderHost'
-import { defineScene, type CubeSceneProps } from '../src/sdk/defineScene'
+import { IllustrationsPage } from '@app/IllustrationsPage'
+import { SCENE_CATALOG } from '@app/sceneCatalog'
+import type { GridCubeFaceLabels } from '@scenes/cubeFaceLabels'
+import { SceneRenderHost } from '@scenes/SceneRenderHost'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 /** jsdom has no ResizeObserver; nothing here depends on it reporting a size. */
 class StubResizeObserver {
@@ -73,9 +64,7 @@ beforeEach(() => {
         textAlign: '',
         textBaseline: '',
     })) as unknown as HTMLCanvasElement['getContext']
-    consoleError = vi.spyOn(console, 'error').mockImplementation(
-        () => undefined
-    ) as unknown as MockInstance<(...args: unknown[]) => void>
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     rejections = []
     process.on('unhandledRejection', collectRejection)
 
@@ -95,8 +84,7 @@ afterEach(() => {
  * The plan's criterion is an empty console, not merely an absence of this package's own
  * messages: an error raised by React or three counts just as much.
  */
-const reportedErrors = (): string[] =>
-    consoleError.mock.calls.map((call) => String(call[0]))
+const reportedErrors = (): string[] => consoleError.mock.calls.map((call) => String(call[0]))
 
 const settle = async (): Promise<void> => {
     // Scene setup awaits a dynamic import and then a chain of microtasks.
@@ -158,7 +146,6 @@ describe('scene lifecycle under StrictMode', () => {
     it('covers every scene in the catalog', () => {
         expect(SCENE_CATALOG.length).toBeGreaterThan(0)
     })
-
 })
 
 describe('scene restart contract', () => {

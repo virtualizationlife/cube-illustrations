@@ -1,11 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { runSceneScript } from '../src/scenes/runSceneScript'
-import {
-    getSceneTimeScale,
-    scaleSceneDuration,
-    setSceneTimeScale,
-} from '../src/scenes/timeScale'
+import { runSceneScript } from '@scenes/runSceneScript'
+import { getSceneTimeScale, scaleSceneDuration, setSceneTimeScale } from '@scenes/timeScale'
+
 import { createFakeSceneRuntime } from './support/fakeSceneRuntime'
 
 afterEach(() => {
@@ -52,10 +49,14 @@ describe('scene time scale', () => {
             'test',
             fake.runtime,
             async ({ runtime }) => {
-                await runtime.moveCubeTo('main', { column: 1, row: 0 }, {
-                    duration: 0.8,
-                    easing: 'linear',
-                })
+                await runtime.moveCubeTo(
+                    'main',
+                    { column: 1, row: 0 },
+                    {
+                        duration: 0.8,
+                        easing: 'linear',
+                    }
+                )
             },
             vi.fn()
         )

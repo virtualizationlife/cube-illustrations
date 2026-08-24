@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import {
-    runSceneScript,
-    SceneCancelledError,
-} from '../src/scenes/runSceneScript'
+import { runSceneScript, SceneCancelledError } from '@scenes/runSceneScript'
+
 import { createFakeSceneRuntime } from './support/fakeSceneRuntime'
 
 const LINEAR = { duration: 0.5, easing: 'linear' } as const
@@ -102,7 +100,11 @@ describe('runSceneScript', () => {
 
         const outcome = await Promise.race([
             handle.completion.then(() => 'settled'),
-            new Promise((resolve) => globalThis.setTimeout(() => resolve('hung'), 500)),
+            new Promise((resolve) =>
+                globalThis.setTimeout(() => {
+                    resolve('hung')
+                }, 500)
+            ),
         ])
         expect(outcome).toBe('settled')
         expect(handle.signal.aborted).toBe(true)
@@ -195,10 +197,6 @@ describe('runSceneScript', () => {
         await handle.completion
 
         expect(onError).not.toHaveBeenCalled()
-        expect(fake.methodNames()).toEqual([
-            'setCubePosition',
-            'moveCubeTo',
-            'setCubeOpacity',
-        ])
+        expect(fake.methodNames()).toEqual(['setCubePosition', 'moveCubeTo', 'setCubeOpacity'])
     })
 })

@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createSceneChoreography } from '../src/sdk/choreography'
-import { SceneCancelledError } from '../src/scenes/runSceneScript'
+import { SceneCancelledError } from '@scenes/runSceneScript'
+import { createSceneChoreography } from '@sdk/choreography'
+
 import { createFakeSceneRuntime } from './support/fakeSceneRuntime'
 
 const MOVE = { duration: 0.4, easing: 'easeInOutCubic' } as const
@@ -139,8 +140,12 @@ describe('createSceneChoreography', () => {
         const { timeline } = setup()
         let done = 0
         await timeline.all([
-            Promise.resolve().then(() => { done += 1 }),
-            Promise.resolve().then(() => { done += 1 }),
+            Promise.resolve().then(() => {
+                done += 1
+            }),
+            Promise.resolve().then(() => {
+                done += 1
+            }),
         ])
         expect(done).toBe(2)
     })

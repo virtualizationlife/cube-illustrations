@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.07
 /** Leaves a physical gap between adjacent grid tiles, including while one cube turns. */
@@ -15,7 +15,7 @@ const TURNED_ANGLE = Math.PI / 2
 const SPIN_RESPONSE_S = 0.16
 const SPIN_SNAP_EPSILON = 0.0001
 
-interface SpinState {
+type SpinState = {
     current: number
     target: number
 }

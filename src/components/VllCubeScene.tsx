@@ -1,13 +1,9 @@
 import { useCallback, useRef, type JSX } from 'react'
 
-import { FaceFlipCubeScene } from '../scenes/FaceFlipCubeScene'
-import {
-    GRID_CUBE_FACES,
-    type GridCubeFace,
-    type GridCubeFaceLabels,
-} from '../scenes/cubeFaceLabels'
-import { getRandomIndex } from '../scenes/sceneRandom'
-import { attachSceneMetadata } from '../sdk/defineScene'
+import { GRID_CUBE_FACES, type GridCubeFace, type GridCubeFaceLabels } from '@scenes/cubeFaceLabels'
+import { FaceFlipCubeScene } from '@scenes/FaceFlipCubeScene'
+import { getRandomIndex } from '@scenes/sceneRandom'
+import { attachSceneMetadata } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.1
 const LETTERS = Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -21,15 +17,13 @@ const INITIAL_FACE_LABELS: GridCubeFaceLabels = {
     bottom: 'T',
 }
 
-export interface VllCubeSceneProps {
+export type VllCubeSceneProps = {
     /** Cube corner radius in world units. Defaults to 3% of the cube edge. */
     readonly cubeCornerRadius?: number
 }
 
 /** A rotating identity cube receives distinct random letters after every turn. */
-const VllCubeSceneComponent = ({
-    cubeCornerRadius,
-}: VllCubeSceneProps): JSX.Element => {
+const VllCubeSceneComponent = ({ cubeCornerRadius }: VllCubeSceneProps): JSX.Element => {
     const labelsRef = useRef<GridCubeFaceLabels>({ ...INITIAL_FACE_LABELS })
     const updateHiddenFaceLabels = useCallback(
         (hiddenFaces: readonly GridCubeFace[]): GridCubeFaceLabels => {
@@ -40,9 +34,7 @@ const VllCubeSceneComponent = ({
                     .map((face) => nextLabels[face])
                     .filter((letter): letter is string => letter !== undefined)
             )
-            const availableLetters = LETTERS.filter(
-                (letter) => !visibleLetters.has(letter)
-            )
+            const availableLetters = LETTERS.filter((letter) => !visibleLetters.has(letter))
 
             for (const face of hiddenFaces) {
                 const index = getRandomIndex(availableLetters.length)

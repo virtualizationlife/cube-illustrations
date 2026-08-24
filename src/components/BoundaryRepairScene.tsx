@@ -1,6 +1,6 @@
-import { isSameGridCell } from '../scenes/gridPathfinding'
-import { type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene } from '../sdk/defineScene'
+import { isSameGridCell } from '@scenes/gridPathfinding'
+import { type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.052
 const BREACH_HOLD_DURATION_S = 0.9
@@ -19,9 +19,7 @@ const BOUNDARY_POSITIONS: readonly GridCoordinate[] = [
     { column: -1, row: 0 },
 ]
 
-const BOUNDARY_CUBE_IDS = BOUNDARY_POSITIONS.map(
-    (_, index) => `boundary-cube-${index}`
-)
+const BOUNDARY_CUBE_IDS = BOUNDARY_POSITIONS.map((_, index) => `boundary-cube-${index}`)
 const BREACHABLE_INDICES = [1, 3, 5, 7] as const
 
 /** An external cube breaches a protective boundary, which redistributes and repairs itself. */
@@ -119,8 +117,7 @@ export const BoundaryRepairScene = defineScene({
             const repairShiftCount = 2 + Math.floor(random.next() * 3)
             for (let offset = 1; offset <= repairShiftCount; offset += 1) {
                 const movingIndex =
-                    (breachedIndex - offset + BOUNDARY_CUBE_IDS.length) %
-                    BOUNDARY_CUBE_IDS.length
+                    (breachedIndex - offset + BOUNDARY_CUBE_IDS.length) % BOUNDARY_CUBE_IDS.length
                 const source = BOUNDARY_POSITIONS[movingIndex]
                 if (source === undefined) continue
                 const movingCubeId = findCubeAt(source)

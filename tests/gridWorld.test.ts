@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createGridWorld } from '../src/scenes/gridWorld'
+import { createGridWorld } from '@scenes/gridWorld'
 
 describe('grid world', () => {
     it('models collision-safe movement without a rendering dependency', async () => {
@@ -32,11 +32,7 @@ describe('grid world', () => {
             { duration: 1, easing: 'linear' }
         )
         world.update(0.25)
-        await world.moveCubeTo(
-            'follower',
-            { column: 0, row: 0 },
-            { duration: 1 }
-        )
+        await world.moveCubeTo('follower', { column: 0, row: 0 }, { duration: 1 })
 
         expect(world.getCubePosition('follower')).toEqual({ column: -1, row: 0 })
         world.update(0.75)

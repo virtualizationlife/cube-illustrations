@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.04
 const GRID_CELL_COUNT = 21
@@ -26,7 +26,7 @@ const getInitialQueuePosition = (index: number): GridCoordinate => ({
     row: QUEUE_HEAD_EXIT_ROW - QUEUE_SPACING_CELLS - index * QUEUE_SPACING_CELLS,
 })
 
-interface ContinuousQueueState {
+type ContinuousQueueState = {
     readonly queue: string[]
 }
 

@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.06
 const INITIAL_RAIL_COLUMNS = [-2, -1, 0, 1, 2] as const
@@ -13,7 +13,7 @@ const BASE_PRESENTATION = {
     gridFadeOuterRadiusCells: 9,
 } as const
 
-interface MovingBridgeState {
+type MovingBridgeState = {
     mainColumn: number
     frontColumn: number
     cycleCount: number

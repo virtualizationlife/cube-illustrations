@@ -1,6 +1,6 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { GRID_PRESETS } from '../scenes/motion'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { GRID_PRESETS } from '@scenes/motion'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = GRID_PRESETS.corridor.gridCellSize
 const ONCOMING_CUBE_ID = 'corridor-oncoming'

@@ -1,76 +1,58 @@
-import {
-    useCallback,
-    useRef,
-    useState,
-    type ComponentType,
-    type JSX,
-} from 'react'
+import { useCallback, useRef, useState, type ComponentType, type JSX } from 'react'
 
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { GridSceneCubeEntry } from '../scenes/gridSceneRuntime'
-import type { CubeFaceLabelsProps } from '../scenes/cubeFaceLabels'
+import type { CubeFaceLabelsProps } from '@scenes/cubeFaceLabels'
+import { CubeSceneViewport } from '@scenes/CubeSceneViewport'
+import type { GridSceneCubeEntry } from '@scenes/gridSceneRuntime'
 import {
     runSceneScript,
     type SceneScriptContext,
     type SceneScriptHandle,
-} from '../scenes/runSceneScript'
+} from '@scenes/runSceneScript'
 import {
-    createSceneRandom,
-    type SceneRandom,
-    type SceneRandomSeed,
-} from '../scenes/sceneRandom'
+    createScenePresentation,
+    type ScenePresentationController,
+    type ScenePresentationValues,
+} from '@scenes/scenePresentation'
+import { createSceneRandom, type SceneRandom, type SceneRandomSeed } from '@scenes/sceneRandom'
 import {
     useSimpleCubeScene,
     type IllustrationSceneSizeProps,
     type SimpleCubeFrameContext,
     type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
-import {
-    createScenePresentation,
-    type ScenePresentationController,
-    type ScenePresentationValues,
-} from '../scenes/scenePresentation'
-import {
-    createSceneChoreography,
-    type SceneCubeActors,
-    type SceneTimeline,
-} from './choreography'
+} from '@scenes/useSimpleCubeScene'
 
-export interface SceneMetadata {
+import { createSceneChoreography, type SceneCubeActors, type SceneTimeline } from './choreography'
+
+export type SceneMetadata = {
     readonly id: string
     readonly title: string
     readonly tags: readonly string[]
     readonly description?: string
 }
 
-export interface CubeSceneProps extends CubeFaceLabelsProps {
+export type CubeSceneProps = {
     /** Replays SDK-authored random choices deterministically when provided. */
     readonly seed?: SceneRandomSeed
-}
+} & CubeFaceLabelsProps
 
-export interface CubeSceneView
-    extends Omit<
-        IllustrationSceneSizeProps,
-        'cubeCornerRadius' | 'mainCubeFaceLabels'
-    > {
+export type CubeSceneView = {
     readonly enableCubeHover?: boolean
-}
+} & Omit<IllustrationSceneSizeProps, 'cubeCornerRadius' | 'mainCubeFaceLabels'>
 
 /** Initial semantic zoom and grid visibility, smoothed towards new targets each frame. */
-export interface ScenePresentationOptions extends ScenePresentationValues {
+export type ScenePresentationOptions = {
     /** Seconds the smoothing takes to close most of the gap. Defaults to 0.32. */
     readonly responseDuration?: number
-}
+} & ScenePresentationValues
 
-export interface DefinedSceneSetupContext<Props> extends SimpleCubeSetupContext {
+export type DefinedSceneSetupContext<Props> = {
     readonly props: Readonly<Props>
     readonly random: SceneRandom
     /** Present only when the definition declares `presentation`. */
     readonly presentation: ScenePresentationController | null
-}
+} & SimpleCubeSetupContext
 
-export interface DefinedSceneScriptContext<Props, State>
-    extends SceneScriptContext {
+export type DefinedSceneScriptContext<Props, State> = {
     readonly props: Readonly<Props>
     readonly state: State
     readonly cubes: SceneCubeActors
@@ -78,28 +60,24 @@ export interface DefinedSceneScriptContext<Props, State>
     readonly random: SceneRandom
     /** Present only when the definition declares `presentation`. */
     readonly presentation: ScenePresentationController | null
-}
+} & SceneScriptContext
 
-export interface DefinedSceneFrameContext<Props, State>
-    extends SimpleCubeFrameContext {
+export type DefinedSceneFrameContext<Props, State> = {
     readonly props: Readonly<Props>
     readonly state: State
     readonly random: SceneRandom
     /** Present only when the definition declares `presentation`. */
     readonly presentation: ScenePresentationController | null
-}
+} & SimpleCubeFrameContext
 
-export interface DefinedSceneHoverContext<Props, State> {
+export type DefinedSceneHoverContext<Props, State> = {
     /** The cube under the pointer, or null when the pointer left every cube. */
     readonly cube: GridSceneCubeEntry | null
     readonly props: Readonly<Props>
     readonly state: State
 }
 
-export interface DefineSceneOptions<
-    Props extends CubeSceneProps,
-    State = undefined,
-> {
+export type DefineSceneOptions<Props extends CubeSceneProps, State = undefined> = {
     readonly metadata: SceneMetadata
     readonly view: CubeSceneView
     /**
@@ -108,18 +86,11 @@ export interface DefineSceneOptions<
      */
     readonly presentation?: ScenePresentationOptions
     readonly setup?: (context: DefinedSceneSetupContext<Props>) => State
-    readonly script?: (
-        context: DefinedSceneScriptContext<Props, State>
-    ) => Promise<void>
+    readonly script?: (context: DefinedSceneScriptContext<Props, State>) => Promise<void>
     readonly onFrame?: (context: DefinedSceneFrameContext<Props, State>) => void
     /** Requires `view.enableCubeHover`, which is on by default. */
-    readonly onCubeHoverChange?: (
-        context: DefinedSceneHoverContext<Props, State>
-    ) => void
-    readonly teardown?: (
-        context: DefinedSceneSetupContext<Props>,
-        state: State
-    ) => void
+    readonly onCubeHoverChange?: (context: DefinedSceneHoverContext<Props, State>) => void
+    readonly teardown?: (context: DefinedSceneSetupContext<Props>, state: State) => void
     /** Changes to this value recreate the scene instance. */
     readonly restartKey?: (props: Readonly<Props>) => unknown
 }
@@ -136,17 +107,13 @@ export type DefinedSceneComponent<Props> = ComponentType<Props> & {
 export const attachSceneMetadata = <Props,>(
     component: ComponentType<Props>,
     metadata: SceneMetadata
-): DefinedSceneComponent<Props> =>
-    Object.assign(component, { scene: metadata })
+): DefinedSceneComponent<Props> => Object.assign(component, { scene: metadata })
 
 /**
  * Creates a ready-to-render scene component while keeping renderer, lifecycle, script
  * cancellation, and viewport plumbing out of scene implementations.
  */
-export const defineScene = <
-    Props extends CubeSceneProps = CubeSceneProps,
-    State = undefined,
->(
+export const defineScene = <Props extends CubeSceneProps = CubeSceneProps, State = undefined>(
     definition: DefineSceneOptions<Props, State>
 ): DefinedSceneComponent<Props> => {
     const SceneComponent = (props: Props): JSX.Element => {
@@ -167,10 +134,7 @@ export const defineScene = <
             key: restartKey,
             generation: 0,
         })
-        if (
-            !Object.is(restartState.seed, props.seed) ||
-            !Object.is(restartState.key, restartKey)
-        ) {
+        if (!Object.is(restartState.seed, props.seed) || !Object.is(restartState.key, restartKey)) {
             setRestartState({
                 seed: props.seed,
                 key: restartKey,
@@ -208,14 +172,16 @@ export const defineScene = <
                                 scriptContext.runtime,
                                 scriptContext.delay
                             )
-                            return definition.script?.({
-                                ...scriptContext,
-                                ...choreography,
-                                props: propsRef.current,
-                                state,
-                                random,
-                                presentation,
-                            }) ?? Promise.resolve()
+                            return (
+                                definition.script?.({
+                                    ...scriptContext,
+                                    ...choreography,
+                                    props: propsRef.current,
+                                    state,
+                                    random,
+                                    presentation,
+                                }) ?? Promise.resolve()
+                            )
                         }
                     )
                 }
@@ -249,17 +215,14 @@ export const defineScene = <
             })
         }, [])
 
-        const onCubeHoverChange = useCallback(
-            (cube: GridSceneCubeEntry | null): void => {
-                if (!hasSetupRef.current || definition.onCubeHoverChange === undefined) return
-                definition.onCubeHoverChange({
-                    cube,
-                    props: propsRef.current,
-                    state: stateRef.current as State,
-                })
-            },
-            []
-        )
+        const onCubeHoverChange = useCallback((cube: GridSceneCubeEntry | null): void => {
+            if (!hasSetupRef.current || definition.onCubeHoverChange === undefined) return
+            definition.onCubeHoverChange({
+                cube,
+                props: propsRef.current,
+                state: stateRef.current as State,
+            })
+        }, [])
 
         const { faceLabels, cubeCornerRadius } = props
         const { enableCubeHover = true, ...view } = definition.view

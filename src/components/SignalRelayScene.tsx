@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.05
 const RELAY_ROW = 0
@@ -8,9 +8,7 @@ const EXIT: GridCoordinate = { column: -7, row: RELAY_ROW }
 const ENTRY: GridCoordinate = { column: 7, row: RELAY_ROW }
 const RELAY_CUBE_IDS = [
     MAIN_CUBE_ID,
-    ...Array.from({ length: RELAY_COLUMNS.length - 1 }, (_, index) =>
-        `signal-relay-${index}`
-    ),
+    ...Array.from({ length: RELAY_COLUMNS.length - 1 }, (_, index) => `signal-relay-${index}`),
 ] as const
 
 /** A pulse travels through a line whose carriers continuously leave and rejoin. */

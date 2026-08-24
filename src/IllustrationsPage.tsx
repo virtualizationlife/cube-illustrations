@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 
 import { SCENE_CATALOG } from './sceneCatalog'
-import { SceneRenderHost } from './scenes/SceneRenderHost'
+import { SceneRenderHost } from '@scenes/SceneRenderHost'
 
 export const IllustrationsPage = (): JSX.Element => (
     <SceneRenderHost>

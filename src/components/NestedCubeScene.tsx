@@ -1,5 +1,5 @@
-import { MAIN_CUBE_ID } from '../scenes/gridSceneRuntime'
-import { defineScene } from '../sdk/defineScene'
+import { MAIN_CUBE_ID } from '@scenes/gridSceneRuntime'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.055
 const OUTER_CUBE_SIZE = GRID_CELL_SIZE * 3

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { SCENE_CATALOG } from '../src/sceneCatalog'
+import { SCENE_CATALOG } from '@app/sceneCatalog'
 
 const SCENES_DOC = fileURLToPath(new URL('../docs/SCENES.md', import.meta.url))
 
@@ -24,7 +24,9 @@ const readDocumentedScenes = (): { title: string; component: string }[] => {
  */
 describe('scene documentation', () => {
     it('documents exactly the scenes the gallery shows', () => {
-        const documented = readDocumentedScenes().map((scene) => scene.title).sort()
+        const documented = readDocumentedScenes()
+            .map((scene) => scene.title)
+            .sort()
         const catalogued = SCENE_CATALOG.map((entry) => entry.title).sort()
         expect(documented).toEqual(catalogued)
     })

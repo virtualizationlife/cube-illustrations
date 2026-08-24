@@ -1,6 +1,6 @@
-import { getGridCellKey } from '../scenes/gridPathfinding'
-import { MAIN_CUBE_ID, type GridCoordinate } from '../scenes/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '../sdk/defineScene'
+import { getGridCellKey } from '@scenes/gridPathfinding'
+import { MAIN_CUBE_ID, type GridCoordinate } from '@scenes/gridSceneRuntime'
+import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.038
 const FIELD_RADIUS = 6
@@ -9,10 +9,18 @@ const CURRENT_CUBE_IDS = [
     ...Array.from({ length: 11 }, (_, index) => `collective-current-${index}`),
 ] as const
 const INITIAL_POSITIONS: readonly GridCoordinate[] = [
-    { column: -5, row: -4 }, { column: -2, row: -5 }, { column: 1, row: -4 },
-    { column: 4, row: -5 }, { column: -4, row: -1 }, { column: 0, row: -1 },
-    { column: 4, row: 0 }, { column: -5, row: 3 }, { column: -2, row: 4 },
-    { column: 1, row: 3 }, { column: 5, row: 4 }, { column: 3, row: 6 },
+    { column: -5, row: -4 },
+    { column: -2, row: -5 },
+    { column: 1, row: -4 },
+    { column: 4, row: -5 },
+    { column: -4, row: -1 },
+    { column: 0, row: -1 },
+    { column: 4, row: 0 },
+    { column: -5, row: 3 },
+    { column: -2, row: 4 },
+    { column: 1, row: 3 },
+    { column: 5, row: 4 },
+    { column: 3, row: 6 },
 ]
 const DIRECTIONS: readonly GridCoordinate[] = [
     { column: 1, row: 0 },
@@ -21,7 +29,7 @@ const DIRECTIONS: readonly GridCoordinate[] = [
     { column: 0, row: -1 },
 ]
 
-interface CollectiveCurrentState {
+type CollectiveCurrentState = {
     previousDirectionIndex: number
 }
 
@@ -85,7 +93,8 @@ export const CollectiveCurrentScene = defineScene<CubeSceneProps, CollectiveCurr
                     Math.abs(destination.column) > FIELD_RADIUS ||
                     Math.abs(destination.row) > FIELD_RADIUS ||
                     occupied.has(getGridCellKey(destination))
-                ) continue
+                )
+                    continue
 
                 await runtime.moveCubeTo(cubeId, destination, {
                     duration: 0.16,
@@ -107,10 +116,8 @@ export const CollectiveCurrentScene = defineScene<CubeSceneProps, CollectiveCurr
                 const left = runtime.getCubePosition(leftId)
                 const right = runtime.getCubePosition(rightId)
                 if (left === undefined || right === undefined) return 0
-                const leftProjection =
-                    left.column * direction.column + left.row * direction.row
-                const rightProjection =
-                    right.column * direction.column + right.row * direction.row
+                const leftProjection = left.column * direction.column + left.row * direction.row
+                const rightProjection = right.column * direction.column + right.row * direction.row
                 return rightProjection - leftProjection
             })
             for (const cubeId of orderedIds) {
