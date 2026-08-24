@@ -1,5 +1,30 @@
 [
     {
+        "id": "rolling-cube",
+        "title": "Rolling Cube",
+        "tags": ["movement", "rotation"]
+    },
+    {
+        "id": "sliding-cube",
+        "title": "Sliding Cube",
+        "tags": ["movement", "translation"]
+    },
+    {
+        "id": "jumping-cube",
+        "title": "Jumping Cube",
+        "tags": ["movement", "jump"]
+    },
+    {
+        "id": "raised-stride-cube",
+        "title": "Raised Stride",
+        "tags": ["movement", "elevation"]
+    },
+    {
+        "id": "teleporting-cube",
+        "title": "Dissolving Transfer",
+        "tags": ["movement", "transparency", "transition"]
+    },
+    {
         "id": "moving-world",
         "title": "Moving World",
         "tags": ["space", "navigation"]

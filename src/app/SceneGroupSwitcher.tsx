@@ -8,6 +8,7 @@ import '@styles/scene_switcher.css'
 const GROUP_LABELS: Readonly<Record<SceneGroup, string>> = {
     all: 'all',
     structure: 'structure',
+    movement: 'movement',
     flow: 'flow',
     mind: 'mind',
     continuity: 'continuity',

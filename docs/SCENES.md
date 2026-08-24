@@ -368,6 +368,40 @@ Hovering the middle cube triggers a complete animation: it rises by one grid cel
 
 **Abstract meaning:** Equal entities can diverge through expansion, reduction, and the continuous discovery of new orientations.
 
+## Focused Movement
+
+These five scenes are a focused study of a single cube moving across an endless grid. The grid travels with the cube so it remains the visual centre of the scene.
+
+### 41. Rolling Cube (`RollingCubeScene`)
+
+**Tags:** `movement`, `rotation`
+
+The cube advances one grid cell at a time by rotating around the lower edge that faces its direction of travel. The pivot edge remains on the grid through the turn, and the cube settles fully onto its next face before repeating.
+
+### 42. Sliding Cube (`SlidingCubeScene`)
+
+**Tags:** `movement`, `translation`
+
+The cube glides directly forward by one adjacent grid cell, without changing orientation. Each short pause makes the discrete cell-by-cell rhythm visible before the next step.
+
+### 43. Jumping Cube (`JumpingCubeScene`)
+
+**Tags:** `movement`, `jump`
+
+The cube follows a smooth arc over one grid cell and lands on the cell after it. It repeats the two-cell jump continuously while the view follows.
+
+### 44. Raised Stride (`RaisedStrideCubeScene`)
+
+**Tags:** `movement`, `elevation`
+
+The cube rises one cell above the grid, travels forward by two cells at that height, and then lowers itself back to ground level. The full three-phase motion repeats as one continuous stride.
+
+### 45. Dissolving Transfer (`TeleportingCubeScene`)
+
+**Tags:** `movement`, `transparency`, `transition`
+
+A successor cube is chosen at a random grid position within a five-cell radius. It fades in as the current cube fades out; the opacity transition lasts three seconds by default and can be changed with the `transparencyDuration` parameter. Once the crossfade completes, the camera moves to the successor and the former cube is removed before the next transfer.
+
 ## Proposed Scenes
 
 The eight scenes below are design briefs, not implementations. They are absent from the gallery and from the package exports. Each description uses the same catalogue format as the scenes above so they can be copied into this list if they are built.

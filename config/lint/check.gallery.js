@@ -5,7 +5,15 @@ import { fileURLToPath } from 'node:url'
 
 const lintDirectory = path.dirname(fileURLToPath(import.meta.url))
 const galleryDirectory = path.resolve(lintDirectory, '../../src/gallery')
-const categories = new Set(['structure', 'flow', 'mind', 'continuity', 'interaction', 'cycles'])
+const categories = new Set([
+    'structure',
+    'movement',
+    'flow',
+    'mind',
+    'continuity',
+    'interaction',
+    'cycles',
+])
 const errors = []
 
 for (const categoryEntry of fs.readdirSync(galleryDirectory, { withFileTypes: true })) {

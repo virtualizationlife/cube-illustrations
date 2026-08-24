@@ -29,6 +29,7 @@ import { createSceneChoreography, type SceneCubeActors, type SceneTimeline } fro
 
 export const SCENE_CATEGORIES = [
     'structure',
+    'movement',
     'flow',
     'mind',
     'continuity',

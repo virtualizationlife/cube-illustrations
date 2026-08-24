@@ -32,6 +32,11 @@ import { MemoryReplayScene } from '@gallery/mind/MemoryReplayScene'
 import { PredictedPathsScene } from '@gallery/mind/PredictedPathsScene'
 import { PreferenceChoiceScene } from '@gallery/mind/PreferenceChoiceScene'
 import { RecognizedPartnerScene } from '@gallery/mind/RecognizedPartnerScene'
+import { JumpingCubeScene } from '@gallery/movement/JumpingCubeScene'
+import { RaisedStrideCubeScene } from '@gallery/movement/RaisedStrideCubeScene'
+import { RollingCubeScene } from '@gallery/movement/RollingCubeScene'
+import { SlidingCubeScene } from '@gallery/movement/SlidingCubeScene'
+import { TeleportingCubeScene } from '@gallery/movement/TeleportingCubeScene'
 import { CenteredCubeScene } from '@gallery/structure/CenteredCubeScene'
 import { DynamicBalanceScene } from '@gallery/structure/DynamicBalanceScene'
 import { NestedCubeScene } from '@gallery/structure/NestedCubeScene'
@@ -56,6 +61,11 @@ const orderScenes = <Scenes extends readonly { readonly scene: SceneMetadata }[]
  * only: the sequence the scenes are shown in.
  */
 const ORDERED_SCENES = orderScenes([
+    RollingCubeScene,
+    SlidingCubeScene,
+    JumpingCubeScene,
+    RaisedStrideCubeScene,
+    TeleportingCubeScene,
     MovingGridScene,
     FlippingCubeScene,
     EncounterCubeScene,
