@@ -1,6 +1,6 @@
 {
     "name": "cube-illustrations",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Reusable animated WebGPU cube illustration scenes for React",
     "type": "module",
     "sideEffects": [
