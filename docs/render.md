@@ -77,7 +77,7 @@ if (this.parameters.device === undefined && this.device !== null) {
 
 A shared device therefore survives an unmounting scene.
 
-**Implemented** in [src/scenes/sharedGpuDevice.ts](../src/scenes/sharedGpuDevice.ts): one
+**Implemented** in [src/runtime/rendering/sharedGpuDevice.ts](../src/runtime/rendering/sharedGpuDevice.ts): one
 lazily-created, memoised device request for the whole page.
 
 It resolves to `null` rather than throwing when WebGPU is unavailable, and the caller then
@@ -107,14 +107,14 @@ embed a single scene. Worth doing if the page is still the bottleneck.
 The animation loop previously ran from mount to unmount. With 25 scenes in a wrapping
 layout, typically 4–8 are on screen; the rest rendered full frames into a canvas nobody saw.
 
-**Implemented** in [src/scenes/useSimpleCubeScene.ts](../src/scenes/useSimpleCubeScene.ts): an
+**Implemented** in [src/runtime/core/useSimpleCubeScene.ts](../src/runtime/core/useSimpleCubeScene.ts): an
 `IntersectionObserver` with a 128px `rootMargin` (so a scene is already running by the time
 it scrolls in) combined with `document.hidden`, driving `setAnimationLoop`.
 
 **One deliberate behavioural change came with it.** `elapsed` used to be read straight off
 `THREE.Timer`, i.e. wall-clock time since start. A paused scene would come back with its
 clock advanced by the whole pause, and
-[FaceFlipCubeScene](../src/scenes/FaceFlipCubeScene.tsx#L187) uses `elapsed` for hold timing
+[FaceFlipCubeScene](../src/runtime/presentation/FaceFlipCubeScene.tsx#L187) uses `elapsed` for hold timing
 (`holdUntil = elapsed + HOLD_DURATION_S`) — so every pending hold would read as expired on
 resume. `elapsed` is now accumulated from the same clamped per-frame delta the rest of the
 scene uses, so a paused scene resumes exactly where it stopped. For a continuously rendering
@@ -140,7 +140,7 @@ grid per scene before any cubes.
 **Per-frame uploads.** `updateGridVisual` recomputed every vertex alpha on the CPU and
 flagged the whole colour attribute dirty — a full buffer re-upload, per line, per frame.
 
-**Implemented** in [src/scenes/gridLines.ts](../src/scenes/gridLines.ts).
+**Implemented** in [src/runtime/grid/gridLines.ts](../src/runtime/grid/gridLines.ts).
 
 Baking each line's `basePosition` into its vertices turned out to give _both_ line families
 the same offset, `(columnOffset, 0, rowOffset)` — so the whole grid merges into a **single**
@@ -209,7 +209,7 @@ per cube. `EdgesGeometry` is an expensive CPU pass — it hashes and merges ever
 for the dihedral-angle threshold — and scenes that spawn cubes mid-animation paid it on the
 frame the cube appeared, which is where a hitch shows most.
 
-**Implemented** in [src/scenes/cubeGeometryCache.ts](../src/scenes/cubeGeometryCache.ts): a
+**Implemented** in [src/runtime/rendering/cubeGeometryCache.ts](../src/runtime/rendering/cubeGeometryCache.ts): a
 refcounted cache keyed on `size:cornerRadius`, released on `removeCube` and disposed at
 refcount zero. It is per-runtime, so `runtime.dispose()` stays a complete teardown.
 Materials remain per-cube — they carry per-cube opacity and must not be shared.
@@ -227,7 +227,7 @@ identical cubes now share one copy instead of building twelve.
 
 `mergeVertices` preserves `geometry.type` and `geometry.parameters`, so existing
 introspection — including the assertions in
-[tests/gridSceneRuntime.test.ts](../tests/gridSceneRuntime.test.ts) — still sees a
+[tests/unit/gridSceneRuntime.test.ts](../tests/unit/gridSceneRuntime.test.ts) — still sees a
 `RoundedBoxGeometry` with its original parameters.
 
 ---
@@ -239,14 +239,14 @@ introspection — including the assertions in
 cube labelled `{ front: 'A' }` allocated roughly 1.5 MB of texture for five blank faces and
 drew them.
 
-**Implemented** in [src/scenes/cubeFaceLabels.ts](../src/scenes/cubeFaceLabels.ts):
+**Implemented** in [src/runtime/grid/cubeFaceLabels.ts](../src/runtime/grid/cubeFaceLabels.ts):
 
 - Faces with an empty label get no texture, no material and no mesh at all.
 - Faces sharing the same text share one surface, so the common `faceLabels: 'ABC'` case
   allocates **one** texture instead of six.
 - `setLabels` reconciles rather than rebuilds: a surface whose text disappeared is repainted
   for a new text instead of being destroyed and re-uploaded, which matters for scenes like
-  [BecomingSignScene](../src/components/BecomingSignScene.tsx) that change labels during an
+  [BecomingSignScene](../src/gallery/interaction/BecomingSignScene.tsx) that change labels during an
   animation.
 
 `CubeFaceLabelAssets` gained `setOpacity`; `materials` is kept as a live view of the
@@ -380,7 +380,7 @@ a light grey line — and it confirms item 7's reordering changes nothing.
 4. Diff with PIL.
 
 For a page-level diff, the harness has to go further: seed
-[sceneRandom.ts](../src/scenes/sceneRandom.ts), replace `THREE.Timer` with a fixed-step clock,
+[sceneRandom.ts](../src/runtime/core/sceneRandom.ts), replace `THREE.Timer` with a fixed-step clock,
 and step a set number of frames before capturing.
 
 ---
@@ -560,7 +560,7 @@ outer DOM shape so consumer CSS targeting the slot keeps working.
 #### Renderer init and the `unsupported` path
 
 The host initialises its renderer once, with the shared device from
-[sharedGpuDevice.ts](../src/scenes/sharedGpuDevice.ts); if `renderer.init()` rejects, the
+[sharedGpuDevice.ts](../src/runtime/rendering/sharedGpuDevice.ts); if `renderer.init()` rejects, the
 host marks itself unsupported and every registered slot shows its fallback. Slots that
 register later get the answer synchronously. Standalone scenes keep their own
 init/fallback exactly as now.
@@ -602,7 +602,7 @@ init/fallback exactly as now.
 ### Part II — Caches shared across scenes
 
 Independent of Part I and cheaper; both follow the precedent set by
-[sharedGpuDevice.ts](../src/scenes/sharedGpuDevice.ts).
+[sharedGpuDevice.ts](../src/runtime/rendering/sharedGpuDevice.ts).
 
 #### Geometry cache: per-runtime → per-page
 
@@ -617,7 +617,7 @@ tests that assert full teardown, via an injectable cache in
 
 #### Label texture cache
 
-[cubeFaceLabels.ts](../src/scenes/cubeFaceLabels.ts) already shares one texture between
+[cubeFaceLabels.ts](../src/runtime/grid/cubeFaceLabels.ts) already shares one texture between
 faces with identical text _within one cube_. A page-level map `text → texture`
 (refcounted, same pattern) extends that across cubes and scenes — the common case of the
 whole page rendered with `faceLabels='ABC'` collapses from one texture per cube to one
@@ -638,7 +638,7 @@ consumers bundle the core twice. Fix alongside Part I, whichever is less invasiv
 
 ### Part III — The scene SDK
 
-The 33 components in [src/components](../src/components) total ~6,300 lines, and three
+The 33 gallery scenes in [src/gallery](../src/gallery) total ~6,300 lines, and three
 layers of them are the same code written 33 times. In descending order of value:
 
 #### III.1 A script runner with real cancellation
@@ -784,7 +784,7 @@ Recurring figures currently reimplemented per scene, worth one shared module eac
   from a seed". → `ctx.moveGroup(ids, formation, { order: 'from-seed' | 'random',
 seed, segmentDuration })`, built on the existing collision-safe `moveCubeTo`.
 - **The shape library.** StructureMorph's form set and BecomingSign's twelve symbols
-  are reusable assets locked inside components. → `src/scenes/formations.ts` exporting
+  are reusable assets locked inside components. → `src/runtime/formations.ts` exporting
   named coordinate sets plus `rotateFormation` / `pickDifferent` utilities.
 - **Stagger/sequence.** `ctx.stagger(items, gapSeconds, fn)` for "each with a delay",
   `ctx.all([...])` as a cancellation-aware `Promise.all`.

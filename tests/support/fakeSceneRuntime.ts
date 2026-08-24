@@ -1,4 +1,4 @@
-import type { GridCoordinate, GridSceneRuntime } from '@scenes/gridSceneRuntime'
+import type { GridCoordinate, GridSceneRuntime } from '@runtime/grid/gridSceneRuntime'
 
 export type RecordedCall = {
     readonly method: string

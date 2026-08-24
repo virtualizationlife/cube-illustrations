@@ -1,31 +1,48 @@
 import { useCallback, useRef, useState, type ComponentType, type JSX } from 'react'
 
-import type { CubeFaceLabelsProps } from '@scenes/cubeFaceLabels'
-import { CubeSceneViewport } from '@scenes/CubeSceneViewport'
-import type { GridSceneCubeEntry } from '@scenes/gridSceneRuntime'
-import {
-    runSceneScript,
-    type SceneScriptContext,
-    type SceneScriptHandle,
-} from '@scenes/runSceneScript'
 import {
     createScenePresentation,
     type ScenePresentationController,
     type ScenePresentationValues,
-} from '@scenes/scenePresentation'
-import { createSceneRandom, type SceneRandom, type SceneRandomSeed } from '@scenes/sceneRandom'
+} from '@runtime/animation/scenePresentation'
+import {
+    runSceneScript,
+    type SceneScriptContext,
+    type SceneScriptHandle,
+} from '@runtime/core/runSceneScript'
+import {
+    createSceneRandom,
+    type SceneRandom,
+    type SceneRandomSeed,
+} from '@runtime/core/sceneRandom'
 import {
     useSimpleCubeScene,
     type IllustrationSceneSizeProps,
     type SimpleCubeFrameContext,
     type SimpleCubeSetupContext,
-} from '@scenes/useSimpleCubeScene'
+} from '@runtime/core/useSimpleCubeScene'
+import type { CubeFaceLabelsProps } from '@runtime/grid/cubeFaceLabels'
+import type { GridSceneCubeEntry } from '@runtime/grid/gridSceneRuntime'
+import { CubeSceneViewport } from '@runtime/rendering/CubeSceneViewport'
 
 import { createSceneChoreography, type SceneCubeActors, type SceneTimeline } from './choreography'
+
+export const SCENE_CATEGORIES = [
+    'structure',
+    'flow',
+    'mind',
+    'continuity',
+    'interaction',
+    'cycles',
+] as const
+
+export type SceneCategory = (typeof SCENE_CATEGORIES)[number]
 
 export type SceneMetadata = {
     readonly id: string
     readonly title: string
+    /** The canonical gallery folder for this scene. */
+    readonly primaryCategory: SceneCategory
     readonly tags: readonly string[]
     readonly description?: string
 }

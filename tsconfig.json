@@ -12,9 +12,9 @@
         "baseUrl": ".",
         "ignoreDeprecations": "6.0",
         "paths": {
-            "@app/*": ["src/*"],
-            "@components/*": ["src/components/*"],
-            "@scenes/*": ["src/scenes/*"],
+            "@app/*": ["src/app/*"],
+            "@gallery/*": ["src/gallery/*"],
+            "@runtime/*": ["src/runtime/*"],
             "@sdk/*": ["src/sdk/*"],
             "@styles/*": ["src/styles/*"],
             "@tests/*": ["tests/*"]

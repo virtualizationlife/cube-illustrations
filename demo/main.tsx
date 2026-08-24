@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client'
 
 import { IllustrationsPage } from '@app/index'
-import '@app/styles.css'
+import '../src/styles.css'
 import './demo.css'
 
 const root = document.querySelector('#root')

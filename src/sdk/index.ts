@@ -1,15 +1,15 @@
 export * from './choreography'
 export * from './defineScene'
-export * from '@scenes/runSceneScript'
-export { MOTION, GRID_PRESETS } from '@scenes/motion'
-export { getSceneTimeScale, setSceneTimeScale, scaleSceneDuration } from '@scenes/timeScale'
+export * from '@runtime/core/runSceneScript'
+export { MOTION, GRID_PRESETS } from '@runtime/animation/motion'
+export { getSceneTimeScale, setSceneTimeScale, scaleSceneDuration } from '@runtime/core/timeScale'
 export {
     createSceneRandom,
     createSeededRandom,
     type SceneRandom,
     type SceneRandomSeed,
     type SceneRandomSource,
-} from '@scenes/sceneRandom'
+} from '@runtime/core/sceneRandom'
 export {
     MAIN_CUBE_ID,
     type GridCoordinate,
@@ -17,10 +17,10 @@ export {
     type GridSceneEasing,
     type GridSceneRuntime,
     type GridSceneTransitionOptions,
-} from '@scenes/gridSceneRuntime'
+} from '@runtime/grid/gridSceneRuntime'
 export type {
     CubeFaceLabelsProps,
     GridCubeFace,
     GridCubeFaceLabelInput,
     GridCubeFaceLabels,
-} from '@scenes/cubeFaceLabels'
+} from '@runtime/grid/cubeFaceLabels'

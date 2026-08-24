@@ -7,9 +7,9 @@ const lintDirectory = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(lintDirectory, '../..')
 const tsconfigPath = path.join(root, 'tsconfig.json')
 const expectedAliases = {
-    '@app/*': ['src/*'],
-    '@components/*': ['src/components/*'],
-    '@scenes/*': ['src/scenes/*'],
+    '@app/*': ['src/app/*'],
+    '@gallery/*': ['src/gallery/*'],
+    '@runtime/*': ['src/runtime/*'],
     '@sdk/*': ['src/sdk/*'],
     '@styles/*': ['src/styles/*'],
     '@tests/*': ['tests/*'],

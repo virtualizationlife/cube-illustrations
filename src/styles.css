@@ -1,6 +1,6 @@
 @import url('@styles/tokens.css');
 @import url('@styles/document.css');
 @import url('@styles/page.css');
-@import url('@styles/labeled-scene.css');
+@import url('@styles/labeled_scene.css');
 @import url('@styles/slot.css');
-@import url('@styles/render-host.css');
+@import url('@styles/render_host.css');

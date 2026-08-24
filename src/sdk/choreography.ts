@@ -1,9 +1,9 @@
+import { MOTION } from '@runtime/animation/motion'
 import type {
     GridCoordinate,
     GridSceneRuntime,
     GridSceneTransitionOptions,
-} from '@scenes/gridSceneRuntime'
-import { MOTION } from '@scenes/motion'
+} from '@runtime/grid/gridSceneRuntime'
 
 export type ScenePulseOptions = {
     readonly opacity?: number

@@ -24,7 +24,7 @@ export default defineConfig({
     build: {
         lib: {
             entry: {
-                index: fileURLToPath(new URL('../src/bundle.ts', import.meta.url)),
+                index: fileURLToPath(new URL('../src/app/bundle.ts', import.meta.url)),
                 'sdk/index': fileURLToPath(new URL('../src/sdk/index.ts', import.meta.url)),
             },
             formats: ['es'],

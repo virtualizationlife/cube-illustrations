@@ -245,6 +245,7 @@ export const GreetingScene = defineScene({
     metadata: {
         id: 'greeting',
         title: 'Greeting',
+        primaryCategory: 'interaction',
         tags: ['example'],
     },
     view: {
