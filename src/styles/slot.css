@@ -1,0 +1,47 @@
+.cube_illustrations__slot {
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0;
+    width: var(--cube-illustrations-scene-size);
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    border: var(--cube-illustrations-border);
+}
+
+.cube_illustrations__canvas,
+.cube_illustrations__scene_element {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: pan-y;
+}
+
+.cube_illustrations__canvas {
+    display: block;
+}
+
+.cube_illustrations__canvas,
+.cube_illustrations__render_host_canvas {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+}
+
+.cube_illustrations__canvas[data-ready='true'],
+.cube_illustrations__render_host_canvas[data-ready='true'] {
+    opacity: 1;
+}
+
+.cube_illustrations__fallback {
+    display: grid;
+    position: absolute;
+    place-items: center;
+    inset: 0;
+    margin: 0;
+    padding: 16px;
+    color: var(--cube-illustrations-muted-color);
+    font-size: var(--cube-illustrations-fallback-font-size);
+    text-align: center;
+    pointer-events: none;
+}

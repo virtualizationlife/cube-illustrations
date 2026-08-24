@@ -1,0 +1,25 @@
+:root {
+    /* Surface */
+    --cube-illustrations-background: #ffffff;
+
+    /* Text */
+    --cube-illustrations-label-color: #8b919a;
+    --cube-illustrations-tag-color: #a0a5ad;
+    --cube-illustrations-muted-color: #6b7280;
+
+    /* Type */
+    --cube-illustrations-font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+    --cube-illustrations-font-weight: 300;
+    --cube-illustrations-label-font-size: 16px;
+    --cube-illustrations-label-letter-spacing: 0.04em;
+    --cube-illustrations-tag-font-size: 11px;
+    --cube-illustrations-tag-letter-spacing: 0.02em;
+    --cube-illustrations-fallback-font-size: 14px;
+
+    /* Layout */
+    --cube-illustrations-scene-min-size: 240px;
+    --cube-illustrations-scene-size: 280px;
+    --cube-illustrations-page-padding: 24px;
+    --cube-illustrations-gap: 0;
+    --cube-illustrations-border: 0;
+}

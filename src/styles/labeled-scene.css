@@ -1,0 +1,42 @@
+.cube_illustrations__labeled_scene {
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+}
+
+.cube_illustrations__labeled_scene > .cube_illustrations__slot {
+    width: 100%;
+}
+
+.cube_illustrations__scene_label,
+.cube_illustrations__scene_tags {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    padding: 0;
+    font-family: var(--cube-illustrations-font-family);
+    font-weight: var(--cube-illustrations-font-weight);
+    text-align: center;
+    text-transform: lowercase;
+    overflow-wrap: break-word;
+}
+
+.cube_illustrations__scene_label {
+    color: var(--cube-illustrations-label-color);
+    font-size: var(--cube-illustrations-label-font-size);
+    letter-spacing: var(--cube-illustrations-label-letter-spacing);
+    line-height: 1;
+}
+
+.cube_illustrations__scene_tags {
+    color: var(--cube-illustrations-tag-color);
+    font-size: var(--cube-illustrations-tag-font-size);
+    letter-spacing: var(--cube-illustrations-tag-letter-spacing);
+    line-height: 1.2;
+}
+
+@media (max-width: 520px) {
+    .cube_illustrations__scene_label {
+        line-height: 1.2;
+    }
+}

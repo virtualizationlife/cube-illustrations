@@ -190,7 +190,7 @@ opacity transition.
 
 Override these custom properties on a parent element or `:root`:
 
-- `--cube-illustrations-scene-size` (default `260px`)
+- `--cube-illustrations-scene-size` (default `280px`)
 - `--cube-illustrations-page-padding` (default `24px`)
 - `--cube-illustrations-gap` (default `0`)
 - `--cube-illustrations-background` (default `#fff`)
