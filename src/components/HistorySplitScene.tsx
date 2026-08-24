@@ -1,8 +1,4 @@
-import { useCallback, useRef, type JSX } from 'react'
-
-import { CubeSceneViewport } from '../scenes/CubeSceneViewport'
-import type { CubeFaceLabelsProps, GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
-import { createCancellableDelay } from '../scenes/createCancellableDelay'
+import type { GridCubeFaceLabelInput } from '../scenes/cubeFaceLabels'
 import {
     MAIN_CUBE_ID,
     type GridCoordinate,
@@ -12,12 +8,7 @@ import {
     createScenePresentation,
     type ScenePresentationController,
 } from '../scenes/scenePresentation'
-import { startSceneAnimation } from '../scenes/startSceneAnimation'
-import {
-    useSimpleCubeScene,
-    type SimpleCubeFrameContext,
-    type SimpleCubeSetupContext,
-} from '../scenes/useSimpleCubeScene'
+import { defineScene } from '../sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.032
 const ORIGIN: GridCoordinate = { column: 0, row: 0 }
@@ -87,21 +78,15 @@ const STORY_TRACES: readonly (readonly GridCoordinate[])[] = [
     ],
 ]
 
-interface HistorySplitController {
+interface HistorySplitState {
     readonly presentation: ScenePresentationController
-    readonly dispose: () => void
 }
 
-const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitController => {
-    let cancelled = false
-    const delay = createCancellableDelay()
-    const presentation = createScenePresentation({
-        zoom: 0.96,
-        gridOpacity: 0.52,
-        gridFadeInnerRadiusCells: 4,
-        gridFadeOuterRadiusCells: 17,
-    })
-
+const runHistorySplit = async (
+    runtime: GridSceneRuntime,
+    delay: (durationSeconds: number) => Promise<void>,
+    presentation: ScenePresentationController
+): Promise<void> => {
     const move = (cubeId: string, position: GridCoordinate, duration = 0.52): Promise<void> =>
         runtime.moveCubeTo(cubeId, position, {
             duration,
@@ -165,10 +150,9 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             easing: 'easeOutCubic',
         })
         for (const position of route) {
-            if (cancelled) return
             await move(PREVIEW_CUBE_ID, position, 0.3)
         }
-        await delay.wait(0.24)
+        await delay(0.24)
     }
 
     const followPreview = async (position: GridCoordinate, duration = 0.9): Promise<void> => {
@@ -186,19 +170,17 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             duration: 0.42,
             easing: 'linear',
         })
-        if (cancelled) return
         runtime.setCubePosition(MAIN_CUBE_ID, ORIGIN)
         resetWorldActors()
         await runtime.moveGridFocusTo(ORIGIN, {
             duration: 0.9,
             easing: 'easeInOutCubic',
         })
-        if (cancelled) return
         await runtime.fadeCubeTo(MAIN_CUBE_ID, 1, {
             duration: 0.4,
             easing: 'easeOutCubic',
         })
-        await delay.wait(0.42)
+        await delay(0.42)
     }
 
     const playCompanionHistory = async (): Promise<void> => {
@@ -208,52 +190,37 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             { column: 3, row: 0 },
             { column: 4, row: 0 },
         ])
-        if (cancelled) return
         await followPreview({ column: 4, row: 0 }, 1.15)
-        if (cancelled) return
-        await delay.wait(0.6)
+        await delay(0.6)
 
         await Promise.all([
             move(COMPANION_CUBE_ID, { column: 5, row: 1 }),
             travel({ column: 5, row: 0 }),
         ])
-        if (cancelled) return
         await Promise.all([
             move(COMPANION_CUBE_ID, { column: 6, row: 2 }),
             travel({ column: 6, row: 1 }),
         ])
-        if (cancelled) return
 
         await move(COMPANION_CUBE_ID, { column: 7, row: 3 })
-        if (cancelled) return
         await travel({ column: 6, row: 3 }, 0.5)
         await move(COMPANION_CUBE_ID, { column: 8, row: 3 })
-        if (cancelled) return
         await travel({ column: 7, row: 3 }, 0.42)
         await move(COMPANION_CUBE_ID, { column: 9, row: 3 })
-        if (cancelled) return
         await travel({ column: 8, row: 3 }, 0.42)
-        if (cancelled) return
         await move(COMPANION_CUBE_ID, { column: 11, row: 1 }, 0.68)
-        if (cancelled) return
         await travel({ column: 10, row: 1 }, 0.68)
-        if (cancelled) return
 
         await move(COMPANION_CUBE_ID, { column: 12, row: 1 }, 0.4)
         await travel({ column: 11, row: 1 }, 0.4)
-        if (cancelled) return
         await move(COMPANION_CUBE_ID, { column: 13, row: 1 }, 0.4)
         await travel({ column: 12, row: 1 }, 0.4)
-        if (cancelled) return
         await move(COMPANION_CUBE_ID, { column: 15, row: 1 }, 0.55)
         await travel({ column: 14, row: 1 }, 0.55)
-        if (cancelled) return
         await move(COMPANION_CUBE_ID, { column: 17, row: 2 }, 0.62)
-        if (cancelled) return
         await travel({ column: 17, row: 0 }, 0.82)
-        if (cancelled) return
         await revealTrace(0)
-        await delay.wait(1)
+        await delay(1)
     }
 
     const playObstacleHistory = async (): Promise<void> => {
@@ -264,37 +231,30 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             { column: -4, row: 4 },
             { column: -5, row: 5 },
         ])
-        if (cancelled) return
         await followPreview({ column: -5, row: 5 }, 1.25)
-        if (cancelled) return
         await travel({ column: -4, row: 8 }, 0.72)
-        await delay.wait(0.7)
+        await delay(0.7)
         await travel({ column: -5, row: 8 }, 0.34)
         await travel({ column: -7, row: 8 }, 0.6)
-        if (cancelled) return
 
         await Promise.all([
             move(NORTH_TRAVELER_IDS[0], { column: -7, row: 11 }, 0.72),
             move(NORTH_TRAVELER_IDS[1], { column: -8, row: 11 }, 0.72),
         ])
-        if (cancelled) return
-        await delay.wait(0.55)
+        await delay(0.55)
         await Promise.all([
             move(NORTH_TRAVELER_IDS[0], { column: -6, row: 11 }, 0.4),
             move(NORTH_TRAVELER_IDS[1], { column: -9, row: 11 }, 0.4),
         ])
-        if (cancelled) return
 
         await travel({ column: -7, row: 9 }, 0.4)
         await travel({ column: -7, row: 11 }, 0.48)
         await travel({ column: -7, row: 13 }, 0.48)
-        if (cancelled) return
-        await delay.wait(0.38)
+        await delay(0.38)
         await travel({ column: -6, row: 15 }, 0.56)
         await travel({ column: -7, row: 17 }, 0.56)
-        if (cancelled) return
         await revealTrace(1)
-        await delay.wait(1)
+        await delay(1)
     }
 
     const playGroupHistory = async (): Promise<void> => {
@@ -305,10 +265,8 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             { column: 0, row: -4 },
             { column: 0, row: -5 },
         ])
-        if (cancelled) return
         await followPreview({ column: 0, row: -5 }, 1.2)
-        if (cancelled) return
-        await delay.wait(0.55)
+        await delay(0.55)
 
         const flowTargets: readonly GridCoordinate[] = [
             { column: 8, row: -8 },
@@ -320,22 +278,17 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             const target = flowTargets[index]
             if (cubeId === undefined || target === undefined) continue
             await move(cubeId, target, 0.9)
-            if (cancelled) return
         }
 
         await travel({ column: 0, row: -9 }, 0.72)
         await travel({ column: 0, row: -11 }, 0.52)
-        if (cancelled) return
-        await delay.wait(0.42)
+        await delay(0.42)
         await travel({ column: 0, row: -13 }, 0.52)
         await travel({ column: 0, row: -15 }, 0.52)
-        if (cancelled) return
         await move(GROUP_CUBE_IDS[1], { column: -1, row: -16 }, 0.5)
-        if (cancelled) return
         await travel({ column: 0, row: -17 }, 0.62)
-        if (cancelled) return
         await revealTrace(2)
-        await delay.wait(1.1)
+        await delay(1.1)
     }
 
     const showAllHistories = async (): Promise<void> => {
@@ -343,14 +296,12 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             duration: 0.38,
             easing: 'linear',
         })
-        if (cancelled) return
         runtime.setCubePosition(MAIN_CUBE_ID, ORIGIN)
         resetWorldActors()
         await runtime.moveGridFocusTo(ORIGIN, {
             duration: 0.9,
             easing: 'easeInOutCubic',
         })
-        if (cancelled) return
         presentation.setTarget({
             zoom: 0.62,
             gridOpacity: 0.42,
@@ -361,12 +312,12 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
             duration: 0.42,
             easing: 'easeOutCubic',
         })
-        await delay.wait(2.4)
+        await delay(2.4)
     }
 
     const play = async (): Promise<void> => {
-        await delay.wait(0.9)
-        while (!cancelled) {
+        await delay(0.9)
+        for (;;) {
             presentation.setTarget({
                 zoom: 0.96,
                 gridOpacity: 0.52,
@@ -374,32 +325,18 @@ const createHistorySplitAnimation = (runtime: GridSceneRuntime): HistorySplitCon
                 gridFadeOuterRadiusCells: 17,
             })
             await clearTraces()
-            if (cancelled) return
             await playCompanionHistory()
-            if (cancelled) return
             await returnToOrigin()
-            if (cancelled) return
             await playObstacleHistory()
-            if (cancelled) return
             await returnToOrigin()
-            if (cancelled) return
             await playGroupHistory()
-            if (cancelled) return
             await showAllHistories()
-            if (cancelled) return
             await clearTraces()
-            await delay.wait(0.5)
+            await delay(0.5)
         }
     }
 
-    void startSceneAnimation('History Split', play)
-    return {
-        presentation,
-        dispose: () => {
-            cancelled = true
-            delay.cancel()
-        },
-    }
+    await play()
 }
 
 const addWorldCube = (
@@ -412,76 +349,15 @@ const addWorldCube = (
 }
 
 /** One unchanged world produces three different histories from the same starting point. */
-export const HistorySplitScene = ({
-    faceLabels,
-    cubeCornerRadius,
-}: CubeFaceLabelsProps): JSX.Element => {
-    const controllerRef = useRef<HistorySplitController | null>(null)
-
-    const onSetup = useCallback(
-        ({ runtime }: SimpleCubeSetupContext): (() => void) => {
-            runtime.setCubePosition(MAIN_CUBE_ID, ORIGIN)
-            runtime.addCube({
-                id: PREVIEW_CUBE_ID,
-                position: ORIGIN,
-                opacity: 0,
-                hoverCells: 0.08,
-                occupiesCell: false,
-                faceLabels,
-            })
-            addWorldCube(runtime, COMPANION_CUBE_ID, COMPANION_START, faceLabels)
-            EAST_WALL.forEach((position, index) => {
-                addWorldCube(runtime, `history-east-wall-${index}`, position, faceLabels)
-            })
-            EAST_GATE.forEach((position, index) => {
-                addWorldCube(runtime, `history-east-gate-${index}`, position, faceLabels)
-            })
-            NORTH_WALL.forEach((position, index) => {
-                addWorldCube(runtime, `history-north-wall-${index}`, position, faceLabels)
-            })
-            SOUTH_GATE.forEach((position, index) => {
-                addWorldCube(runtime, `history-south-gate-${index}`, position, faceLabels)
-            })
-            NORTH_TRAVELER_IDS.forEach((id, index) => {
-                const position = NORTH_TRAVELER_STARTS[index]
-                if (position !== undefined) addWorldCube(runtime, id, position, faceLabels)
-            })
-            FLOW_CUBE_IDS.forEach((id, index) => {
-                const position = FLOW_STARTS[index]
-                if (position !== undefined) addWorldCube(runtime, id, position, faceLabels)
-            })
-            GROUP_CUBE_IDS.forEach((id, index) => {
-                const position = GROUP_STARTS[index]
-                if (position !== undefined) addWorldCube(runtime, id, position, faceLabels)
-            })
-            TRACE_CUBE_IDS.forEach((id) => {
-                runtime.addCube({
-                    id,
-                    position: ORIGIN,
-                    opacity: 0,
-                    hoverCells: 0.04,
-                    occupiesCell: false,
-                    faceLabels,
-                })
-            })
-
-            const controller = createHistorySplitAnimation(runtime)
-            controllerRef.current = controller
-            return () => {
-                controller.dispose()
-                if (controllerRef.current === controller) controllerRef.current = null
-            }
-        },
-        [faceLabels]
-    )
-
-    const onFrame = useCallback(({ delta, camera, runtime }: SimpleCubeFrameContext): void => {
-        controllerRef.current?.presentation.update(delta, camera, runtime)
-    }, [])
-
-    const { canvasRef, status } = useSimpleCubeScene({
+export const HistorySplitScene = defineScene({
+    metadata: {
+        id: 'history-split',
+        title: 'History Split',
+        tags: ['continuity', 'biography', 'comparison'],
+        description: 'One unchanged world produces different histories from one origin.',
+    },
+    view: {
         cubeSize: GRID_CELL_SIZE,
-        cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: 39,
         gridOpacity: 0.52,
@@ -490,11 +366,66 @@ export const HistorySplitScene = ({
         cameraAzimuthDeg: 35,
         viewOffsetY: 0,
         hoverCells: 0,
-        mainCubeFaceLabels: faceLabels,
-        enableCubeHover: true,
-        onSetup,
-        onFrame,
-    })
+    },
+    setup: ({ runtime, props }): HistorySplitState => {
+        const { faceLabels } = props
+        runtime.setCubePosition(MAIN_CUBE_ID, ORIGIN)
+        runtime.addCube({
+            id: PREVIEW_CUBE_ID,
+            position: ORIGIN,
+            opacity: 0,
+            hoverCells: 0.08,
+            occupiesCell: false,
+            faceLabels,
+        })
+        addWorldCube(runtime, COMPANION_CUBE_ID, COMPANION_START, faceLabels)
+        EAST_WALL.forEach((position, index) => {
+            addWorldCube(runtime, `history-east-wall-${index}`, position, faceLabels)
+        })
+        EAST_GATE.forEach((position, index) => {
+            addWorldCube(runtime, `history-east-gate-${index}`, position, faceLabels)
+        })
+        NORTH_WALL.forEach((position, index) => {
+            addWorldCube(runtime, `history-north-wall-${index}`, position, faceLabels)
+        })
+        SOUTH_GATE.forEach((position, index) => {
+            addWorldCube(runtime, `history-south-gate-${index}`, position, faceLabels)
+        })
+        NORTH_TRAVELER_IDS.forEach((id, index) => {
+            const position = NORTH_TRAVELER_STARTS[index]
+            if (position !== undefined) addWorldCube(runtime, id, position, faceLabels)
+        })
+        FLOW_CUBE_IDS.forEach((id, index) => {
+            const position = FLOW_STARTS[index]
+            if (position !== undefined) addWorldCube(runtime, id, position, faceLabels)
+        })
+        GROUP_CUBE_IDS.forEach((id, index) => {
+            const position = GROUP_STARTS[index]
+            if (position !== undefined) addWorldCube(runtime, id, position, faceLabels)
+        })
+        TRACE_CUBE_IDS.forEach((id) => {
+            runtime.addCube({
+                id,
+                position: ORIGIN,
+                opacity: 0,
+                hoverCells: 0.04,
+                occupiesCell: false,
+                faceLabels,
+            })
+        })
 
-    return <CubeSceneViewport canvasRef={canvasRef} status={status} />
-}
+        return {
+            presentation: createScenePresentation({
+                zoom: 0.96,
+                gridOpacity: 0.52,
+                gridFadeInnerRadiusCells: 4,
+                gridFadeOuterRadiusCells: 17,
+            }),
+        }
+    },
+    script: ({ runtime, timeline, state }) =>
+        runHistorySplit(runtime, timeline.wait, state.presentation),
+    onFrame: ({ delta, camera, runtime, state }) => {
+        state.presentation.update(delta, camera, runtime)
+    },
+})
