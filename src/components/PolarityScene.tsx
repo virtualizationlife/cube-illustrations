@@ -12,15 +12,18 @@ import {
 } from '../scenes/useSimpleCubeScene'
 
 const GRID_CELL_SIZE = 0.07
+/** Leaves a physical gap between adjacent grid tiles, including while one cube turns. */
+const CUBE_SIZE = GRID_CELL_SIZE * 0.78
 const PARTNER_CUBE_ID = 'polarity-partner'
 const AXIS_ROW = 0
 const PARTNER_COLUMN = 4
 const CONTACT_COLUMN = 3
 const APPROACH_COLUMN = 1
 const DISTANT_COLUMN = -2
-/** Half a face turn: the only rotation a featureless cube visibly holds. */
-const TURNED_ANGLE = Math.PI / 4
+/** A complete quarter-turn always finishes on a stable cube orientation. */
+const TURNED_ANGLE = Math.PI / 2
 const SPIN_RESPONSE_S = 0.16
+const SPIN_SNAP_EPSILON = 0.0001
 
 interface SpinState {
     current: number
@@ -117,11 +120,16 @@ export const PolarityScene = ({
         if (spin === undefined) return
         const progress = 1 - Math.exp(-delta / SPIN_RESPONSE_S)
         spin.current += (spin.target - spin.current) * progress
+        // An exponential response is smooth but only approaches its target; snap the final
+        // fraction so each turn conclusively reaches 0° or 90° on every loop.
+        if (Math.abs(spin.target - spin.current) < SPIN_SNAP_EPSILON) {
+            spin.current = spin.target
+        }
         mesh.rotation.y = spin.current
     }, [])
 
     const { canvasRef, status } = useSimpleCubeScene({
-        cubeSize: GRID_CELL_SIZE,
+        cubeSize: CUBE_SIZE,
         cubeCornerRadius,
         gridCellSize: GRID_CELL_SIZE,
         gridCellCount: 15,
