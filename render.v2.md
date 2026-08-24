@@ -1,5 +1,11 @@
 # Render v2: One Renderer, and a Scene SDK
 
+> Implementation status (August 2026): the shared `SceneRenderHost`, cancellation-aware
+> `runSceneScript`, `defineScene`, actor/timeline choreography helpers, seeded random facade,
+> scene catalog, `cube-illustrations/sdk` entry point, and pure `GridWorld` extraction are
+> implemented. `SignalRelayScene` and `HistorySplitScene` are the reference migrations; remaining
+> legacy scenes can move incrementally without changing their public component API.
+
 A design document. [render.md](render.md) records the optimisation pass that is already done;
 this document describes the two structural steps that remain:
 
@@ -407,5 +413,5 @@ any resolution without depending on wall-clock frame pacing.
 3. **Part I host renderer** — the big frame/startup win; verified with the existing
    A/B method plus III.5's fixed clock.
 4. **III.2 `defineScene` + III.3/III.4 helpers** — best done while migrating scenes to
-   the runner anyway; new scenes (see [scenes.extra.md](scenes.extra.md)) should be
+   the runner anyway; new scenes (see [SCENES.md](SCENES.md#proposed-scenes)) should be
    written in this style from day one.

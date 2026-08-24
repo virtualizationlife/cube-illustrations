@@ -230,11 +230,79 @@ A central cube and seven surrounding cubes form a compact group with one vacant 
 
 **Abstract meaning:** Stability is an ongoing achievement produced through exchange and internal redistribution rather than complete immobility.
 
+## Coupled Phenomena
+
+The following eight scenes focus on synchrony, delayed self, orientation, succession, mutual yielding, causal loops, scarce time, and residual avoidance.
+
+### 26. Two Metronomes (`MetronomePairScene`)
+
+**Tags:** `rhythm`, `synchrony`
+
+Two cubes swing toward and away from the center on opposite sides of a shared row, like pendulums. They begin with different periods and a phase offset. Each swing pulls the neighbour's period and phase toward its own. After they stay in sync for several swings, they snap back to the original mismatched tempos and the coupling starts again.
+
+**Abstract meaning:** Separate rhythms can lock into one tempo through repeated local influence, then fall back into difference.
+
+### 27. Trailing Shadow (`TrailingShadowScene`)
+
+**Tags:** `self`, `delay`
+
+A solid cube walks a repeating path of legs along a row. A translucent double on a parallel row is always one cell behind: it only enters the cell the walker has just left. When the walker pauses, the shadow catches up, brightens, then fades back to its lagging opacity before the next leg. After a reversal the shadow briefly travels the wrong way, because it is still completing the abandoned step.
+
+**Abstract meaning:** A delayed copy of the self reconstructs the recent past and only aligns when action stops.
+
+### 28. Polarity (`PolarityScene`)
+
+**Tags:** `relation`, `orientation`
+
+Two cubes share a row. While they are rotationally aligned, the moving cube drifts in, then snaps into contact and holds. A quarter-turn of the same cube reverses the relation: the pair breaks apart and the mover retreats to a distant cell. The cycle repeats, so attraction and repulsion belong only to orientation, not to identity or distance.
+
+**Abstract meaning:** The same pair can attract or repel depending solely on how one of them is turned.
+
+### 29. Changing of the Guard (`GuardChangeScene`)
+
+**Tags:** `continuity`, `handover`
+
+One cube occupies a central post. Relief arrives from a transparent edge. On odd handovers the newcomer waits beside the post until the occupant leaves through the opposite edge, then steps into place. On even handovers the post is left empty for a beat: the view loosens, then the relief takes the vacant center. The departed cube becomes the next relief, so the post outlives every holder.
+
+**Abstract meaning:** An office can continue across overlapping succession or a brief vacancy; the role is more durable than any occupant.
+
+### 30. Corridor Dance (`CorridorDanceScene`)
+
+**Tags:** `relation`, `symmetry`
+
+Two cubes enter a corridor from opposite transparent edges and stop face to face. They sidestep together — the same way, three times — and return to the corridor, remaining blocked. The deadlock ends only when one cube stops mirroring and holds still; the other then takes the bypass, they pass, fade out through the far edges, and return from swapped entries.
+
+**Abstract meaning:** Perfect mutual politeness can prevent progress until one participant stops matching the other.
+
+### 31. Domino Ring (`DominoRingScene`)
+
+**Tags:** `causality`, `recurrence`
+
+Twelve cubes form a closed ring. A toppling wave travels around it: each cube falls a quarter-turn outward onto the neighbouring empty cell, holds, then rises. Because the wave returns to its start, the cause never runs out of effects. The cubes do not slide between cells; they rotate around an outer lower edge so each fall lands on a real grid tile.
+
+**Abstract meaning:** In a closed causal loop, an effect becomes the next cause and the sequence has no final cube.
+
+### 32. Thinning Clock (`ThinningClockScene`)
+
+**Tags:** `time`, `scarcity`
+
+A hand cube circles a twelve-cube dial, pausing at each remaining mark. After every lap it extinguishes the last two marks it passed, and the beat of the next lap is shorter. When only two marks remain, the dial refills and the tempo returns to the start. Each circuit is therefore poorer and faster than the one before until time is restored.
+
+**Abstract meaning:** As the marks of time dwindle, each remaining interval has to carry more, until the measure itself is renewed.
+
+### 33. Remembered Threshold (`RememberedThresholdScene`)
+
+**Tags:** `mind`, `residue`
+
+A cube enters a corridor from a transparent edge and meets a real obstacle once, stepping around it. The obstacle then vanishes, but the cube continues the detour with shrinking hesitation. On a later pass the camera tightens as the cube finally occupies the empty cell, after which the detour ends. The threshold then appears in a different column and the residue is learned again.
+
+**Abstract meaning:** Avoidance can outlive the obstacle that taught it, until the remembered cell is tested and found empty.
+
 ## Narrative and Ontology
 
 The following five scenes extend the collection with nested frames, divergent biography, partner recognition, embodied energy, and scale containment.
 
-### Recursive Frame (`RecursiveFrameScene`)
+### 34. Recursive Frame (`RecursiveFrameScene`)
 
 **Tags:** `ontology`, `continuity`, `reality`
 
@@ -242,7 +310,7 @@ Three nested square frames of translucent cubes surround a central cube. The cen
 
 **Abstract meaning:** Reality can renew its outer layers while a continuous process persists unchanged at the center.
 
-### Nested Cube (`NestedCubeScene`)
+### 35. Nested Cube (`NestedCubeScene`)
 
 **Tags:** `form`, `containment`
 
@@ -252,7 +320,7 @@ There is no movement animation in this scene. It is a static composition that co
 
 **Abstract meaning:** A whole can contain a distinct part that occupies the same place while remaining separate in scale and elevation.
 
-### History Split (`HistorySplitScene`)
+### 36. History Split (`HistorySplitScene`)
 
 **Tags:** `continuity`, `biography`, `comparison`
 
@@ -260,7 +328,7 @@ From the same starting point, the main cube relives three different journeys thr
 
 **Abstract meaning:** One unchanged world can produce multiple divergent biographies from the same origin.
 
-### Recognized Partner (`RecognizedPartnerScene`)
+### 37. Recognized Partner (`RecognizedPartnerScene`)
 
 **Tags:** `identity`, `memory`, `relationship`
 
@@ -268,7 +336,7 @@ Two identical visitors approach a central cube from opposite sides. The first vi
 
 **Abstract meaning:** Recognition persists as spatial memory even when two indistinguishable partners exchange places.
 
-### Anticipatory Return (`AnticipatoryReturnScene`)
+### 38. Anticipatory Return (`AnticipatoryReturnScene`)
 
 **Tags:** `embodiment`, `energy`, `maintenance`
 
@@ -278,7 +346,7 @@ A main cube carries a trailing column of five energy cubes. On the first cycle i
 
 ## Interactive Scenes
 
-### Cursor Repulsion (`CursorRepulsionScene`)
+### 39. Cursor Repulsion (`CursorRepulsionScene`)
 
 **Tags:** `interaction`, `avoidance`
 
@@ -290,7 +358,7 @@ The cubes retain a small amount of inertia, avoid overlapping one another, and r
 
 ## Comparative Transformations
 
-### Three States (`ThreeCubeStatesScene`)
+### 40. Three States (`ThreeCubeStatesScene`)
 
 **Tags:** `form`, `contrast`, `transformation`
 
@@ -299,3 +367,79 @@ Three equal cubes begin in a straight row and react independently to pointer att
 Hovering the middle cube triggers a complete animation: it rises by one grid cell, makes three random quarter-turns, and returns smoothly to the grid. The X, Y, and Z axes are shuffled for every activation, while the direction of each turn is selected independently. The sequence therefore uses all three spatial planes without becoming predictable.
 
 **Abstract meaning:** Equal entities can diverge through expansion, reduction, and the continuous discovery of new orientations.
+
+## Proposed Scenes
+
+The eight scenes below are design briefs, not implementations. They are absent from the gallery and from the package exports. Each description uses the same catalogue format as the scenes above so they can be copied into this list if they are built.
+
+### P1. Contagion (`ContagionScene`)
+
+**Tags:** `propagation`, `resilience`
+
+Twelve to fourteen cubes stand scattered across a large grid, taking occasional independent one-cell steps, all at full opacity. At a random moment one cube ignites: it pulses and switches to a marked state. The state is contagious by proximity — every unmarked cube within a small radius of a marked one catches it after a short individual delay, so the mark spreads as a two-dimensional wavefront, fast through dense clusters and slower across gaps. Isolated cubes may escape entirely.
+
+Once the wave exhausts itself, recovery runs the same way in reverse from the first-infected cube. A pause, a reshuffle of positions, and a new cycle starts from a different cube.
+
+**Abstract meaning:** A state spreads through local contact alone, and the shape of the crowd — not any central decision — determines who is reached and who is spared.
+
+### P2. Tower (`TowerScene`)
+
+**Tags:** `accumulation`, `order`
+
+Cubes arrive one at a time from the transparent edges, travel to a designated build cell, and stack: the first occupies the ground, the next settles one cell higher, up to a height of four or five. Each climb moves through adjacent cells and then up the tower's side before sliding onto the top.
+
+When the tower is complete it holds for a beat, then is dismantled from the top. Each cube travels to a new build cell elsewhere, where the tower reassembles — the last-removed top cube ends up at the bottom of the new tower.
+
+**Abstract meaning:** Accumulation is sequential and so is its undoing — what was added last must leave first, and rebuilding reverses history.
+
+### P3. Scale Shift (`ScaleShiftScene`)
+
+**Tags:** `hierarchy`, `emergence`
+
+The camera starts close on a compact group of three or four cubes performing a small local routine. It looks like a complete scene. The camera then zooms out and the grid fade radii widen, revealing that this group is one of nine, and that the nine groups form a larger symbol.
+
+At the wide view the groups' local movements read as texture, and the macro-figure reorganises as groups travel as units into a different symbol. The camera then descends onto a different group. The symbol never repeats twice in a row.
+
+**Abstract meaning:** Organisation has levels; the order of the whole is invisible from inside any of its parts, and only a change of scale reveals it.
+
+### P4. Trail (`TrailScene`)
+
+**Tags:** `communication`, `environment`
+
+A pioneer cube crosses the grid along a winding route around a few obstacle cubes, leaving a fading non-occupying ghost mark in every cell it exits. Follower cubes enter behind it. A follower with a fresh trail moves briskly along the marks; where the trail has evaporated it slows and re-derives the route hesitantly. Walking a cell refreshes its mark, so a used path stays alive and an unused one disappears.
+
+**Abstract meaning:** The environment itself can carry messages — a path exists only as long as someone keeps walking it.
+
+### P5. Passing the Name (`PassedNameScene`)
+
+**Tags:** `identity`, `inheritance`
+
+One cube carries a distinct face label on all faces and walks a long patrol circuit. With each completed lap it dims and slows. When it reaches a low opacity, a fresh unlabelled cube enters, meets it, and receives the same label while the old cube's label fades away. The old cube exits; the newcomer continues the same circuit from the same point.
+
+**Abstract meaning:** A name outlives its bearer — identity persists by being handed on, not by any carrier lasting.
+
+### P6. Gear Train (`GearTrainScene`)
+
+**Tags:** `causation`, `coupling`
+
+Five cubes stand in a row, one empty cell between neighbours, each floating one cell above the grid. The leftmost cube begins a quarter-turn roll. When its rotation passes halfway, its neighbour begins the opposite quarter-turn, and so on down the row. At the end the wave reflects and runs back.
+
+Occasionally a middle cube jams and stays still. The wave dies there. After two failed waves the jammed cube performs a catch-up double-turn, and transmission resumes.
+
+**Abstract meaning:** In a coupled system motion is transmitted, inverted, and reflected — and one stuck element silences everything beyond it.
+
+### P7. Shadow of Danger (`DangerShadowScene`)
+
+**Tags:** `fear`, `proximity`
+
+Eight cubes cycle through small unhurried errands in the middle of the grid. A ninth cube patrols a slow rectangle around them without entering the group. When the patroller comes within a few cells, an errand cube freezes and dims; when the patroller recedes, it resumes exactly where it stopped. A wave of stillness continuously tracks the patroller. Nothing is chased, caught, or displaced.
+
+**Abstract meaning:** A threat needs no contact to govern behaviour — its mere presence reshapes what everyone around it does.
+
+### P8. Bottleneck (`BottleneckScene`)
+
+**Tags:** `throughput`, `self-organization`
+
+A wall of cubes spans the grid vertically, with a single one-cell gap at its middle. Cubes appear from the transparent left edge faster than the gap can pass them, all needing the right edge. They condense into a funnel-shaped crowd, each advancing into whichever adjacent cell frees up. Cubes pass the gap one at a time; on the far side they fan out and accelerate, so the right side stays sparse. Occasionally arrivals drop, the crowd drains, and a lone cube sails through an empty gap.
+
+**Abstract meaning:** When many independent intentions share one narrow passage, order appears on its own — as pressure, patience, and turn-taking that nobody designed.

@@ -1,9 +1,9 @@
 # Scene Feature Matrix
 
-A cross-reference of all 25 illustration scenes and the features they contain. Scenes are listed in
+A cross-reference of all 40 illustration scenes and the features they contain. Scenes are listed in
 the order they appear on the illustrations page and in [SCENES.md](SCENES.md), which describes each
 one in prose. This document is the compact view: what is inside every scene, marked feature by
-feature.
+feature. Proposed scenes from the end of SCENES.md are listed in the appendix only.
 
 ## Legend
 
@@ -44,6 +44,21 @@ Numeric and categorical columns give the actual value used in the component inst
 | 23 | Shared Load | `SharedLoadScene` | Phenomena | cooperation, resources |
 | 24 | Phase Change | `PhaseChangeScene` | Phenomena | adaptation, organization |
 | 25 | Dynamic Balance | `DynamicBalanceScene` | Phenomena | maintenance, stability |
+| 26 | Two Metronomes | `MetronomePairScene` | Coupled | rhythm, synchrony |
+| 27 | Trailing Shadow | `TrailingShadowScene` | Coupled | self, delay |
+| 28 | Polarity | `PolarityScene` | Coupled | relation, orientation |
+| 29 | Changing of the Guard | `GuardChangeScene` | Coupled | continuity, handover |
+| 30 | Corridor Dance | `CorridorDanceScene` | Coupled | relation, symmetry |
+| 31 | Domino Ring | `DominoRingScene` | Coupled | causality, recurrence |
+| 32 | Thinning Clock | `ThinningClockScene` | Coupled | time, scarcity |
+| 33 | Remembered Threshold | `RememberedThresholdScene` | Coupled | mind, residue |
+| 34 | Recursive Frame | `RecursiveFrameScene` | Narrative | ontology, continuity, reality |
+| 35 | Nested Cube | `NestedCubeScene` | Narrative | form, containment |
+| 36 | History Split | `HistorySplitScene` | Narrative | continuity, biography, comparison |
+| 37 | Recognized Partner | `RecognizedPartnerScene` | Narrative | identity, memory, relationship |
+| 38 | Anticipatory Return | `AnticipatoryReturnScene` | Narrative | embodiment, energy, maintenance |
+| 39 | Cursor Repulsion | `CursorRepulsionScene` | Interactive | interaction, avoidance |
+| 40 | Three States | `ThreeCubeStatesScene` | Comparative | form, contrast, transformation |
 
 ## 2. What is depicted
 
@@ -74,6 +89,21 @@ Numeric and categorical columns give the actual value used in the component inst
 | 23 | Shared Load | 1 + 10 | ● | ● | · | · | ● | · |
 | 24 | Phase Change | 12 | · | ● | · | · | ● | · |
 | 25 | Dynamic Balance | 1 + 8 + 1 | ◐ | ● | · | · | ● | · |
+| 26 | Two Metronomes | 2 | · | ◐ | · | · | · | · |
+| 27 | Trailing Shadow | 1 + 1 | ● | · | · | · | · | · |
+| 28 | Polarity | 2 | ◐ | ◐ | · | · | · | · |
+| 29 | Changing of the Guard | 2 | ◐ | ◐ | · | · | · | · |
+| 30 | Corridor Dance | 2 | · | ◐ | · | · | · | · |
+| 31 | Domino Ring | 12 | · | ● | · | · | ● | · |
+| 32 | Thinning Clock | 1 + 12 | ● | ● | · | · | ● | · |
+| 33 | Remembered Threshold | 1 + 1 | ● | · | · | ● | · | · |
+| 34 | Recursive Frame | 1 + 12 | ● | ● | · | · | ● | · |
+| 35 | Nested Cube | 2 | ◐ | ◐ | ● | · | ◐ | · |
+| 36 | History Split | 1 + world + traces | ● | ● | · | ● | · | · |
+| 37 | Recognized Partner | 1 + 2 + 4 + 4 | ● | ● | · | · | · | · |
+| 38 | Anticipatory Return | 1 + 5 + 1 + 10 | ● | ● | · | ● | · | · |
+| 39 | Cursor Repulsion | 3 | · | ● | · | · | ◐ | · |
+| 40 | Three States | 3 | · | ● | · | · | · | · |
 
 Every scene also accepts the `faceLabels` prop, so text can be added to any of them. The column
 marks only what the scene shows by default.
@@ -107,6 +137,21 @@ marks only what the scene shows by default.
 | 23 | Shared Load | two rails | closed | · |
 | 24 | Phase Change | scatter ↔ block | closed | · |
 | 25 | Dynamic Balance | ring | closed, wraps | ◐ |
+| 26 | Two Metronomes | facing pendulums | closed | · |
+| 27 | Trailing Shadow | walk + lagging double | closed | ● |
+| 28 | Polarity | pair on an axis | closed | · |
+| 29 | Changing of the Guard | post + relief | closed, wraps | · |
+| 30 | Corridor Dance | facing pair in a corridor | closed, wraps | · |
+| 31 | Domino Ring | closed ring | closed | · |
+| 32 | Thinning Clock | dial + hand | closed | ◐ |
+| 33 | Remembered Threshold | corridor + threshold | closed, wraps | · |
+| 34 | Recursive Frame | nested frames | closed | · |
+| 35 | Nested Cube | cube in a cube | closed | · |
+| 36 | History Split | shared world + traces | closed | ● |
+| 37 | Recognized Partner | pair + memory cubes | closed | ● |
+| 38 | Anticipatory Return | body + energy column | closed | ● |
+| 39 | Cursor Repulsion | line of three | closed | · |
+| 40 | Three States | line of three | closed | · |
 
 `Cube inventory` says whether the scene is a closed system. `closed` — the same cubes only move
 around; `closed, wraps` — the population is constant, but a cube leaves through a transparent edge
@@ -143,6 +188,21 @@ memory echoes, passers-by.
 | 23 | Shared Load | ● | ● | follows cube | · | ● | · | · | ● |
 | 24 | Phase Change | ● | · | fixed | · | · | ◐ | · | ◐ |
 | 25 | Dynamic Balance | ● | ● | fixed | · | · | ● | ● | ◐ |
+| 26 | Two Metronomes | ● | · | fixed | · | · | · | · | ● |
+| 27 | Trailing Shadow | ● | · | fixed | · | · | · | ● | ◐ |
+| 28 | Polarity | ● | · | fixed | ● | · | · | · | ◐ |
+| 29 | Changing of the Guard | ● | ◐ | fixed | · | · | ● | ● | ● |
+| 30 | Corridor Dance | ● | · | fixed | · | · | ● | ● | ● |
+| 31 | Domino Ring | ◐ | · | fixed | ● | ◐ | · | · | · |
+| 32 | Thinning Clock | ● | · | fixed | · | · | · | ● | ◐ |
+| 33 | Remembered Threshold | ● | · | fixed | · | · | ● | ● | ● |
+| 34 | Recursive Frame | ● | · | fixed | · | · | · | ● | · |
+| 35 | Nested Cube | · | ● | fixed | · | ● | · | · | · |
+| 36 | History Split | ● | · | fixed | · | · | ● | ● | ◐ |
+| 37 | Recognized Partner | ● | ◐ | fixed | · | · | ● | ● | ● |
+| 38 | Anticipatory Return | ● | · | fixed | · | · | · | ● | ● |
+| 39 | Cursor Repulsion | ◐ | ● | fixed | · | · | · | · | · |
+| 40 | Three States | ◐ | ● | fixed | ● | ◐ | · | · | · |
 
 `Frame of reference` says what produces the motion on screen. `world moves` — the grid itself is
 animated and the cube stands still (`movementMode='move-grid'`, only Moving World). `follows cube` —
@@ -151,8 +211,9 @@ stays in the middle while the supports stream past it. `fixed` — the grid neve
 do.
 
 That distinction matters for the centre column: scenes 1, 19, and 23 hold the centre through the
-frame of reference, while scenes 2, 4, 5, 7, 13, and 25 hold it the plain way — that cube simply
-never moves, and everything else happens around it.
+frame of reference, while scenes 2, 4, 5, 7, 13, 25, 35, 39, and 40 hold it the plain way — that cube
+simply never moves, and everything else happens around it. Scene 29 keeps a post at the centre
+while its occupants change; scene 37 returns the recognised cube to the centre between routines.
 
 ## 5. Behaviour and logic
 
@@ -183,10 +244,27 @@ never moves, and everything else happens around it.
 | 23 | Shared Load | · | ● | ● | · | · | ● | ● |
 | 24 | Phase Change | ● | · | ● | · | · | ● | ● |
 | 25 | Dynamic Balance | ● | · | ● | · | · | ● | ● |
+| 26 | Two Metronomes | · | ● | ● | · | · | ◐ | ● |
+| 27 | Trailing Shadow | · | ● | ● | · | · | · | ● |
+| 28 | Polarity | · | ● | ● | ◐ | · | · | ● |
+| 29 | Changing of the Guard | · | ● | ● | · | · | ● | ● |
+| 30 | Corridor Dance | · | ● | ● | · | · | · | ● |
+| 31 | Domino Ring | · | ● | · | · | · | · | ● |
+| 32 | Thinning Clock | · | ● | ● | · | · | ● | ● |
+| 33 | Remembered Threshold | ◐ | ● | ● | · | · | ● | ● |
+| 34 | Recursive Frame | · | ● | ● | · | · | · | ● |
+| 35 | Nested Cube | · | · | · | · | · | · | · |
+| 36 | History Split | · | ● | ● | · | · | ● | ● |
+| 37 | Recognized Partner | · | ● | ● | · | · | ● | ● |
+| 38 | Anticipatory Return | · | ● | ● | · | · | ● | ● |
+| 39 | Cursor Repulsion | · | · | · | ● | · | · | · |
+| 40 | Three States | ● | ◐ | · | · | · | · | · |
 
 `State carried across cycles` means the next cycle differs because of what happened in the previous
 one: a learned route, a remembered journey, a symbol or direction that must not repeat, a swapped
-pair of destinations, or a rotated position of the free cell.
+pair of destinations, a rotated position of the free cell, a thinning dial, a shrinking hesitation,
+accumulated traces, partner memory, or a lesson about remaining energy. Two Metronomes carry
+coupling only until they reset.
 
 ## 6. Camera, grid, and interaction
 
@@ -217,12 +295,27 @@ pair of destinations, or a rotated position of the free cell.
 | 23 | Shared Load | 17 | 0.05 | 45° | 3 / 9 | · | · | · |
 | 24 | Phase Change | 23 | 0.035 | 35° | 4 / 12 | · | · | · |
 | 25 | Dynamic Balance | 17 | 0.055 | 45° | 3 / 9 | · | · | · |
+| 26 | Two Metronomes | 15 | 0.06 | 0° | 2.5 / 8 | · | · | · |
+| 27 | Trailing Shadow | 17 | 0.05 | 20° | 3 / 9 | · | · | · |
+| 28 | Polarity | 15 | 0.07 | 0° | 2.5 / 8 | · | · | · |
+| 29 | Changing of the Guard | 17 | 0.06 | 30° | 1.5–2.5 / 9 | 0.88 – 1.00 | 0.26 – 0.55 | · |
+| 30 | Corridor Dance | 17 | 0.05 | 0° | 3 / 9 | · | · | · |
+| 31 | Domino Ring | 15 | 0.055 | 35° | 3 / 8 | · | · | · |
+| 32 | Thinning Clock | 19 | 0.042 | 45° | 4 / 10 | · | · | · |
+| 33 | Remembered Threshold | 19 | 0.045 | 15° | 2–3 / 10 | 1.00 – 1.20 | 0.52 – 0.72 | · |
+| 34 | Recursive Frame | 19 | 0.045 | 45° | 2–3 / 10 | 0.96 – 1.16 | 0.38 – 0.50 | · |
+| 35 | Nested Cube | 13 | 0.055 | 45° | 2.5 / 7 | · | · | · |
+| 36 | History Split | 39 | 0.032 | 35° | 4–6 / 17–20 | 0.62 – 0.96 | 0.42 – 0.52 | · |
+| 37 | Recognized Partner | 21 | 0.047 | 25° | 3 / 10 | 1.00 – 1.20 | 0.50 – 0.66 | · |
+| 38 | Anticipatory Return | 25 | 0.043 | 40° | 3 / 11 | 1.04 – 1.20 | 0.52 – 0.70 | · |
+| 39 | Cursor Repulsion | 9 | 0.1 | 0° | default | · | · | · |
+| 40 | Three States | 9 | 0.1 | 0° | default | · | · | ● |
 
 Camera elevation is 35° in every scene. The fade columns give the animated range where a scene
 changes it; `default` means the wide radii derived from the grid size, and `off (bounded)` means the
 radial fade is disabled so the grid stays at full strength up to its border. Pointer hovering highlights a
-cube with a pointer cursor in every scene, but only the two face-flip scenes scale the cube in
-response.
+cube with a pointer cursor in every scene, but only the two face-flip scenes and Three States scale
+the cube in response.
 
 ## 7. Feature totals
 
@@ -230,29 +323,44 @@ Counting every scene where the feature is marked `●` or `◐`.
 
 | Feature | Scenes |
 | --- | --: |
-| Repeats forever | 24 |
-| Cubes move between grid cells | 22 |
-| Main cube stays at centre | 9 |
-| Ghost / translucent copies | 6 |
-| Closed system (constant population) | 20 |
-| — of them wrapping through an edge | 7 |
+| Repeats forever | 36 |
+| Cubes move between grid cells | 36 |
+| Main cube stays at centre | 14 |
+| Ghost / translucent copies | 11 |
+| Closed system (constant population) | 35 |
+| — of them wrapping through an edge | 10 |
 | Open system (cubes created and destroyed) | 5 |
 | Frame of reference other than fixed | 3 |
-| Collision-safe pathfinding | 20 |
-| Waiting or synchronising | 18 |
-| Group or collective composition | 18 |
-| State carried across cycles | 17 |
-| Randomised per cycle | 15 |
-| Opacity fades | 15 |
-| Assembled shape | 13 |
-| Enters / exits through a transparent edge | 12 |
-| Fixed scripted route | 12 |
-| Proximity reaction | 5 |
-| Animated camera zoom and grid opacity | 5 |
-| Obstacle or barrier | 4 |
+| Collision-safe pathfinding | 31 |
+| Waiting or synchronising | 28 |
+| Group or collective composition | 31 |
+| State carried across cycles | 24 |
+| Randomised per cycle | 17 |
+| Opacity fades | 24 |
+| Assembled shape | 18 |
+| Enters / exits through a transparent edge | 17 |
+| Fixed scripted route | 25 |
+| Proximity reaction | 7 |
+| Animated camera zoom and grid opacity | 11 |
+| Obstacle or barrier | 7 |
 | World (grid) moves under the cube | 3 |
-| Lifted above the grid | 3 |
-| Cube rotation | 2 |
-| Hover scale response | 2 |
+| Lifted above the grid | 6 |
+| Cube rotation | 5 |
+| Hover scale response | 3 |
 | Signal or pulse | 2 |
-| Static composition | 1 |
+| Static composition | 2 |
+
+## Appendix. Proposed scenes
+
+Identity only. These eight briefs are not in the gallery; camera and grid values do not exist until they are implemented. Full descriptions live in [SCENES.md](SCENES.md#proposed-scenes).
+
+| # | Scene | Component | Set | Tags |
+| --: | --- | --- | --- | --- |
+| P1 | Contagion | `ContagionScene` | Proposed | propagation, resilience |
+| P2 | Tower | `TowerScene` | Proposed | accumulation, order |
+| P3 | Scale Shift | `ScaleShiftScene` | Proposed | hierarchy, emergence |
+| P4 | Trail | `TrailScene` | Proposed | communication, environment |
+| P5 | Passing the Name | `PassedNameScene` | Proposed | identity, inheritance |
+| P6 | Gear Train | `GearTrainScene` | Proposed | causation, coupling |
+| P7 | Shadow of Danger | `DangerShadowScene` | Proposed | fear, proximity |
+| P8 | Bottleneck | `BottleneckScene` | Proposed | throughput, self-organization |

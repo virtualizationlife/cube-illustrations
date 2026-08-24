@@ -22,6 +22,11 @@ Or add it to `package.json`:
 
 The consuming project must provide `react`, `react-dom`, and `three`.
 
+The package has two supported entry points:
+
+- `cube-illustrations` for built-in scene components and the gallery;
+- `cube-illustrations/sdk` for authoring custom scenes.
+
 ## Usage
 
 ```tsx
@@ -36,31 +41,44 @@ Each ready-to-use scene is a separate component:
 
 ```tsx
 import {
+    AnticipatoryReturnScene,
     BoundaryRepairScene,
     BecomingSignScene,
     CenteredCubeScene,
     CollectiveCurrentScene,
     ContinuousQueueScene,
+    CorridorDanceScene,
     CrossingFlowsScene,
     CursorRepulsionScene,
+    DominoRingScene,
     DynamicBalanceScene,
     EncounterCubeScene,
     FlippingCubeScene,
+    GuardChangeScene,
+    HistorySplitScene,
     LearnedDetourScene,
     LearnedRhythmScene,
     MemoryReplayScene,
+    MetronomePairScene,
     MovingGridScene,
     MovingBridgeScene,
+    NestedCubeScene,
     PhaseChangeScene,
+    PolarityScene,
     PredictedPathsScene,
     PreferenceChoiceScene,
+    RecursiveFrameScene,
+    RecognizedPartnerScene,
+    RememberedThresholdScene,
     ReunitingPairScene,
     SevenCubesScene,
     SharedLoadScene,
     SignalRelayScene,
     StructureMorphScene,
+    ThinningClockScene,
     ThreeCubeStatesScene,
     ThreeCubesScene,
+    TrailingShadowScene,
     VllCubeScene,
     ValenceFieldScene,
 } from 'cube-illustrations'
@@ -94,6 +112,19 @@ export const Scene = () => (
         <SharedLoadScene />
         <PhaseChangeScene />
         <DynamicBalanceScene />
+        <MetronomePairScene />
+        <TrailingShadowScene />
+        <PolarityScene />
+        <GuardChangeScene />
+        <CorridorDanceScene />
+        <DominoRingScene />
+        <ThinningClockScene />
+        <RememberedThresholdScene />
+        <RecursiveFrameScene />
+        <NestedCubeScene />
+        <HistorySplitScene />
+        <RecognizedPartnerScene />
+        <AnticipatoryReturnScene />
     </>
 )
 ```
@@ -136,6 +167,21 @@ alternates between independent movement and locally aligned flow. `SharedLoadSce
 supports around a raised traveler one at a time. `PhaseChangeScene` repeatedly crystallizes a
 scatter and melts it again. `DynamicBalanceScene` maintains a compact group through continual
 arrival, departure, and redistribution.
+
+`MetronomePairScene` couples two pendulums until they share a tempo, then detunes them again.
+`TrailingShadowScene` keeps a translucent double one step behind a walker. `PolarityScene` attracts
+or repels the same pair according to one cube's quarter-turn. `GuardChangeScene` alternates
+overlapping and vacant handovers at a central post. `CorridorDanceScene` deadlocks two polite cubes
+until one of them stops mirroring. `DominoRingScene` sends a toppling wave around a closed ring.
+`ThinningClockScene` shortens each lap as dial marks disappear. `RememberedThresholdScene` keeps
+detouring around a cell after the obstacle is gone.
+
+`RecursiveFrameScene` renews nested frames while a centre cube keeps its inner route.
+`NestedCubeScene` holds a raised cube inside a larger translucent cube. `HistorySplitScene` replays
+three biographies through one world and then shows their traces together. `RecognizedPartnerScene`
+repeats a dance from spatial memory after two identical visitors swap places.
+`AnticipatoryReturnScene` spends an energy column on a long outbound trip, fails once, then turns
+back in time.
 
 ## Face labels
 
@@ -183,7 +229,60 @@ multiple cubes cannot enter or cross the same occupied space. `moveCubeTo` resol
 when no safe route exists.
 
 The lower-level scene components and grid animation/runtime APIs remain public exports for custom
-compositions.
+compositions. They remain available from the root entry for compatibility; new scene authoring
+should use `cube-illustrations/sdk`. The legacy root runtime exports may move in the next major
+version.
+
+## Scene SDK
+
+`defineScene` owns the React, renderer, visibility, viewport, and cancellation lifecycle. A scene
+only declares its metadata, view, initial composition, and choreography:
+
+```tsx
+import { defineScene } from 'cube-illustrations/sdk'
+
+export const GreetingScene = defineScene({
+    metadata: {
+        id: 'greeting',
+        title: 'Greeting',
+        tags: ['example'],
+    },
+    view: {
+        cubeSize: 0.06,
+        gridCellSize: 0.06,
+        gridCellCount: 11,
+        cameraAzimuthDeg: 35,
+        viewOffsetY: 0,
+        hoverCells: 0,
+    },
+    setup: ({ runtime, props }) => {
+        runtime.addCube({
+            id: 'partner',
+            position: { column: 3, row: 0 },
+            faceLabels: props.faceLabels,
+        })
+    },
+    script: async ({ cubes, timeline }) => {
+        await timeline.wait(0.5)
+        await cubes.main.moveTo(
+            { column: 2, row: 0 },
+            { duration: 0.8, easing: 'easeInOutCubic' }
+        )
+        await cubes.get('partner').pulse()
+    },
+})
+```
+
+SDK delays and asynchronous runtime commands are cancelled automatically when the component
+unmounts. `timeline` also provides `all`, `sequence`, `stagger`, and `loop`; `runtime` remains
+available for lower-level operations.
+
+SDK-authored scenes accept `seed` for reproducible random choices. Use the injected `random`
+facade in `setup`, `script`, or `onFrame` instead of `Math.random`; the same seed then produces the
+same sequence of `random.next()`, `random.item()`, and `random.shuffle()` results.
+
+`SCENE_CATALOG` is the ordered source of built-in component metadata used by
+`IllustrationsPage`; consumers can use it to build their own gallery or filtering UI.
 
 ## Camera angle
 
