@@ -98,6 +98,9 @@ export const createFakeSceneRuntime = (): FakeSceneRuntime => {
         setGridOpacity: (opacity) => {
             record('setGridOpacity', opacity)
         },
+        setGridVisibility: (visibility) => {
+            record('setGridVisibility', visibility)
+        },
         setGridFadeRadii: (inner, outer) => {
             record('setGridFadeRadii', inner, outer)
         },

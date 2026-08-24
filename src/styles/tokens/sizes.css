@@ -12,6 +12,7 @@
     --cube_illustrations_scene_min_size: 240px;
     --cube_illustrations_scene_size: 280px;
     --cube_illustrations_scene_aspect_ratio: 1 / 1;
+    --cube_illustrations_scene_panoramic_aspect_ratio: 3 / 2;
     --cube_illustrations_scene_fallback_padding: 16px;
     --cube_illustrations_scene_fade_duration: 0.4s;
     --cube_illustrations_scene_fade_easing: ease-out;

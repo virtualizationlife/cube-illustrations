@@ -5,15 +5,20 @@ import { useSceneRenderHost, type CubeRendererStatus } from '@runtime/rendering/
 export type CubeSceneViewportProps = {
     readonly canvasRef: RefObject<HTMLCanvasElement | HTMLDivElement | null>
     readonly status: CubeRendererStatus
+    readonly variant?: 'standard' | 'panoramic'
 }
 
 /** Shared canvas shell for cube scenes, including the WebGPU fallback state. */
-export const CubeSceneViewport = ({ canvasRef, status }: CubeSceneViewportProps): JSX.Element => {
+export const CubeSceneViewport = ({
+    canvasRef,
+    status,
+    variant = 'standard',
+}: CubeSceneViewportProps): JSX.Element => {
     const host = useSceneRenderHost()
 
     return (
         <div
-            className='cube_illustrations_slot'
+            className={`cube_illustrations_slot cube_illustrations_slot_${variant}`}
             data-status={status}
             data-scene-ready={status === 'ready' ? 'true' : 'false'}
         >

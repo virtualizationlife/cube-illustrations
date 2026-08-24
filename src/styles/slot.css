@@ -9,6 +9,10 @@
     border: var(--cube_illustrations_border);
 }
 
+.cube_illustrations_slot_panoramic {
+    aspect-ratio: var(--cube_illustrations_scene_panoramic_aspect_ratio);
+}
+
 .cube_illustrations_canvas,
 .cube_illustrations_scene_element {
     position: absolute;

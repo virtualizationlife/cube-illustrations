@@ -14,7 +14,7 @@ import {
     MAIN_CUBE_ID,
 } from '@runtime/grid/gridSceneRuntime'
 
-const createRuntime = () => {
+const createRuntime = (mainCubeEnabled = true) => {
     const scene = new THREE.Scene()
     const runtime = createGridSceneRuntime({
         scene,
@@ -23,6 +23,7 @@ const createRuntime = () => {
         gridCellCount: 5,
         mainCubeSize: 0.1,
         mainCubeHoverCells: 0,
+        mainCubeEnabled,
     })
     return { runtime, scene }
 }
@@ -38,6 +39,26 @@ const PROXIMITY_OPACITY: GridProximityOpacityConfig = {
 }
 
 describe('grid scene runtime', () => {
+    it('creates a grid-only world without constructing the conventional main cube', () => {
+        const { runtime, scene } = createRuntime(false)
+
+        expect(runtime.hasCube(MAIN_CUBE_ID)).toBe(false)
+        expect(runtime.getCube(MAIN_CUBE_ID)).toBeUndefined()
+        expect(runtime.getCubes()).toEqual([])
+        expect(runtime.mainCube.children).toEqual([])
+        expect(scene.children).toContain(runtime.grid)
+        expect(scene.children).not.toContain(runtime.mainCube)
+
+        runtime.setGridVisibility({
+            shape: 'rounded-rectangle',
+            widthCells: 4,
+            heightCells: 2,
+            cornerRadiusCells: 0.5,
+            fadeCells: 1,
+        })
+        runtime.dispose()
+    })
+
     it('uses subtle rounded corners by default and supports radius overrides', () => {
         const { runtime } = createRuntime()
         const mainBody = runtime.mainCube.children[0]

@@ -5,6 +5,7 @@ import {
     type CubeFaceLabelAssets,
     type GridCubeFaceLabelInput,
 } from '@runtime/grid/cubeFaceLabels'
+import type { GridVisibility } from '@runtime/grid/gridFade'
 import { createGridLines } from '@runtime/grid/gridLines'
 import {
     createGridWorld,
@@ -95,6 +96,8 @@ export type GridSceneRuntime = {
         options: GridSceneTransitionOptions
     ) => Promise<void>
     readonly setGridOpacity: (opacity: number) => void
+    readonly setGridVisibility: (visibility: GridVisibility) => void
+    /** @deprecated Use setGridVisibility with a radial shape. */
     readonly setGridFadeRadii: (innerRadiusCells: number, outerRadiusCells: number) => void
     readonly travelWithCube: (
         id: string,
@@ -135,6 +138,10 @@ export type CreateGridSceneRuntimeOptions = {
     readonly gridOpacity?: number
     readonly gridFadeInnerRadiusCells?: number
     readonly gridFadeOuterRadiusCells?: number
+    /** Defaults to the existing radial grid fade when omitted. */
+    readonly gridVisibility?: GridVisibility
+    /** Adds the conventional main cube unless explicitly disabled. */
+    readonly mainCubeEnabled?: boolean
     readonly mainCubeSize: number
     readonly mainCubeHoverCells: number
     /** Default corner radius for every cube, in world units. */
@@ -212,6 +219,8 @@ export const createGridSceneRuntime = ({
     gridOpacity = DEFAULT_GRID_OPACITY,
     gridFadeInnerRadiusCells,
     gridFadeOuterRadiusCells,
+    gridVisibility,
+    mainCubeEnabled = true,
     mainCubeSize,
     mainCubeHoverCells,
     cubeCornerRadius,
@@ -228,8 +237,11 @@ export const createGridSceneRuntime = ({
         gridCellCount,
         color: GRID_LINE_COLOR,
         opacity: maxGridOpacity,
-        fadeInnerRadius: Math.max(0, gridFadeInnerRadiusCells ?? 0) * gridCellSize,
-        fadeOuterRadius: Math.max(0, gridFadeOuterRadiusCells ?? 0) * gridCellSize,
+        visibility: gridVisibility ?? {
+            shape: 'radial',
+            innerRadiusCells: Math.max(0, gridFadeInnerRadiusCells ?? 0),
+            outerRadiusCells: Math.max(0, gridFadeOuterRadiusCells ?? 0),
+        },
     })
     grid.add(gridLines.object)
     scene.add(grid)
@@ -403,12 +415,16 @@ export const createGridSceneRuntime = ({
         applyPositions()
     }
 
-    const mainCube = addCube({
-        id: MAIN_CUBE_ID,
-        size: mainCubeSize,
-        hoverCells: mainCubeHoverCells,
-        faceLabels: mainCubeFaceLabels,
-    })
+    // Keep a stable mesh reference for the existing scene lifecycle API. Grid-only worlds
+    // receive an unattached anchor instead of constructing, registering, then removing a cube.
+    const mainCube = mainCubeEnabled
+        ? addCube({
+              id: MAIN_CUBE_ID,
+              size: mainCubeSize,
+              hoverCells: mainCubeHoverCells,
+              faceLabels: mainCubeFaceLabels,
+          })
+        : new THREE.Group()
     updateGridVisual()
 
     return {
@@ -466,11 +482,15 @@ export const createGridSceneRuntime = ({
             maxGridOpacity = clampOpacity(opacity)
             gridLines.setOpacity(maxGridOpacity)
         },
+        setGridVisibility: (visibility) => {
+            gridLines.setVisibility(visibility)
+        },
         setGridFadeRadii: (innerRadiusCells, outerRadiusCells) => {
-            gridLines.setFadeRadii(
-                Math.max(0, innerRadiusCells) * gridCellSize,
-                Math.max(0, outerRadiusCells) * gridCellSize
-            )
+            gridLines.setVisibility({
+                shape: 'radial',
+                innerRadiusCells: Math.max(0, innerRadiusCells),
+                outerRadiusCells: Math.max(0, outerRadiusCells),
+            })
         },
         travelWithCube: world.travelWithCube,
         update,

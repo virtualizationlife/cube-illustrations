@@ -35,9 +35,12 @@ export const SCENE_CATEGORIES = [
     'continuity',
     'interaction',
     'cycles',
+    'world',
 ] as const
 
 export type SceneCategory = (typeof SCENE_CATEGORIES)[number]
+
+export type SceneLayout = 'standard' | 'panoramic'
 
 export type SceneMetadata = {
     readonly id: string
@@ -46,6 +49,12 @@ export type SceneMetadata = {
     readonly primaryCategory: SceneCategory
     readonly tags: readonly string[]
     readonly description?: string
+    /** The card proportions used when this scene appears in the gallery. */
+    readonly layout?: SceneLayout
+    /** False keeps a scene out of the gallery's combined "all" view. Defaults to true. */
+    readonly includeInAll?: boolean
+    /** False hides the title and tags below this scene's viewport. Defaults to true. */
+    readonly showCaption?: boolean
 }
 
 export type CubeSceneProps = {
@@ -255,7 +264,13 @@ export const defineScene = <Props extends CubeSceneProps = CubeSceneProps, State
             onFrame,
         })
 
-        return <CubeSceneViewport canvasRef={canvasRef} status={status} />
+        return (
+            <CubeSceneViewport
+                canvasRef={canvasRef}
+                status={status}
+                variant={definition.metadata.layout ?? 'standard'}
+            />
+        )
     }
 
     Object.defineProperty(SceneComponent, 'name', {

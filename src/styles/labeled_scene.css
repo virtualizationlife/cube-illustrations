@@ -4,6 +4,12 @@
     min-width: var(--cube_illustrations_zero);
 }
 
+.cube_illustrations_labeled_scene_panoramic {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(calc(var(--cube_illustrations_scene_size) * 3), var(--cube_illustrations_full_size));
+}
+
 .cube_illustrations_labeled_scene > .cube_illustrations_slot {
     width: var(--cube_illustrations_full_size);
 }

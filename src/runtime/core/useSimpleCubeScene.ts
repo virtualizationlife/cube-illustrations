@@ -7,7 +7,7 @@ import { createSceneWorld, DEFAULT_CAMERA_ELEVATION_DEG } from '@runtime/core/cr
 import { getSceneTimeScale } from '@runtime/core/timeScale'
 import { bindGridCubeHover, type GridCubeHoverController } from '@runtime/grid/bindGridCubeHover'
 import { getCubeFaceLabelsKey, type GridCubeFaceLabelInput } from '@runtime/grid/cubeFaceLabels'
-import { getWideGridFadeRadii } from '@runtime/grid/gridFade'
+import { getWideGridFadeRadii, type GridVisibility } from '@runtime/grid/gridFade'
 import type { GridSceneCubeEntry, GridSceneRuntime } from '@runtime/grid/gridSceneRuntime'
 import { createStandaloneRenderer } from '@runtime/rendering/createStandaloneRenderer'
 import { useSceneRenderHost, type CubeRendererStatus } from '@runtime/rendering/SceneRenderHost'
@@ -55,10 +55,16 @@ export type IllustrationSceneSizeProps = {
     readonly gridFadeInnerRadiusCells?: number
     /** Radius in cells where the radial grid fade reaches full transparency. */
     readonly gridFadeOuterRadiusCells?: number
+    /** Shape and dimensions of the visible grid area. Defaults to a radial fade. */
+    readonly gridVisibility?: GridVisibility
+    /** Builds a grid-only world when false. Defaults to true for existing scenes. */
+    readonly mainCubeEnabled?: boolean
     /** Horizontal camera angle in degrees (0 = +Z, 90 = +X). */
     readonly cameraAzimuthDeg: number
     /** Vertical camera angle above the horizon in degrees. Defaults to 35. */
     readonly cameraElevationDeg?: number
+    /** Distance between the camera and its look-at point. */
+    readonly cameraDistance?: number
     /**
      * Vertical shift of the whole picture in world units.
      * 0 = look at the cube center; negative = look lower (cube sits higher in frame).
@@ -98,8 +104,11 @@ export const useSimpleCubeScene = ({
     gridOpacity,
     gridFadeInnerRadiusCells,
     gridFadeOuterRadiusCells,
+    gridVisibility,
+    mainCubeEnabled = true,
     cameraAzimuthDeg,
     cameraElevationDeg = DEFAULT_CAMERA_ELEVATION_DEG,
+    cameraDistance,
     viewOffsetY,
     hoverCells,
     mainCubeFaceLabels,
@@ -168,8 +177,11 @@ export const useSimpleCubeScene = ({
                 gridOpacity,
                 gridFadeInnerRadiusCells: resolvedGridFadeInnerRadiusCells,
                 gridFadeOuterRadiusCells: resolvedGridFadeOuterRadiusCells,
+                gridVisibility,
+                mainCubeEnabled,
                 cameraAzimuthDeg,
                 cameraElevationDeg,
+                cameraDistance,
                 viewOffsetY,
                 hoverCells,
                 mainCubeFaceLabels: mainCubeFaceLabelsRef.current,
@@ -282,9 +294,12 @@ export const useSimpleCubeScene = ({
         gridOpacity,
         resolvedGridFadeInnerRadiusCells,
         resolvedGridFadeOuterRadiusCells,
+        gridVisibility,
+        mainCubeEnabled,
         enableCubeHover,
         cameraAzimuthDeg,
         cameraElevationDeg,
+        cameraDistance,
         viewOffsetY,
         hoverCells,
         faceLabelsKey,

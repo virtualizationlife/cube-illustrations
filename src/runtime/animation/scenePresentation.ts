@@ -62,10 +62,11 @@ export const createScenePresentation = (
             camera.zoom = current.zoom
             camera.updateProjectionMatrix()
             runtime.setGridOpacity(current.gridOpacity)
-            runtime.setGridFadeRadii(
-                current.gridFadeInnerRadiusCells,
-                current.gridFadeOuterRadiusCells
-            )
+            runtime.setGridVisibility({
+                shape: 'radial',
+                innerRadiusCells: current.gridFadeInnerRadiusCells,
+                outerRadiusCells: current.gridFadeOuterRadiusCells,
+            })
         },
     }
 }

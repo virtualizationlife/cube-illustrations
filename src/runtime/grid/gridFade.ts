@@ -3,6 +3,24 @@ export type GridFadeRadii = {
     readonly outerRadiusCells: number
 }
 
+export type GridVisibility =
+    | {
+          readonly shape: 'radial'
+          readonly innerRadiusCells: number
+          readonly outerRadiusCells: number
+      }
+    | {
+          readonly shape: 'rounded-rectangle'
+          /** Width of the fully visible rectangular area, measured in grid cells. */
+          readonly widthCells: number
+          /** Height of the fully visible rectangular area, measured in grid cells. */
+          readonly heightCells: number
+          /** Radius of each corner, measured in grid cells. */
+          readonly cornerRadiusCells: number
+          /** Width of the soft fade beyond the rounded boundary, measured in grid cells. */
+          readonly fadeCells: number
+      }
+
 /** Nominal distance from the grid center to its outermost regular cell. */
 export const getMaximumGridFadeRadiusCells = (gridCellCount: number): number =>
     Math.ceil(Math.max(0, gridCellCount) / 2)

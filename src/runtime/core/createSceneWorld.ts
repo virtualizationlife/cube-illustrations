@@ -1,6 +1,7 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 import type { GridCubeFaceLabelInput } from '@runtime/grid/cubeFaceLabels'
+import type { GridVisibility } from '@runtime/grid/gridFade'
 import { createGridSceneRuntime, type GridSceneRuntime } from '@runtime/grid/gridSceneRuntime'
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
@@ -20,8 +21,11 @@ export type CreateSceneWorldOptions = {
     readonly gridOpacity?: number
     readonly gridFadeInnerRadiusCells: number
     readonly gridFadeOuterRadiusCells: number
+    readonly gridVisibility?: GridVisibility
+    readonly mainCubeEnabled?: boolean
     readonly cameraAzimuthDeg: number
     readonly cameraElevationDeg: number
+    readonly cameraDistance?: number
     readonly viewOffsetY: number
     readonly hoverCells: number
     readonly mainCubeFaceLabels?: GridCubeFaceLabelInput
@@ -45,8 +49,11 @@ export const createSceneWorld = ({
     gridOpacity,
     gridFadeInnerRadiusCells,
     gridFadeOuterRadiusCells,
+    gridVisibility,
+    mainCubeEnabled = true,
     cameraAzimuthDeg,
     cameraElevationDeg,
+    cameraDistance = CAMERA_DISTANCE,
     viewOffsetY,
     hoverCells,
     mainCubeFaceLabels,
@@ -59,10 +66,10 @@ export const createSceneWorld = ({
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100)
-    const horizontal = CAMERA_DISTANCE * Math.cos(cameraElevation)
+    const horizontal = cameraDistance * Math.cos(cameraElevation)
     camera.position.set(
         horizontal * Math.sin(cameraAzimuth),
-        lookAtY + CAMERA_DISTANCE * Math.sin(cameraElevation),
+        lookAtY + cameraDistance * Math.sin(cameraElevation),
         horizontal * Math.cos(cameraAzimuth)
     )
     camera.lookAt(0, lookAtY, 0)
@@ -75,6 +82,8 @@ export const createSceneWorld = ({
         gridOpacity,
         gridFadeInnerRadiusCells,
         gridFadeOuterRadiusCells,
+        gridVisibility,
+        mainCubeEnabled,
         mainCubeSize: cubeSize,
         mainCubeHoverCells: hoverCells,
         cubeCornerRadius,
