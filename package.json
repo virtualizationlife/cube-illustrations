@@ -20,8 +20,8 @@
         "./styles.css": "./dist/styles.css"
     },
     "scripts": {
-        "demo": "vite --config vite.demo.config.ts",
-        "build": "vite build && tsc -p tsconfig.build.json",
+        "demo": "vite --config config/vite.demo.config.ts",
+        "build": "vite build --config config/vite.config.ts && tsc -p config/tsconfig.build.json",
         "prepare": "npm run build",
         "check": "tsc -p tsconfig.json --noEmit && npm run build",
         "test": "vitest run",

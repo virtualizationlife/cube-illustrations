@@ -4,6 +4,6 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-    root: fileURLToPath(new URL('./demo', import.meta.url)),
+    root: fileURLToPath(new URL('../demo', import.meta.url)),
     plugins: [react()],
 })
