@@ -1,4 +1,5 @@
 export { IllustrationsPage } from './IllustrationsPage'
+export { SCENE_CATALOG, type SceneCatalogEntry } from './sceneCatalog'
 export { AnticipatoryReturnScene } from './components/AnticipatoryReturnScene'
 export { BoundaryRepairScene } from './components/BoundaryRepairScene'
 export { BecomingSignScene } from './components/BecomingSignScene'
