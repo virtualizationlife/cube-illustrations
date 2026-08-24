@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 
 import { SceneRenderHost } from './scenes/SceneRenderHost'
+import { AnticipatoryReturnScene } from './components/AnticipatoryReturnScene'
 import { CenteredCubeScene } from './components/CenteredCubeScene'
 import { CollectiveCurrentScene } from './components/CollectiveCurrentScene'
 import { BoundaryRepairScene } from './components/BoundaryRepairScene'
@@ -13,17 +14,21 @@ import { DominoRingScene } from './components/DominoRingScene'
 import { EncounterCubeScene } from './components/EncounterCubeScene'
 import { FlippingCubeScene } from './components/FlippingCubeScene'
 import { GuardChangeScene } from './components/GuardChangeScene'
+import { HistorySplitScene } from './components/HistorySplitScene'
 import { MovingGridScene } from './components/MovingGridScene'
 import { LearnedDetourScene } from './components/LearnedDetourScene'
 import { LearnedRhythmScene } from './components/LearnedRhythmScene'
 import { MemoryReplayScene } from './components/MemoryReplayScene'
 import { MetronomePairScene } from './components/MetronomePairScene'
 import { MovingBridgeScene } from './components/MovingBridgeScene'
+import { NestedCubeScene } from './components/NestedCubeScene'
 import { PhaseChangeScene } from './components/PhaseChangeScene'
 import { PolarityScene } from './components/PolarityScene'
 import { PredictedPathsScene } from './components/PredictedPathsScene'
 import { PreferenceChoiceScene } from './components/PreferenceChoiceScene'
 import { RememberedThresholdScene } from './components/RememberedThresholdScene'
+import { RecursiveFrameScene } from './components/RecursiveFrameScene'
+import { RecognizedPartnerScene } from './components/RecognizedPartnerScene'
 import { ReunitingPairScene } from './components/ReunitingPairScene'
 import { SevenCubesScene } from './components/SevenCubesScene'
 import { SharedLoadScene } from './components/SharedLoadScene'
@@ -150,6 +155,21 @@ export const IllustrationsPage = (): JSX.Element => (
         </LabeledScene>
         <LabeledScene label='Remembered Threshold' tags='mind, residue'>
             <RememberedThresholdScene />
+        </LabeledScene>
+        <LabeledScene label='Recursive Frame' tags='ontology, continuity, reality'>
+            <RecursiveFrameScene />
+        </LabeledScene>
+        <LabeledScene label='Nested Cube' tags='form, containment'>
+            <NestedCubeScene />
+        </LabeledScene>
+        <LabeledScene label='History Split' tags='continuity, biography, comparison'>
+            <HistorySplitScene />
+        </LabeledScene>
+        <LabeledScene label='Recognized Partner' tags='identity, memory, relationship'>
+            <RecognizedPartnerScene />
+        </LabeledScene>
+        <LabeledScene label='Anticipatory Return' tags='embodiment, energy, maintenance'>
+            <AnticipatoryReturnScene />
         </LabeledScene>
         </div>
     </SceneRenderHost>

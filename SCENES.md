@@ -229,3 +229,49 @@ Twelve cubes begin widely scattered around a large grid. A different random targ
 A central cube and seven surrounding cubes form a compact group with one vacant boundary cell. A translucent cube arrives from the faded edge and fills the vacancy. The cube on the opposite side then leaves and becomes the next incoming participant, while one to three remaining cubes move around the perimeter to redistribute the empty position before the next arrival.
 
 **Abstract meaning:** Stability is an ongoing achievement produced through exchange and internal redistribution rather than complete immobility.
+
+## Narrative and Ontology
+
+The following five scenes extend the collection with nested frames, divergent biography, partner recognition, embodied energy, and scale containment.
+
+### Recursive Frame (`RecursiveFrameScene`)
+
+**Tags:** `ontology`, `continuity`, `reality`
+
+Three nested square frames of translucent cubes surround a central cube. The central cube continuously travels around a fixed eight-step route. Periodically, the outermost frame expands and fades away, the middle frame moves outward, the inner frame shifts to the middle radius, and a renewed inner frame appears at the smallest radius. The cycle repeats indefinitely while the main cube never breaks its path.
+
+**Abstract meaning:** Reality can renew its outer layers while a continuous process persists unchanged at the center.
+
+### Nested Cube (`NestedCubeScene`)
+
+**Tags:** `form`, `containment`
+
+A translucent cube three grid cells wide rests on the ground at the center of the grid. Inside its volume, an opaque one-cell cube occupies the same grid position but is raised one cell above the floor, so it sits fully within the larger cube without touching the ground.
+
+There is no movement animation in this scene. It is a static composition that contrasts outer scale with an elevated interior.
+
+**Abstract meaning:** A whole can contain a distinct part that occupies the same place while remaining separate in scale and elevation.
+
+### History Split (`HistorySplitScene`)
+
+**Tags:** `continuity`, `biography`, `comparison`
+
+From the same starting point, the main cube relives three different journeys through a shared world of walls, gates, and moving actors. A translucent preview cube traces each route before the main cube follows it. After each journey, faint trace cubes mark the path taken. The scene ends by pulling the camera back to reveal all three histories simultaneously before the cycle begins again.
+
+**Abstract meaning:** One unchanged world can produce multiple divergent biographies from the same origin.
+
+### Recognized Partner (`RecognizedPartnerScene`)
+
+**Tags:** `identity`, `memory`, `relationship`
+
+Two identical visitors approach a central cube from opposite sides. The first visitor performs a four-step paired dance with the central cube, leaving translucent memory cubes at each position. After both visitors swap places, the central cube follows the same routine with the second visitor but moves toward the remembered positions rather than mirroring the partner's steps.
+
+**Abstract meaning:** Recognition persists as spatial memory even when two indistinguishable partners exchange places.
+
+### Anticipatory Return (`AnticipatoryReturnScene`)
+
+**Tags:** `embodiment`, `energy`, `maintenance`
+
+A main cube carries a trailing column of five energy cubes. On the first cycle it travels far outward, spending one energy cube at each step, and returns too late, fading to a failure echo. On the next cycle it turns back earlier while energy remains, recharges at a home dock, and completes the return successfully.
+
+**Abstract meaning:** A body learns to turn back before its remaining resources can no longer reach home.
