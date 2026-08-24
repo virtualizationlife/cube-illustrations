@@ -7,7 +7,7 @@ The goal throughout was speed **without losing quality**. Every item below recor
 cost the renderer, what replaced it, and what risk it carried to the image.
 
 Measured against `three@0.185.1` and the 25 scenes in
-[src/IllustrationsPage.tsx](src/IllustrationsPage.tsx).
+[src/IllustrationsPage.tsx](../src/IllustrationsPage.tsx).
 
 ---
 
@@ -52,7 +52,7 @@ batch. Items 1 and 2 attack this directly and are worth more than the rest combi
 ## 1. One `GPUDevice` shared by every scene
 
 `WebGPUBackend` accepts a pre-existing device instead of requesting its own
-([WebGPUBackend.js:209,250](node_modules/three/src/renderers/webgpu/WebGPUBackend.js#L209)),
+([WebGPUBackend.js:209,250](../node_modules/three/src/renderers/webgpu/WebGPUBackend.js#L209)),
 and — the part that makes this safe with our teardown — `dispose()` only destroys the
 device when the backend created it itself:
 
@@ -65,7 +65,7 @@ if ( this.parameters.device === undefined && this.device !== null ) {
 
 A shared device therefore survives an unmounting scene.
 
-**Implemented** in [src/scenes/sharedGpuDevice.ts](src/scenes/sharedGpuDevice.ts): one
+**Implemented** in [src/scenes/sharedGpuDevice.ts](../src/scenes/sharedGpuDevice.ts): one
 lazily-created, memoised device request for the whole page.
 
 It resolves to `null` rather than throwing when WebGPU is unavailable, and the caller then
@@ -95,14 +95,14 @@ embed a single scene. Worth doing if the page is still the bottleneck.
 The animation loop previously ran from mount to unmount. With 25 scenes in a wrapping
 layout, typically 4–8 are on screen; the rest rendered full frames into a canvas nobody saw.
 
-**Implemented** in [src/scenes/useSimpleCubeScene.ts](src/scenes/useSimpleCubeScene.ts): an
+**Implemented** in [src/scenes/useSimpleCubeScene.ts](../src/scenes/useSimpleCubeScene.ts): an
 `IntersectionObserver` with a 128px `rootMargin` (so a scene is already running by the time
 it scrolls in) combined with `document.hidden`, driving `setAnimationLoop`.
 
 **One deliberate behavioural change came with it.** `elapsed` used to be read straight off
 `THREE.Timer`, i.e. wall-clock time since start. A paused scene would come back with its
 clock advanced by the whole pause, and
-[FaceFlipCubeScene](src/scenes/FaceFlipCubeScene.tsx#L187) uses `elapsed` for hold timing
+[FaceFlipCubeScene](../src/scenes/FaceFlipCubeScene.tsx#L187) uses `elapsed` for hold timing
 (`holdUntil = elapsed + HOLD_DURATION_S`) — so every pending hold would read as expired on
 resume. `elapsed` is now accumulated from the same clamped per-frame delta the rest of the
 scene uses, so a paused scene resumes exactly where it stopped. For a continuously rendering
@@ -128,7 +128,7 @@ grid per scene before any cubes.
 **Per-frame uploads.** `updateGridVisual` recomputed every vertex alpha on the CPU and
 flagged the whole colour attribute dirty — a full buffer re-upload, per line, per frame.
 
-**Implemented** in [src/scenes/gridLines.ts](src/scenes/gridLines.ts).
+**Implemented** in [src/scenes/gridLines.ts](../src/scenes/gridLines.ts).
 
 Baking each line's `basePosition` into its vertices turned out to give *both* line families
 the same offset, `(columnOffset, 0, rowOffset)` — so the whole grid merges into a **single**
@@ -190,7 +190,7 @@ per cube. `EdgesGeometry` is an expensive CPU pass — it hashes and merges ever
 for the dihedral-angle threshold — and scenes that spawn cubes mid-animation paid it on the
 frame the cube appeared, which is where a hitch shows most.
 
-**Implemented** in [src/scenes/cubeGeometryCache.ts](src/scenes/cubeGeometryCache.ts): a
+**Implemented** in [src/scenes/cubeGeometryCache.ts](../src/scenes/cubeGeometryCache.ts): a
 refcounted cache keyed on `size:cornerRadius`, released on `removeCube` and disposed at
 refcount zero. It is per-runtime, so `runtime.dispose()` stays a complete teardown.
 Materials remain per-cube — they carry per-cube opacity and must not be shared.
@@ -208,7 +208,7 @@ identical cubes now share one copy instead of building twelve.
 
 `mergeVertices` preserves `geometry.type` and `geometry.parameters`, so existing
 introspection — including the assertions in
-[tests/gridSceneRuntime.test.ts](tests/gridSceneRuntime.test.ts) — still sees a
+[tests/gridSceneRuntime.test.ts](../tests/gridSceneRuntime.test.ts) — still sees a
 `RoundedBoxGeometry` with its original parameters.
 
 ---
@@ -220,14 +220,14 @@ introspection — including the assertions in
 cube labelled `{ front: 'A' }` allocated roughly 1.5 MB of texture for five blank faces and
 drew them.
 
-**Implemented** in [src/scenes/cubeFaceLabels.ts](src/scenes/cubeFaceLabels.ts):
+**Implemented** in [src/scenes/cubeFaceLabels.ts](../src/scenes/cubeFaceLabels.ts):
 
 - Faces with an empty label get no texture, no material and no mesh at all.
 - Faces sharing the same text share one surface, so the common `faceLabels: 'ABC'` case
   allocates **one** texture instead of six.
 - `setLabels` reconciles rather than rebuilds: a surface whose text disappeared is repainted
   for a new text instead of being destroyed and re-uploaded, which matters for scenes like
-  [BecomingSignScene](src/components/BecomingSignScene.tsx) that change labels during an
+  [BecomingSignScene](../src/components/BecomingSignScene.tsx) that change labels during an
   animation.
 
 `CubeFaceLabelAssets` gained `setOpacity`; `materials` is kept as a live view of the
@@ -361,7 +361,7 @@ a light grey line — and it confirms item 7's reordering changes nothing.
 4. Diff with PIL.
 
 For a page-level diff, the harness has to go further: seed
-[sceneRandom.ts](src/scenes/sceneRandom.ts), replace `THREE.Timer` with a fixed-step clock,
+[sceneRandom.ts](../src/scenes/sceneRandom.ts), replace `THREE.Timer` with a fixed-step clock,
 and step a set number of frames before capturing.
 
 ---

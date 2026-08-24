@@ -159,7 +159,7 @@ outer DOM shape so consumer CSS targeting the slot keeps working.
 ### Renderer init and the `unsupported` path
 
 The host initialises its renderer once, with the shared device from
-[sharedGpuDevice.ts](src/scenes/sharedGpuDevice.ts); if `renderer.init()` rejects, the
+[sharedGpuDevice.ts](../src/scenes/sharedGpuDevice.ts); if `renderer.init()` rejects, the
 host marks itself unsupported and every registered slot shows its fallback. Slots that
 register later get the answer synchronously. Standalone scenes keep their own
 init/fallback exactly as now.
@@ -201,7 +201,7 @@ init/fallback exactly as now.
 ## Part II — Caches shared across scenes
 
 Independent of Part I and cheaper; both follow the precedent set by
-[sharedGpuDevice.ts](src/scenes/sharedGpuDevice.ts).
+[sharedGpuDevice.ts](../src/scenes/sharedGpuDevice.ts).
 
 ### Geometry cache: per-runtime → per-page
 
@@ -216,7 +216,7 @@ tests that assert full teardown, via an injectable cache in
 
 ### Label texture cache
 
-[cubeFaceLabels.ts](src/scenes/cubeFaceLabels.ts) already shares one texture between
+[cubeFaceLabels.ts](../src/scenes/cubeFaceLabels.ts) already shares one texture between
 faces with identical text *within one cube*. A page-level map `text → texture`
 (refcounted, same pattern) extends that across cubes and scenes — the common case of the
 whole page rendered with `faceLabels='ABC'` collapses from one texture per cube to one
@@ -237,7 +237,7 @@ consumers bundle the core twice. Fix alongside Part I, whichever is less invasiv
 
 ## Part III — The scene SDK
 
-The 33 components in [src/components](src/components) total ~6,300 lines, and three
+The 33 components in [src/components](../src/components) total ~6,300 lines, and three
 layers of them are the same code written 33 times. In descending order of value:
 
 ### III.1 A script runner with real cancellation
