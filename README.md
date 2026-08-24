@@ -56,6 +56,7 @@ import {
     FlippingCubeScene,
     GuardChangeScene,
     HistorySplitScene,
+    JumpingCubeScene,
     LearnedDetourScene,
     LearnedRhythmScene,
     MemoryReplayScene,
@@ -68,14 +69,18 @@ import {
     PredictedPathsScene,
     PreferenceChoiceScene,
     RecursiveFrameScene,
+    RaisedStrideCubeScene,
     RecognizedPartnerScene,
     RememberedThresholdScene,
     ReunitingPairScene,
+    RollingCubeScene,
     SevenCubesScene,
     SharedLoadScene,
     SignalRelayScene,
+    SlidingCubeScene,
     StructureMorphScene,
     ThinningClockScene,
+    TeleportingCubeScene,
     ThreeCubeStatesScene,
     ThreeCubesScene,
     TrailingShadowScene,
@@ -85,6 +90,11 @@ import {
 
 export const Scene = () => (
     <>
+        <RollingCubeScene />
+        <SlidingCubeScene />
+        <JumpingCubeScene />
+        <RaisedStrideCubeScene />
+        <TeleportingCubeScene transparencyDuration={3} />
         <CenteredCubeScene />
         <MovingGridScene />
         <FlippingCubeScene />
@@ -128,6 +138,13 @@ export const Scene = () => (
     </>
 )
 ```
+
+`RollingCubeScene`, `SlidingCubeScene`, `JumpingCubeScene`, and `RaisedStrideCubeScene` are
+single-cube movement studies: respectively a one-cell edge roll, a one-cell slide, a two-cell jump
+over the intervening tile, and a one-cell lift followed by a two-cell aerial stride. Their grid focus
+travels with the cube. `TeleportingCubeScene` crossfades the current cube with a successor at a
+random position within five cells, then transfers grid focus to it. Its `transparencyDuration` prop
+sets the concurrent fade-out/fade-in duration in seconds and defaults to `3`.
 
 `MovingGridScene` occasionally lets a randomly selected encounter follow the main cube for a few
 steps. `FlippingCubeScene` mixes its regular rotations with short rapid face sequences.

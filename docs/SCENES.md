@@ -96,7 +96,11 @@ Cubes appear at random intervals in the fully transparent zones on the left and 
 
 ## Movement Notes
 
-In the movement-based scenes, cubes slide between grid cells without rotating. The grid itself moves in `MovingGridScene`, keeping the main cube visually fixed in the viewport. `FlippingCubeScene` and `VllCubeScene` actively change cube orientation.
+Most movement-based scenes slide between grid cells without rotating. `RollingCubeScene` instead
+turns around its lower edge, while `JumpingCubeScene` and `RaisedStrideCubeScene` rise above the
+grid. The grid itself moves in `MovingGridScene`, keeping the main cube visually fixed in the
+viewport; the five focused movement scenes use traveling grid focus to keep the active cube central.
+`FlippingCubeScene` and `VllCubeScene` actively change cube orientation.
 
 ## Additional Scenes
 

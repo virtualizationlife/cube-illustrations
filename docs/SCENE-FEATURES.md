@@ -1,6 +1,6 @@
 # Scene Feature Matrix
 
-A cross-reference of all 40 illustration scenes and the features they contain. Scenes are listed in
+A cross-reference of all 45 illustration scenes and the features they contain. Scenes are listed in
 the order they appear on the illustrations page and in [SCENES.md](SCENES.md), which describes each
 one in prose. This document is the compact view: what is inside every scene, marked feature by
 feature. Proposed scenes from the end of SCENES.md are listed in the appendix only.
@@ -17,48 +17,53 @@ Numeric and categorical columns give the actual value used in the component inst
 
 ## 1. Identity
 
-|   # | Scene                 | Component                  | Set         | Tags                              |
-| --: | --------------------- | -------------------------- | ----------- | --------------------------------- |
-|   1 | Moving World          | `MovingGridScene`          | Core        | space, navigation                 |
-|   2 | Changing Faces        | `FlippingCubeScene`        | Core        | form, transformation              |
-|   3 | Discovery             | `EncounterCubeScene`       | Core        | space, perception                 |
-|   4 | Three Cubes           | `ThreeCubesScene`          | Core        | relation, structure               |
-|   5 | Main Cube             | `CenteredCubeScene`        | Core        | identity, focus                   |
-|   6 | Forming a Group       | `SevenCubesScene`          | Core        | relation, organization            |
-|   7 | VLL Cube              | `VllCubeScene`             | Core        | identity, symbol                  |
-|   8 | Random Structure      | `StructureMorphScene`      | Core        | form, reconfiguration             |
-|   9 | Continuous Queue      | `ContinuousQueueScene`     | Core        | continuity, renewal               |
-|  10 | Crossing Flows        | `CrossingFlowsScene`       | Core        | relation, coordination            |
-|  11 | Learned Detour        | `LearnedDetourScene`       | Additional  | mind, learning                    |
-|  12 | Memory Replay         | `MemoryReplayScene`        | Additional  | mind, memory                      |
-|  13 | Boundary Repair       | `BoundaryRepairScene`      | Additional  | continuity, maintenance           |
-|  14 | Reuniting Pair        | `ReunitingPairScene`       | Additional  | continuity, relationship          |
-|  15 | Repeated Preference   | `PreferenceChoiceScene`    | Additional  | mind, preference                  |
-|  16 | Predicted Paths       | `PredictedPathsScene`      | Dynamic     | world, prediction                 |
-|  17 | Learned Rhythm        | `LearnedRhythmScene`       | Dynamic     | others, anticipation              |
-|  18 | Valence Field         | `ValenceFieldScene`        | Dynamic     | valence, behavior                 |
-|  19 | Moving Bridge         | `MovingBridgeScene`        | Dynamic     | continuation, resources           |
-|  20 | Becoming a Sign       | `BecomingSignScene`        | Dynamic     | meaning, symbol                   |
-|  21 | Signal Relay          | `SignalRelayScene`         | Phenomena   | communication, continuity         |
-|  22 | Collective Current    | `CollectiveCurrentScene`   | Phenomena   | coordination, emergence           |
-|  23 | Shared Load           | `SharedLoadScene`          | Phenomena   | cooperation, resources            |
-|  24 | Phase Change          | `PhaseChangeScene`         | Phenomena   | adaptation, organization          |
-|  25 | Dynamic Balance       | `DynamicBalanceScene`      | Phenomena   | maintenance, stability            |
-|  26 | Two Metronomes        | `MetronomePairScene`       | Coupled     | rhythm, synchrony                 |
-|  27 | Trailing Shadow       | `TrailingShadowScene`      | Coupled     | self, delay                       |
-|  28 | Polarity              | `PolarityScene`            | Coupled     | relation, orientation             |
-|  29 | Changing of the Guard | `GuardChangeScene`         | Coupled     | continuity, handover              |
-|  30 | Corridor Dance        | `CorridorDanceScene`       | Coupled     | relation, symmetry                |
-|  31 | Domino Ring           | `DominoRingScene`          | Coupled     | causality, recurrence             |
-|  32 | Thinning Clock        | `ThinningClockScene`       | Coupled     | time, scarcity                    |
-|  33 | Remembered Threshold  | `RememberedThresholdScene` | Coupled     | mind, residue                     |
-|  34 | Recursive Frame       | `RecursiveFrameScene`      | Narrative   | ontology, continuity, reality     |
-|  35 | Nested Cube           | `NestedCubeScene`          | Narrative   | form, containment                 |
-|  36 | History Split         | `HistorySplitScene`        | Narrative   | continuity, biography, comparison |
-|  37 | Recognized Partner    | `RecognizedPartnerScene`   | Narrative   | identity, memory, relationship    |
-|  38 | Anticipatory Return   | `AnticipatoryReturnScene`  | Narrative   | embodiment, energy, maintenance   |
-|  39 | Cursor Repulsion      | `CursorRepulsionScene`     | Interactive | interaction, avoidance            |
-|  40 | Three States          | `ThreeCubeStatesScene`     | Comparative | form, contrast, transformation    |
+|   # | Scene                 | Component                  | Set         | Tags                               |
+| --: | --------------------- | -------------------------- | ----------- | ---------------------------------- |
+|   1 | Moving World          | `MovingGridScene`          | Core        | space, navigation                  |
+|   2 | Changing Faces        | `FlippingCubeScene`        | Core        | form, transformation               |
+|   3 | Discovery             | `EncounterCubeScene`       | Core        | space, perception                  |
+|   4 | Three Cubes           | `ThreeCubesScene`          | Core        | relation, structure                |
+|   5 | Main Cube             | `CenteredCubeScene`        | Core        | identity, focus                    |
+|   6 | Forming a Group       | `SevenCubesScene`          | Core        | relation, organization             |
+|   7 | VLL Cube              | `VllCubeScene`             | Core        | identity, symbol                   |
+|   8 | Random Structure      | `StructureMorphScene`      | Core        | form, reconfiguration              |
+|   9 | Continuous Queue      | `ContinuousQueueScene`     | Core        | continuity, renewal                |
+|  10 | Crossing Flows        | `CrossingFlowsScene`       | Core        | relation, coordination             |
+|  11 | Learned Detour        | `LearnedDetourScene`       | Additional  | mind, learning                     |
+|  12 | Memory Replay         | `MemoryReplayScene`        | Additional  | mind, memory                       |
+|  13 | Boundary Repair       | `BoundaryRepairScene`      | Additional  | continuity, maintenance            |
+|  14 | Reuniting Pair        | `ReunitingPairScene`       | Additional  | continuity, relationship           |
+|  15 | Repeated Preference   | `PreferenceChoiceScene`    | Additional  | mind, preference                   |
+|  16 | Predicted Paths       | `PredictedPathsScene`      | Dynamic     | world, prediction                  |
+|  17 | Learned Rhythm        | `LearnedRhythmScene`       | Dynamic     | others, anticipation               |
+|  18 | Valence Field         | `ValenceFieldScene`        | Dynamic     | valence, behavior                  |
+|  19 | Moving Bridge         | `MovingBridgeScene`        | Dynamic     | continuation, resources            |
+|  20 | Becoming a Sign       | `BecomingSignScene`        | Dynamic     | meaning, symbol                    |
+|  21 | Signal Relay          | `SignalRelayScene`         | Phenomena   | communication, continuity          |
+|  22 | Collective Current    | `CollectiveCurrentScene`   | Phenomena   | coordination, emergence            |
+|  23 | Shared Load           | `SharedLoadScene`          | Phenomena   | cooperation, resources             |
+|  24 | Phase Change          | `PhaseChangeScene`         | Phenomena   | adaptation, organization           |
+|  25 | Dynamic Balance       | `DynamicBalanceScene`      | Phenomena   | maintenance, stability             |
+|  26 | Two Metronomes        | `MetronomePairScene`       | Coupled     | rhythm, synchrony                  |
+|  27 | Trailing Shadow       | `TrailingShadowScene`      | Coupled     | self, delay                        |
+|  28 | Polarity              | `PolarityScene`            | Coupled     | relation, orientation              |
+|  29 | Changing of the Guard | `GuardChangeScene`         | Coupled     | continuity, handover               |
+|  30 | Corridor Dance        | `CorridorDanceScene`       | Coupled     | relation, symmetry                 |
+|  31 | Domino Ring           | `DominoRingScene`          | Coupled     | causality, recurrence              |
+|  32 | Thinning Clock        | `ThinningClockScene`       | Coupled     | time, scarcity                     |
+|  33 | Remembered Threshold  | `RememberedThresholdScene` | Coupled     | mind, residue                      |
+|  34 | Recursive Frame       | `RecursiveFrameScene`      | Narrative   | ontology, continuity, reality      |
+|  35 | Nested Cube           | `NestedCubeScene`          | Narrative   | form, containment                  |
+|  36 | History Split         | `HistorySplitScene`        | Narrative   | continuity, biography, comparison  |
+|  37 | Recognized Partner    | `RecognizedPartnerScene`   | Narrative   | identity, memory, relationship     |
+|  38 | Anticipatory Return   | `AnticipatoryReturnScene`  | Narrative   | embodiment, energy, maintenance    |
+|  39 | Cursor Repulsion      | `CursorRepulsionScene`     | Interactive | interaction, avoidance             |
+|  40 | Three States          | `ThreeCubeStatesScene`     | Comparative | form, contrast, transformation     |
+|  41 | Rolling Cube          | `RollingCubeScene`         | Movement    | movement, rotation                 |
+|  42 | Sliding Cube          | `SlidingCubeScene`         | Movement    | movement, translation              |
+|  43 | Jumping Cube          | `JumpingCubeScene`         | Movement    | movement, jump                     |
+|  44 | Raised Stride         | `RaisedStrideCubeScene`    | Movement    | movement, elevation                |
+|  45 | Dissolving Transfer   | `TeleportingCubeScene`     | Movement    | movement, transparency, transition |
 
 ## 2. What is depicted
 
@@ -104,6 +109,11 @@ Numeric and categorical columns give the actual value used in the component inst
 |  38 | Anticipatory Return   | 1 + 5 + 1 + 10     |         ●          |         ●          |         ·          |          ●          |        ·        |       ·       |
 |  39 | Cursor Repulsion      | 3                  |         ·          |         ●          |         ·          |          ·          |        ◐        |       ·       |
 |  40 | Three States          | 3                  |         ·          |         ●          |         ·          |          ·          |        ·        |       ·       |
+|  41 | Rolling Cube          | 1                  |         ●          |         ·          |         ·          |          ·          |        ·        |       ·       |
+|  42 | Sliding Cube          | 1                  |         ●          |         ·          |         ·          |          ·          |        ·        |       ·       |
+|  43 | Jumping Cube          | 1                  |         ●          |         ·          |         ·          |          ·          |        ·        |       ·       |
+|  44 | Raised Stride         | 1                  |         ●          |         ·          |         ·          |          ·          |        ·        |       ·       |
+|  45 | Dissolving Transfer   | 1 + 1              |         ●          |         ·          |         ·          |          ·          |        ·        |       ·       |
 
 Every scene also accepts the `faceLabels` prop, so text can be added to any of them. The column
 marks only what the scene shows by default.
@@ -152,6 +162,11 @@ marks only what the scene shows by default.
 |  38 | Anticipatory Return   | body + energy column      | closed         |      ●       |
 |  39 | Cursor Repulsion      | line of three             | closed         |      ·       |
 |  40 | Three States          | line of three             | closed         |      ·       |
+|  41 | Rolling Cube          | single cube               | closed         |      ·       |
+|  42 | Sliding Cube          | single cube               | closed         |      ·       |
+|  43 | Jumping Cube          | single cube               | closed         |      ·       |
+|  44 | Raised Stride         | single cube               | closed         |      ·       |
+|  45 | Dissolving Transfer   | dissolving successor pair | open           |      ◐       |
 
 `Cube inventory` says whether the scene is a closed system. `closed` — the same cubes only move
 around; `closed, wraps` — the population is constant, but a cube leaves through a transparent edge
@@ -203,6 +218,11 @@ memory echoes, passers-by.
 |  38 | Anticipatory Return   |     ●      |             ·             |       fixed        |      ·       |         ·         |              ·              |       ●       |            ●             |
 |  39 | Cursor Repulsion      |     ◐      |             ●             |       fixed        |      ·       |         ·         |              ·              |       ·       |            ·             |
 |  40 | Three States          |     ◐      |             ●             |       fixed        |      ●       |         ◐         |              ·              |       ·       |            ·             |
+|  41 | Rolling Cube          |     ●      |             ●             |    follows cube    |      ●       |         ◐         |              ·              |       ·       |            ·             |
+|  42 | Sliding Cube          |     ●      |             ●             |    follows cube    |      ·       |         ·         |              ·              |       ·       |            ·             |
+|  43 | Jumping Cube          |     ●      |             ●             |    follows cube    |      ·       |         ●         |              ·              |       ·       |            ·             |
+|  44 | Raised Stride         |     ●      |             ●             |    follows cube    |      ·       |         ●         |              ·              |       ·       |            ·             |
+|  45 | Dissolving Transfer   |     ·      |             ●             |    focus moves     |      ·       |         ·         |              ·              |       ●       |            ·             |
 
 `Frame of reference` says what produces the motion on screen. `world moves` — the grid itself is
 animated and the cube stands still (`movementMode='move-grid'`, only Moving World). `follows cube` —
@@ -210,10 +230,11 @@ the cube really travels, but the grid focus is retargeted to it every frame (`tr
 stays in the middle while the supports stream past it. `fixed` — the grid never moves and only cubes
 do.
 
-That distinction matters for the centre column: scenes 1, 19, and 23 hold the centre through the
+That distinction matters for the centre column: scenes 1, 19, 23, and 41–44 hold the centre through the
 frame of reference, while scenes 2, 4, 5, 7, 13, 25, 35, 39, and 40 hold it the plain way — that cube
-simply never moves, and everything else happens around it. Scene 29 keeps a post at the centre
-while its occupants change; scene 37 returns the recognised cube to the centre between routines.
+simply never moves, and everything else happens around it. Scene 45 transfers focus after the
+crossfade; scene 29 keeps a post at the centre while its occupants change; scene 37 returns the
+recognised cube to the centre between routines.
 
 ## 5. Behaviour and logic
 
@@ -259,6 +280,11 @@ while its occupants change; scene 37 returns the recognised cube to the centre b
 |  38 | Anticipatory Return   |          ·           |          ●           |             ●              |         ·          |        ·        |              ●              |        ●        |
 |  39 | Cursor Repulsion      |          ·           |          ·           |             ·              |         ●          |        ·        |              ·              |        ·        |
 |  40 | Three States          |          ●           |          ◐           |             ·              |         ·          |        ·        |              ·              |        ·        |
+|  41 | Rolling Cube          |          ·           |          ●           |             ●              |         ·          |        ·        |              ·              |        ●        |
+|  42 | Sliding Cube          |          ·           |          ●           |             ●              |         ·          |        ·        |              ·              |        ●        |
+|  43 | Jumping Cube          |          ·           |          ●           |             ●              |         ·          |        ·        |              ·              |        ●        |
+|  44 | Raised Stride         |          ·           |          ●           |             ●              |         ·          |        ·        |              ·              |        ●        |
+|  45 | Dissolving Transfer   |          ●           |          ·           |             ·              |         ·          |        ·        |              ·              |        ●        |
 
 `State carried across cycles` means the next cycle differs because of what happened in the previous
 one: a learned route, a remembered journey, a symbol or direction that must not repeat, a swapped
@@ -310,6 +336,11 @@ coupling only until they reset.
 |  38 | Anticipatory Return   |         25 |     0.043 |            40° | 3 / 11                  | 1.04 – 1.20          | 0.52 – 0.70           |      ·      |
 |  39 | Cursor Repulsion      |          9 |       0.1 |             0° | default                 | ·                    | ·                     |      ·      |
 |  40 | Three States          |          9 |       0.1 |             0° | default                 | ·                    | ·                     |      ●      |
+|  41 | Rolling Cube          |         13 |       0.1 |            45° | 1.5 / 7                 | ·                    | ·                     |      ·      |
+|  42 | Sliding Cube          |         13 |       0.1 |            45° | 1.5 / 7                 | ·                    | ·                     |      ·      |
+|  43 | Jumping Cube          |         13 |       0.1 |            45° | 1.5 / 7                 | ·                    | ·                     |      ·      |
+|  44 | Raised Stride         |         15 |       0.1 |            45° | 1.5 / 8                 | ·                    | ·                     |      ·      |
+|  45 | Dissolving Transfer   |         15 |       0.1 |            45° | 1.5 / 8                 | ·                    | ·                     |      ·      |
 
 Camera elevation is 35° in every scene. The fade columns give the animated range where a scene
 changes it; `default` means the wide radii derived from the grid size, and `off (bounded)` means the
@@ -323,29 +354,29 @@ Counting every scene where the feature is marked `●` or `◐`.
 
 | Feature                                   | Scenes |
 | ----------------------------------------- | -----: |
-| Repeats forever                           |     36 |
-| Cubes move between grid cells             |     36 |
-| Main cube stays at centre                 |     14 |
-| Ghost / translucent copies                |     11 |
-| Closed system (constant population)       |     35 |
+| Repeats forever                           |     41 |
+| Cubes move between grid cells             |     40 |
+| Main cube stays at centre                 |     19 |
+| Ghost / translucent copies                |     12 |
+| Closed system (constant population)       |     39 |
 | — of them wrapping through an edge        |     10 |
-| Open system (cubes created and destroyed) |      5 |
-| Frame of reference other than fixed       |      3 |
-| Collision-safe pathfinding                |     31 |
+| Open system (cubes created and destroyed) |      6 |
+| Frame of reference other than fixed       |      8 |
+| Collision-safe pathfinding                |     35 |
 | Waiting or synchronising                  |     28 |
 | Group or collective composition           |     31 |
 | State carried across cycles               |     24 |
-| Randomised per cycle                      |     17 |
-| Opacity fades                             |     24 |
+| Randomised per cycle                      |     18 |
+| Opacity fades                             |     25 |
 | Assembled shape                           |     18 |
 | Enters / exits through a transparent edge |     17 |
-| Fixed scripted route                      |     25 |
+| Fixed scripted route                      |     29 |
 | Proximity reaction                        |      7 |
 | Animated camera zoom and grid opacity     |     11 |
 | Obstacle or barrier                       |      7 |
-| World (grid) moves under the cube         |      3 |
-| Lifted above the grid                     |      6 |
-| Cube rotation                             |      5 |
+| World (grid) moves under the cube         |      7 |
+| Lifted above the grid                     |      9 |
+| Cube rotation                             |      6 |
 | Hover scale response                      |      3 |
 | Signal or pulse                           |      2 |
 | Static composition                        |      2 |
