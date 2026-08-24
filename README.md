@@ -42,6 +42,7 @@ import {
     CollectiveCurrentScene,
     ContinuousQueueScene,
     CrossingFlowsScene,
+    CursorRepulsionScene,
     DynamicBalanceScene,
     EncounterCubeScene,
     FlippingCubeScene,
@@ -58,6 +59,7 @@ import {
     SharedLoadScene,
     SignalRelayScene,
     StructureMorphScene,
+    ThreeCubeStatesScene,
     ThreeCubesScene,
     VllCubeScene,
     ValenceFieldScene,
@@ -73,8 +75,10 @@ export const Scene = () => (
         <VllCubeScene />
         <SevenCubesScene />
         <StructureMorphScene />
+        <ThreeCubeStatesScene />
         <ContinuousQueueScene />
         <CrossingFlowsScene />
+        <CursorRepulsionScene />
         <LearnedDetourScene />
         <MemoryReplayScene />
         <BoundaryRepairScene />
@@ -98,6 +102,11 @@ export const Scene = () => (
 steps. `FlippingCubeScene` mixes its regular rotations with short rapid face sequences.
 `CenteredCubeScene` remains fixed while translucent groups of one to three slow cubes enter from
 random sides, with some changing direction once before they leave.
+`CursorRepulsionScene` continuously pushes each of its three cubes away from an approaching pointer;
+the cubes avoid one another and return smoothly to their original row when the pointer leaves.
+In `ThreeCubeStatesScene`, hovering the left cube enlarges it and hovering the right cube reduces
+it. Hovering the middle cube triggers a one-cell lift, followed by random quarter-turns around all
+three axes and a smooth return to the grid.
 
 `SevenCubesScene` starts from a random scatter. Six cubes gather first; a random late arrival then
 causes the group to reorganize into a connected seven-cell island. A turn covers one, two, or three

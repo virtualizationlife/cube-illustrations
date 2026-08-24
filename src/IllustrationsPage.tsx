@@ -34,7 +34,11 @@ import { SevenCubesScene } from './components/SevenCubesScene'
 import { SharedLoadScene } from './components/SharedLoadScene'
 import { SignalRelayScene } from './components/SignalRelayScene'
 import { StructureMorphScene } from './components/StructureMorphScene'
-import { ThreeCubesScene } from './components/ThreeCubesScene'
+import {
+    CursorRepulsionScene,
+    ThreeCubesScene,
+} from './components/ThreeCubesScene'
+import { ThreeCubeStatesScene } from './components/ThreeCubeStatesScene'
 import { ThinningClockScene } from './components/ThinningClockScene'
 import { TrailingShadowScene } from './components/TrailingShadowScene'
 import { ValenceFieldScene } from './components/ValenceFieldScene'
@@ -170,6 +174,12 @@ export const IllustrationsPage = (): JSX.Element => (
         </LabeledScene>
         <LabeledScene label='Anticipatory Return' tags='embodiment, energy, maintenance'>
             <AnticipatoryReturnScene />
+        </LabeledScene>
+        <LabeledScene label='Cursor Repulsion' tags='interaction, avoidance'>
+            <CursorRepulsionScene />
+        </LabeledScene>
+        <LabeledScene label='Three States' tags='form, contrast, transformation'>
+            <ThreeCubeStatesScene />
         </LabeledScene>
         </div>
     </SceneRenderHost>

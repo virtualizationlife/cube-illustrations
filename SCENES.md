@@ -275,3 +275,27 @@ Two identical visitors approach a central cube from opposite sides. The first vi
 A main cube carries a trailing column of five energy cubes. On the first cycle it travels far outward, spending one energy cube at each step, and returns too late, fading to a failure echo. On the next cycle it turns back earlier while energy remains, recharges at a home dock, and completes the return successfully.
 
 **Abstract meaning:** A body learns to turn back before its remaining resources can no longer reach home.
+
+## Interactive Scenes
+
+### Cursor Repulsion (`CursorRepulsionScene`)
+
+**Tags:** `interaction`, `avoidance`
+
+Three cubes begin in the same evenly spaced row as `ThreeCubesScene`. The pointer creates a continuous repulsion field around itself: whenever it approaches a cube, that cube accelerates away from it. The response begins before direct hover, so the cursor feels like a physical presence in the scene rather than a binary trigger.
+
+The cubes retain a small amount of inertia, avoid overlapping one another, and return smoothly to their original positions when the pointer moves away or leaves the scene. Their logical grid cells remain unchanged while temporary visual offsets produce the movement.
+
+**Abstract meaning:** Independent entities preserve the memory of their shared arrangement while making space for an approaching outside presence.
+
+## Comparative Transformations
+
+### Three States (`ThreeCubeStatesScene`)
+
+**Tags:** `form`, `contrast`, `transformation`
+
+Three equal cubes begin in a straight row and react independently to pointer attention. Hovering the left cube smoothly grows it to 116% of its original size, while hovering the right cube shrinks it to 84%. Both return to their normal scale when the pointer leaves.
+
+Hovering the middle cube triggers a complete animation: it rises by one grid cell, makes three random quarter-turns, and returns smoothly to the grid. The X, Y, and Z axes are shuffled for every activation, while the direction of each turn is selected independently. The sequence therefore uses all three spatial planes without becoming predictable.
+
+**Abstract meaning:** Equal entities can diverge through expansion, reduction, and the continuous discovery of new orientations.

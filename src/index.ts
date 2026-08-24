@@ -35,7 +35,11 @@ export { SevenCubesScene } from './components/SevenCubesScene'
 export { SharedLoadScene } from './components/SharedLoadScene'
 export { SignalRelayScene } from './components/SignalRelayScene'
 export { StructureMorphScene } from './components/StructureMorphScene'
-export { ThreeCubesScene } from './components/ThreeCubesScene'
+export {
+    CursorRepulsionScene,
+    ThreeCubesScene,
+} from './components/ThreeCubesScene'
+export { ThreeCubeStatesScene } from './components/ThreeCubeStatesScene'
 export { ThinningClockScene } from './components/ThinningClockScene'
 export { TrailingShadowScene } from './components/TrailingShadowScene'
 export { ValenceFieldScene } from './components/ValenceFieldScene'
