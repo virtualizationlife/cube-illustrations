@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { getWideGridFadeRadii } from '../src/scenes/gridFade'
 import {
+    createSceneRandom,
+    createSeededRandom,
     getDifferentRandomIndex,
     getRandomIndex,
     getRandomItem,
@@ -14,7 +16,14 @@ import {
     rotateSignSymbol,
 } from '../src/scenes/signSymbols'
 import { getSceneRenderRect } from '../src/scenes/SceneRenderHost'
+import {
+    runSceneScript,
+    SceneCancelledError,
+} from '../src/scenes/runSceneScript'
 import { startSceneAnimation } from '../src/scenes/startSceneAnimation'
+import type { GridSceneRuntime } from '../src/scenes/gridSceneRuntime'
+import { defineScene } from '../src/sdk/defineScene'
+import { createSceneChoreography } from '../src/sdk/choreography'
 
 describe('scene random utilities', () => {
     it('shuffles a copy without modifying the source', () => {
@@ -30,6 +39,16 @@ describe('scene random utilities', () => {
         expect(getDifferentRandomIndex(4, 1, () => 0)).toBe(0)
         expect(getDifferentRandomIndex(4, 1, () => 0.99)).toBe(3)
         expect(getDifferentRandomIndex(1, 0)).toBe(0)
+    })
+
+    it('replays the same choices from the same seed', () => {
+        const first = createSeededRandom('scene-42')
+        const second = createSeededRandom('scene-42')
+
+        expect(Array.from({ length: 8 }, first)).toEqual(Array.from({ length: 8 }, second))
+        expect(createSceneRandom(42).shuffle([1, 2, 3, 4])).toEqual(
+            createSceneRandom(42).shuffle([1, 2, 3, 4])
+        )
     })
 })
 
@@ -124,5 +143,138 @@ describe('background scene animations', () => {
 
         expect(onError).toHaveBeenCalledOnce()
         expect(onError).toHaveBeenCalledWith(error, 'Test Scene')
+    })
+
+    it('cancels active SDK delays without reporting an error', async () => {
+        const onError = vi.fn()
+        const runtime = {} as GridSceneRuntime
+        let reachedAfterDelay = false
+        const handle = runSceneScript(
+            'Cancelled Scene',
+            runtime,
+            async ({ delay }) => {
+                await delay(60)
+                reachedAfterDelay = true
+            },
+            onError
+        )
+
+        handle.dispose()
+        await handle.completion
+
+        expect(handle.signal.aborted).toBe(true)
+        expect(reachedAfterDelay).toBe(false)
+        expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('cancels an in-flight runtime command and blocks later sync commands', async () => {
+        let resolveMove = (): void => undefined
+        const move = new Promise<void>((resolve) => {
+            resolveMove = resolve
+        })
+        const setCubeOpacity = vi.fn()
+        const runtime = {
+            moveCubeTo: vi.fn(() => move),
+            setCubeOpacity,
+        } as unknown as GridSceneRuntime
+        const handle = runSceneScript('Moving Scene', runtime, async ({ runtime: scene }) => {
+            await scene.moveCubeTo('main', { column: 1, row: 0 }, { duration: 1 })
+            scene.setCubeOpacity('main', 0)
+        })
+
+        handle.dispose()
+        await handle.completion
+        resolveMove()
+
+        expect(setCubeOpacity).not.toHaveBeenCalled()
+    })
+
+    it('reports non-cancellation errors from SDK scripts', async () => {
+        const error = new Error('script failed')
+        const onError = vi.fn()
+        const handle = runSceneScript(
+            'Broken Scene',
+            {} as GridSceneRuntime,
+            async () => Promise.reject(error),
+            onError
+        )
+
+        await handle.completion
+
+        expect(onError).toHaveBeenCalledWith(error, 'Broken Scene')
+    })
+
+    it('does not treat an arbitrary cancellation-shaped error as teardown', async () => {
+        const onError = vi.fn()
+        const error = new SceneCancelledError()
+        const handle = runSceneScript(
+            'Unexpected Cancellation',
+            {} as GridSceneRuntime,
+            async () => Promise.reject(error),
+            onError
+        )
+
+        await handle.completion
+
+        expect(onError).toHaveBeenCalledWith(error, 'Unexpected Cancellation')
+    })
+})
+
+describe('scene definitions', () => {
+    it('attaches serializable metadata to generated scene components', () => {
+        const Scene = defineScene({
+            metadata: {
+                id: 'test-scene',
+                title: 'Test Scene',
+                tags: ['test', 'sdk'],
+            },
+            view: {
+                cubeSize: 0.1,
+                gridCellSize: 0.1,
+                gridCellCount: 5,
+                cameraAzimuthDeg: 45,
+                viewOffsetY: 0,
+                hoverCells: 0,
+            },
+        })
+
+        expect(Scene.scene).toEqual({
+            id: 'test-scene',
+            title: 'Test Scene',
+            tags: ['test', 'sdk'],
+        })
+    })
+
+    it('composes cube actors and timeline sequences over the runtime', async () => {
+        const calls: string[] = []
+        const runtime = {
+            fadeCubeTo: vi.fn(async (_id: string, opacity: number) => {
+                calls.push(`fade:${opacity}`)
+            }),
+            moveCubeTo: vi.fn(async (_id: string) => {
+                calls.push('move')
+            }),
+        } as unknown as GridSceneRuntime
+        const { cubes, timeline } = createSceneChoreography(runtime, async (seconds) => {
+            calls.push(`wait:${seconds}`)
+        })
+
+        await timeline.sequence(['first', 'second'], async (id) => {
+            await cubes.get(id).pulse()
+        })
+        await cubes.main.moveAndFade(
+            { column: 1, row: 0 },
+            0,
+            { duration: 0.4 }
+        )
+
+        expect(calls).toEqual([
+            'fade:0.28',
+            'fade:1',
+            'fade:0.28',
+            'fade:1',
+            'move',
+            'fade:0',
+        ])
     })
 })
