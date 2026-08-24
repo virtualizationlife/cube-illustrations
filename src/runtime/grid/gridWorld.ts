@@ -151,6 +151,7 @@ export const createGridWorld = (): GridWorld => {
     const gridFocus: MutableGridCoordinate = { column: 0, row: 0 }
     let gridTransition: CoordinateTransition | null = null
     let trackedTravel: TrackedTravel | null = null
+    const getTrackedTravel = (): TrackedTravel | null => trackedTravel
     let cubeRevision = 0
     let disposed = false
 
@@ -237,6 +238,8 @@ export const createGridWorld = (): GridWorld => {
         const blockedCellKeys = cube.occupiesCell ? getBlockedCellKeys(id) : new Set<string>()
         const path = findGridPath(cube.position, destination, blockedCellKeys)
         if (path === null || path.length === 0) return Promise.resolve()
+        const firstPathCell = path[0]
+        if (firstPathCell === undefined) return Promise.resolve()
 
         let resolveMovement = (): void => undefined
         const completion = new Promise<void>((resolve) => {
@@ -254,7 +257,7 @@ export const createGridWorld = (): GridWorld => {
             reservedCellKeys,
             resolve: resolveMovement,
             segmentIndex: 0,
-            transition: createCoordinateTransitionState(cube.position, path[0], {
+            transition: createCoordinateTransitionState(cube.position, firstPathCell, {
                 duration: segmentDuration,
                 easing: options.easing,
             }),
@@ -352,7 +355,8 @@ export const createGridWorld = (): GridWorld => {
             const token = Symbol(id)
             trackedTravel = { cubeId: id, token }
             await moveCubeTo(id, position, options)
-            if (trackedTravel?.token === token) trackedTravel = null
+            const currentTravel = getTrackedTravel()
+            if (currentTravel !== null && currentTravel.token === token) trackedTravel = null
         },
         update,
         dispose: () => {

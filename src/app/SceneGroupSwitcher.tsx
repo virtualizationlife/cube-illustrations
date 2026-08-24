@@ -31,7 +31,7 @@ export const SceneGroupSwitcher = (): JSX.Element => {
     return (
         <div
             aria-label='scene groups'
-            className='cube_illustrations__scene_group_switcher'
+            className='cube_illustrations_scene_group_switcher'
             role='tablist'
         >
             {SCENE_GROUPS.map((group) => {
@@ -40,7 +40,7 @@ export const SceneGroupSwitcher = (): JSX.Element => {
                 return (
                     <div
                         aria-selected={isActive}
-                        className='cube_illustrations__scene_group_switcher_item'
+                        className='cube_illustrations_scene_group_switcher_item'
                         key={group}
                         onClick={() => {
                             setActiveGroup(group)

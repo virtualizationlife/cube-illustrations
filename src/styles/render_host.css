@@ -1,9 +1,9 @@
-.cube_illustrations__render_host_canvas {
+.cube_illustrations_render_host_canvas {
     display: block;
-    z-index: var(--cube-illustrations-render-host-layer);
+    z-index: var(--cube_illustrations_render_host_layer);
     position: fixed;
-    width: var(--cube-illustrations-full-size);
-    height: var(--cube-illustrations-full-size);
-    inset: var(--cube-illustrations-zero);
+    width: var(--cube_illustrations_full_size);
+    height: var(--cube_illustrations_full_size);
+    inset: var(--cube_illustrations_zero);
     pointer-events: none;
 }

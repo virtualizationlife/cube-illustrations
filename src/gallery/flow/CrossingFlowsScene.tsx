@@ -235,7 +235,7 @@ export const CrossingFlowsScene = defineScene<CubeSceneProps, FlowModel>({
                     blockingPosition.row === position.row &&
                     blockingPosition.column + blockingCube.direction === position.column
 
-                if (!isHeadOn || blockingCube === undefined) continue
+                if (!isHeadOn) continue
                 const yieldingCube =
                     activePriorityDirection === null
                         ? random.next() < 0.5

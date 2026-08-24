@@ -88,8 +88,9 @@ describe('createSceneChoreography', () => {
         const { timeline, waits } = setup()
         const finished: number[] = []
 
-        await timeline.stagger(['a', 'b', 'c'], 0.2, async (_item, index) => {
+        await timeline.stagger(['a', 'b', 'c'], 0.2, (_item, index) => {
             finished.push(index)
+            return Promise.resolve()
         })
 
         // The first task starts immediately; the rest wait index * gap.
@@ -99,7 +100,7 @@ describe('createSceneChoreography', () => {
 
     it('treats a negative stagger gap as no gap', async () => {
         const { timeline, waits } = setup()
-        await timeline.stagger(['a', 'b'], -1, async () => undefined)
+        await timeline.stagger(['a', 'b'], -1, () => Promise.resolve())
         expect(waits).toEqual([0])
     })
 
@@ -129,8 +130,9 @@ describe('createSceneChoreography', () => {
         )
 
         await expect(
-            timeline.loop(async () => {
+            timeline.loop(() => {
                 cancelling()
+                return Promise.resolve()
             })
         ).rejects.toBeInstanceOf(SceneCancelledError)
         expect(cancelling).toHaveBeenCalledTimes(1)

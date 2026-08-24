@@ -128,10 +128,14 @@ const assignNearestTargets = (
         let bestDistance = Number.POSITIVE_INFINITY
 
         for (let cubeIndex = 0; cubeIndex < remainingCubeIds.length; cubeIndex += 1) {
-            const position = runtime.getCubePosition(remainingCubeIds[cubeIndex])
+            const cubeId = remainingCubeIds[cubeIndex]
+            if (cubeId === undefined) continue
+            const position = runtime.getCubePosition(cubeId)
             if (position === undefined) continue
             for (let targetIndex = 0; targetIndex < remainingTargets.length; targetIndex += 1) {
-                const distance = getGridDistance(position, remainingTargets[targetIndex])
+                const target = remainingTargets[targetIndex]
+                if (target === undefined) continue
+                const distance = getGridDistance(position, target)
                 if (distance < bestDistance) {
                     bestDistance = distance
                     bestCubeIndex = cubeIndex

@@ -11,9 +11,15 @@ import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
 
 /** jsdom has no ResizeObserver; nothing here depends on it reporting a size. */
 class StubResizeObserver {
-    observe(): void {}
-    unobserve(): void {}
-    disconnect(): void {}
+    observe(): void {
+        /* The test only needs the observer interface. */
+    }
+    unobserve(): void {
+        /* The test only needs the observer interface. */
+    }
+    disconnect(): void {
+        /* The test only needs the observer interface. */
+    }
 }
 
 /**
@@ -35,8 +41,12 @@ class VisibleIntersectionObserver {
         )
     }
 
-    unobserve(): void {}
-    disconnect(): void {}
+    unobserve(): void {
+        /* The test only needs the observer interface. */
+    }
+    disconnect(): void {
+        /* The test only needs the observer interface. */
+    }
     takeRecords(): IntersectionObserverEntry[] {
         return []
     }
@@ -102,7 +112,7 @@ const settle = async (): Promise<void> => {
  */
 describe('scene lifecycle under StrictMode', () => {
     it('mounts and unmounts the whole catalog without reporting an error', async () => {
-        await act(async () => {
+        act(() => {
             root.render(
                 <StrictMode>
                     <IllustrationsPage />
@@ -111,7 +121,7 @@ describe('scene lifecycle under StrictMode', () => {
         })
         await settle()
 
-        await act(async () => {
+        act(() => {
             root.unmount()
         })
         await settle()
@@ -125,7 +135,7 @@ describe('scene lifecycle under StrictMode', () => {
      * leave the setup running against a runtime that had already been disposed.
      */
     it('survives an unmount that lands in the middle of asynchronous setup', async () => {
-        await act(async () => {
+        act(() => {
             root.render(
                 <StrictMode>
                     <IllustrationsPage />
@@ -134,7 +144,7 @@ describe('scene lifecycle under StrictMode', () => {
         })
 
         // Deliberately no settling: teardown races the dynamic import.
-        await act(async () => {
+        act(() => {
             root.unmount()
         })
         await settle()
@@ -176,7 +186,7 @@ describe('scene restart contract', () => {
     })
 
     const renderWithSeed = async (seed: number): Promise<void> => {
-        await act(async () => {
+        act(() => {
             root.render(
                 <SceneRenderHost>
                     <CountingScene seed={seed} />
@@ -240,7 +250,7 @@ describe('restart key identity', () => {
     })
 
     const renderWithRevision = async (revision: { value: number }): Promise<void> => {
-        await act(async () => {
+        act(() => {
             root.render(
                 <SceneRenderHost>
                     <RevisionScene revision={revision} />
@@ -299,7 +309,7 @@ describe('face label changes', () => {
     })
 
     const renderWithLabels = async (faceLabels: GridCubeFaceLabels): Promise<void> => {
-        await act(async () => {
+        act(() => {
             root.render(
                 <SceneRenderHost>
                     <LabelledScene faceLabels={faceLabels} />

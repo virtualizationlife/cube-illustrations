@@ -1,21 +1,21 @@
 :root {
-    --cube-illustrations-font-family: 'Open Sans', arial, helvetica, sans-serif;
-    --cube-illustrations-font-weight: 300;
-    --cube-illustrations-label-font-size: 16px;
-    --cube-illustrations-label-line-height: 1;
-    --cube-illustrations-label-phone-line-height: 1.2;
-    --cube-illustrations-label-letter-spacing: 0.04em;
-    --cube-illustrations-tag-font-size: 11px;
-    --cube-illustrations-tag-line-height: 1.2;
-    --cube-illustrations-tag-letter-spacing: 0.02em;
-    --cube-illustrations-fallback-font-size: 14px;
+    --cube_illustrations_font_family: 'Open Sans', arial, helvetica, sans-serif;
+    --cube_illustrations_font_weight: 300;
+    --cube_illustrations_label_font_size: 16px;
+    --cube_illustrations_label_line_height: 1;
+    --cube_illustrations_label_phone_line_height: 1.2;
+    --cube_illustrations_label_letter_spacing: 0.04em;
+    --cube_illustrations_tag_font_size: 11px;
+    --cube_illustrations_tag_line_height: 1.2;
+    --cube_illustrations_tag_letter_spacing: 0.02em;
+    --cube_illustrations_fallback_font_size: 14px;
 
     /* Scene group switcher */
-    --cube-illustrations-scene-switcher-font-family: var(--cube-illustrations-font-family);
-    --cube-illustrations-scene-switcher-font-weight: var(--cube-illustrations-font-weight);
-    --cube-illustrations-scene-switcher-font-size: var(--cube-illustrations-tag-font-size);
-    --cube-illustrations-scene-switcher-letter-spacing: var(
-        --cube-illustrations-tag-letter-spacing
+    --cube_illustrations_scene_switcher_font_family: var(--cube_illustrations_font_family);
+    --cube_illustrations_scene_switcher_font_weight: var(--cube_illustrations_font_weight);
+    --cube_illustrations_scene_switcher_font_size: var(--cube_illustrations_tag_font_size);
+    --cube_illustrations_scene_switcher_letter_spacing: var(
+        --cube_illustrations_tag_letter_spacing
     );
-    --cube-illustrations-scene-switcher-line-height: 1;
+    --cube_illustrations_scene_switcher_line_height: 1;
 }

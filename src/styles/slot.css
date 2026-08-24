@@ -1,48 +1,48 @@
-.cube_illustrations__slot {
+.cube_illustrations_slot {
     box-sizing: border-box;
     position: relative;
-    flex-shrink: var(--cube-illustrations-no-shrink);
-    aspect-ratio: var(--cube-illustrations-scene-aspect-ratio);
-    width: var(--cube-illustrations-scene-size);
-    max-width: var(--cube-illustrations-full-size);
+    flex-shrink: var(--cube_illustrations_no_shrink);
+    aspect-ratio: var(--cube_illustrations_scene_aspect_ratio);
+    width: var(--cube_illustrations_scene_size);
+    max-width: var(--cube_illustrations_full_size);
     height: auto;
-    border: var(--cube-illustrations-border);
+    border: var(--cube_illustrations_border);
 }
 
-.cube_illustrations__canvas,
-.cube_illustrations__scene_element {
+.cube_illustrations_canvas,
+.cube_illustrations_scene_element {
     position: absolute;
-    width: var(--cube-illustrations-full-size);
-    height: var(--cube-illustrations-full-size);
-    inset: var(--cube-illustrations-zero);
+    width: var(--cube_illustrations_full_size);
+    height: var(--cube_illustrations_full_size);
+    inset: var(--cube_illustrations_zero);
     touch-action: pan-y;
 }
 
-.cube_illustrations__canvas {
+.cube_illustrations_canvas {
     display: block;
 }
 
-.cube_illustrations__canvas,
-.cube_illustrations__render_host_canvas {
-    opacity: var(--cube-illustrations-scene-fade-hidden-opacity);
-    transition: opacity var(--cube-illustrations-scene-fade-duration)
-        var(--cube-illustrations-scene-fade-easing);
+.cube_illustrations_canvas,
+.cube_illustrations_render_host_canvas {
+    opacity: var(--cube_illustrations_scene_fade_hidden_opacity);
+    transition: opacity var(--cube_illustrations_scene_fade_duration)
+        var(--cube_illustrations_scene_fade_easing);
 }
 
-.cube_illustrations__canvas[data-ready='true'],
-.cube_illustrations__render_host_canvas[data-ready='true'] {
-    opacity: var(--cube-illustrations-scene-fade-visible-opacity);
+.cube_illustrations_canvas[data-ready='true'],
+.cube_illustrations_render_host_canvas[data-ready='true'] {
+    opacity: var(--cube_illustrations_scene_fade_visible_opacity);
 }
 
-.cube_illustrations__fallback {
+.cube_illustrations_fallback {
     display: grid;
     position: absolute;
     place-items: center;
-    margin: var(--cube-illustrations-zero);
-    inset: var(--cube-illustrations-zero);
-    padding: var(--cube-illustrations-scene-fallback-padding);
-    color: var(--cube-illustrations-muted-color);
-    font-size: var(--cube-illustrations-fallback-font-size);
+    margin: var(--cube_illustrations_zero);
+    inset: var(--cube_illustrations_zero);
+    padding: var(--cube_illustrations_scene_fallback_padding);
+    color: var(--cube_illustrations_muted_color);
+    font-size: var(--cube_illustrations_fallback_font_size);
     text-align: center;
     pointer-events: none;
 }

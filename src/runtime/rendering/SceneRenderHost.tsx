@@ -96,7 +96,7 @@ export type SceneRenderHostProps = {
     readonly children: ReactNode
 }
 
-const HOST_CANVAS_CLASS = 'cube_illustrations__render_host_canvas'
+const HOST_CANVAS_CLASS = 'cube_illustrations_render_host_canvas'
 
 /**
  * Renders all descendant cube scenes through one transparent, viewport-sized renderer.
@@ -134,6 +134,7 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
 
     useEffect(() => {
         let disposed = false
+        const isDisposed = (): boolean => disposed
         let renderer: WebGpuRenderer | null = null
         let disconnectResize: (() => void) | null = null
         let disconnectTimer: (() => void) | null = null
@@ -155,7 +156,7 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
             // means every slot receives the same unsupported state instead of creating
             // one fallback renderer per scene.
             const device = await getSharedGpuDevice()
-            if (disposed) return
+            if (isDisposed()) return
             if (device === null) {
                 updateStatus('unsupported')
                 return
@@ -173,13 +174,13 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
             try {
                 await renderer.init()
             } catch {
-                if (!disposed) updateStatus('unsupported')
+                if (!isDisposed()) updateStatus('unsupported')
                 renderer.dispose()
                 renderer = null
                 return
             }
 
-            if (disposed) {
+            if (isDisposed()) {
                 renderer.dispose()
                 renderer = null
                 return
@@ -279,6 +280,8 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
                 }
                 wakeLoop()
             }
+            // The listener is removed by disconnectTimer when the async setup is torn down.
+            // eslint-disable-next-line @eslint-react/web-api-no-leaked-event-listener
             document.addEventListener('visibilitychange', syncLoopState)
             disconnectTimer = () => {
                 document.removeEventListener('visibilitychange', syncLoopState)

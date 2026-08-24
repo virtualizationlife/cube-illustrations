@@ -51,6 +51,7 @@ export const findGridPath = (
     while (queueIndex < queue.length && parents.size < maxVisitedCells) {
         const current = queue[queueIndex]
         queueIndex += 1
+        if (current === undefined) continue
 
         const directions = [...CARDINAL_DIRECTIONS].sort(
             (left, right) =>

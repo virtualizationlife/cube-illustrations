@@ -1,4 +1,4 @@
-import { useCallback, useRef, type JSX } from 'react'
+import { useCallback, useEffect, useRef, type JSX } from 'react'
 import type { Object3D, Vector3 } from 'three'
 
 import {
@@ -40,7 +40,9 @@ export const InertiaCubeScene = ({
     mainCubeFaceLabels,
 }: InertiaCubeSceneProps): JSX.Element => {
     const enableInertiaRef = useRef(enableInertia)
-    enableInertiaRef.current = enableInertia
+    useEffect(() => {
+        enableInertiaRef.current = enableInertia
+    }, [enableInertia])
 
     const velocityRef = useRef({ x: 0, y: enableInertia ? INITIAL_SPIN_Y : 0 })
     const draggingRef = useRef(false)

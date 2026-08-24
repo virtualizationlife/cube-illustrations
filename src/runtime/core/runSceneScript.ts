@@ -58,7 +58,7 @@ const raceWithCancellation = <Value>(
             },
             (error: unknown) => {
                 signal.removeEventListener('abort', handleAbort)
-                reject(error)
+                reject(error instanceof Error ? error : new Error(String(error)))
             }
         )
     })
@@ -91,7 +91,7 @@ const createCancellationAwareRuntime = (
 
     return new Proxy(runtime, {
         get(target, property, receiver): unknown {
-            const value = Reflect.get(target, property, receiver)
+            const value: unknown = Reflect.get(target, property, receiver)
             if (typeof value !== 'function') return value
 
             const existing = wrappedMethods.get(property)
@@ -99,7 +99,13 @@ const createCancellationAwareRuntime = (
 
             const wrapped = (...args: never[]): unknown => {
                 throwIfCancelled(signal)
-                const result = Reflect.apply(value, target, args)
+                const callable = value as (...args: never[]) => unknown
+                const apply = Reflect.apply as unknown as (
+                    target: (...args: never[]) => unknown,
+                    thisArg: unknown,
+                    args: never[]
+                ) => unknown
+                const result = apply(callable, target, args)
                 return ASYNC_RUNTIME_METHODS.has(property)
                     ? raceWithCancellation(Promise.resolve(result), signal)
                     : result

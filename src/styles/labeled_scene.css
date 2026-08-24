@@ -1,42 +1,42 @@
-.cube_illustrations__labeled_scene {
+.cube_illustrations_labeled_scene {
     box-sizing: border-box;
-    width: var(--cube-illustrations-full-size);
-    min-width: var(--cube-illustrations-zero);
+    width: var(--cube_illustrations_full_size);
+    min-width: var(--cube_illustrations_zero);
 }
 
-.cube_illustrations__labeled_scene > .cube_illustrations__slot {
-    width: var(--cube-illustrations-full-size);
+.cube_illustrations_labeled_scene > .cube_illustrations_slot {
+    width: var(--cube_illustrations_full_size);
 }
 
-.cube_illustrations__scene_label,
-.cube_illustrations__scene_tags {
-    z-index: var(--cube-illustrations-label-layer);
+.cube_illustrations_scene_label,
+.cube_illustrations_scene_tags {
+    z-index: var(--cube_illustrations_label_layer);
     position: relative;
-    margin: var(--cube-illustrations-zero);
-    padding: var(--cube-illustrations-zero);
-    font-weight: var(--cube-illustrations-font-weight);
-    font-family: var(--cube-illustrations-font-family);
+    margin: var(--cube_illustrations_zero);
+    padding: var(--cube_illustrations_zero);
+    font-weight: var(--cube_illustrations_font_weight);
+    font-family: var(--cube_illustrations_font_family);
     text-align: center;
     text-transform: lowercase;
     overflow-wrap: break-word;
 }
 
-.cube_illustrations__scene_label {
-    color: var(--cube-illustrations-label-color);
-    font-size: var(--cube-illustrations-label-font-size);
-    line-height: var(--cube-illustrations-label-line-height);
-    letter-spacing: var(--cube-illustrations-label-letter-spacing);
+.cube_illustrations_scene_label {
+    color: var(--cube_illustrations_label_color);
+    font-size: var(--cube_illustrations_label_font_size);
+    line-height: var(--cube_illustrations_label_line_height);
+    letter-spacing: var(--cube_illustrations_label_letter_spacing);
 }
 
-.cube_illustrations__scene_tags {
-    color: var(--cube-illustrations-tag-color);
-    font-size: var(--cube-illustrations-tag-font-size);
-    line-height: var(--cube-illustrations-tag-line-height);
-    letter-spacing: var(--cube-illustrations-tag-letter-spacing);
+.cube_illustrations_scene_tags {
+    color: var(--cube_illustrations_tag_color);
+    font-size: var(--cube_illustrations_tag_font_size);
+    line-height: var(--cube_illustrations_tag_line_height);
+    letter-spacing: var(--cube_illustrations_tag_letter_spacing);
 }
 
 @media (width <= 520px) {
-    .cube_illustrations__scene_label {
-        line-height: var(--cube-illustrations-label-phone-line-height);
+    .cube_illustrations_scene_label {
+        line-height: var(--cube_illustrations_label_phone_line_height);
     }
 }

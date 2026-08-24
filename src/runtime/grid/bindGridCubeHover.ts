@@ -61,7 +61,10 @@ export const bindGridCubeHover = ({
 
     const findHoveredCube = (): GridSceneCubeEntry | null => {
         for (const intersection of intersections) {
-            const { cubeId, cubeObject } = intersection.object.userData
+            const { cubeId, cubeObject } = intersection.object.userData as {
+                cubeId?: unknown
+                cubeObject?: Object3D
+            }
             if (typeof cubeId !== 'string') continue
             // Opacity 0 hides a cube by clearing `visible` on its group, and the group is
             // not what was raycast, so invisible cubes have to be stepped over here.

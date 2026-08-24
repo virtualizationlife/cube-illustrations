@@ -12,19 +12,31 @@ class ControllableIntersectionObserver {
         latestObserverCallback = callback
     }
 
-    observe(): void {}
-    unobserve(): void {}
-    disconnect(): void {}
+    observe(): void {
+        /* The test controls visibility directly through the captured callback. */
+    }
+    unobserve(): void {
+        /* The test controls visibility directly through the captured callback. */
+    }
+    disconnect(): void {
+        /* The test controls visibility directly through the captured callback. */
+    }
 }
 
 /** Stands in for `THREE.Timer`, handing out a fixed step per frame. */
 class StubTimer {
-    connect(): void {}
-    update(): void {}
+    connect(): void {
+        /* Timer setup is not under test here. */
+    }
+    update(): void {
+        /* Timer updates are controlled by getDelta in this stub. */
+    }
     getDelta(): number {
         return 0.016
     }
-    disconnect(): void {}
+    disconnect(): void {
+        /* Timer teardown is not under test here. */
+    }
 }
 
 const createFakeRenderer = () => {

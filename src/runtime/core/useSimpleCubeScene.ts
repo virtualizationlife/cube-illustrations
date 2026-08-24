@@ -126,13 +126,16 @@ export const useSimpleCubeScene = ({
     const faceLabelsKey = getCubeFaceLabelsKey(mainCubeFaceLabels)
     const runtimeRef = useRef<GridSceneRuntime | null>(null)
     const mainCubeFaceLabelsRef = useRef(mainCubeFaceLabels)
-    mainCubeFaceLabelsRef.current = mainCubeFaceLabels
     const onFrameRef = useRef(onFrame)
     const onSetupRef = useRef(onSetup)
     const onCubeHoverChangeRef = useRef(onCubeHoverChange)
-    onFrameRef.current = onFrame
-    onSetupRef.current = onSetup
-    onCubeHoverChangeRef.current = onCubeHoverChange
+
+    useEffect(() => {
+        mainCubeFaceLabelsRef.current = mainCubeFaceLabels
+        onFrameRef.current = onFrame
+        onSetupRef.current = onSetup
+        onCubeHoverChangeRef.current = onCubeHoverChange
+    }, [mainCubeFaceLabels, onCubeHoverChange, onFrame, onSetup])
 
     useEffect(() => {
         const element = canvasRef.current

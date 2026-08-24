@@ -44,7 +44,7 @@ const createRandomIsland = (
     cubeCount: number = CUBE_IDS.length
 ): readonly GridCoordinate[] => {
     const positions: GridCoordinate[] = [{ column: 0, row: 0 }]
-    const occupiedCells = new Set([getGridCellKey(positions[0])])
+    const occupiedCells = new Set([getGridCellKey({ column: 0, row: 0 })])
 
     while (positions.length < cubeCount) {
         const anchor = random.item(positions)
@@ -124,10 +124,13 @@ const createRandomLayout = (random: SceneRandom): readonly CubeLayoutEntry[] => 
 
     const shuffledPositions = random.shuffle(availablePositions)
 
-    return CUBE_IDS.map((id, index) => ({
-        id,
-        scatteredPosition: shuffledPositions[index],
-    }))
+    return CUBE_IDS.map((id, index) => {
+        const scatteredPosition = shuffledPositions[index]
+        if (scatteredPosition === undefined) {
+            throw new Error('Forming a Group scene ran out of scattered positions')
+        }
+        return { id, scatteredPosition }
+    })
 }
 
 /** Six cubes gather first, then the group reorganizes to include a random late arrival. */

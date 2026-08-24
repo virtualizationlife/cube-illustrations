@@ -33,7 +33,8 @@ describe('scene random utilities', () => {
 
     it('handles empty collections and can exclude the previous index', () => {
         expect(getRandomIndex(0)).toBe(-1)
-        expect(getRandomItem([], () => 0.5)).toBeUndefined()
+        const emptyItem = getRandomItem<number>([], () => 0.5)
+        expect(emptyItem).toBeUndefined()
         expect(getDifferentRandomIndex(4, 1, () => 0)).toBe(0)
         expect(getDifferentRandomIndex(4, 1, () => 0.99)).toBe(3)
         expect(getDifferentRandomIndex(1, 0)).toBe(0)
@@ -242,15 +243,16 @@ describe('scene definitions', () => {
     it('composes cube actors and timeline sequences over the runtime', async () => {
         const calls: string[] = []
         const runtime = {
-            fadeCubeTo: vi.fn(async (_id: string, opacity: number) => {
+            fadeCubeTo: vi.fn((_id: string, opacity: number) => {
                 calls.push(`fade:${opacity}`)
             }),
-            moveCubeTo: vi.fn(async (_id: string) => {
+            moveCubeTo: vi.fn((_id: string) => {
                 calls.push('move')
             }),
         } as unknown as GridSceneRuntime
-        const { cubes, timeline } = createSceneChoreography(runtime, async (seconds) => {
+        const { cubes, timeline } = createSceneChoreography(runtime, (seconds) => {
             calls.push(`wait:${seconds}`)
+            return Promise.resolve()
         })
 
         await timeline.sequence(['first', 'second'], async (id) => {

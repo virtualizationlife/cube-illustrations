@@ -43,8 +43,12 @@ describe('grid scene runtime', () => {
         const mainBody = runtime.mainCube.children[0]
         if (!(mainBody instanceof THREE.Mesh)) throw new Error('Main cube body is missing')
 
-        expect(mainBody.geometry.type).toBe('RoundedBoxGeometry')
-        expect(mainBody.geometry.parameters.radius).toBeCloseTo(
+        const roundedGeometry = mainBody.geometry as {
+            readonly type: string
+            readonly parameters: { readonly radius: number }
+        }
+        expect(roundedGeometry.type).toBe('RoundedBoxGeometry')
+        expect(roundedGeometry.parameters.radius).toBeCloseTo(
             0.1 * DEFAULT_CUBE_CORNER_RADIUS_RATIO
         )
 
@@ -55,7 +59,8 @@ describe('grid scene runtime', () => {
         })
         const sharpBody = sharpCube.children[0]
         if (!(sharpBody instanceof THREE.Mesh)) throw new Error('Sharp cube body is missing')
-        expect(sharpBody.geometry.type).toBe('BoxGeometry')
+        const sharpGeometry = sharpBody.geometry as { readonly type: string }
+        expect(sharpGeometry.type).toBe('BoxGeometry')
 
         runtime.dispose()
     })

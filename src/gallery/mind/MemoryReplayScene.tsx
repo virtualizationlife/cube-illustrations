@@ -1,5 +1,5 @@
 import { MAIN_CUBE_ID, type GridCoordinate } from '@runtime/grid/gridSceneRuntime'
-import { defineScene, type CubeSceneProps } from '@sdk/defineScene'
+import { defineScene } from '@sdk/defineScene'
 
 const GRID_CELL_SIZE = 0.045
 const MEMORY_ECHO_OPACITIES = [0.38, 0.27, 0.18] as const
@@ -43,6 +43,9 @@ export const MemoryReplayScene = defineScene({
         if (start !== undefined) runtime.setCubePosition(MAIN_CUBE_ID, start)
     },
     script: async ({ runtime, timeline, props }) => {
+        const start = JOURNEY[0]
+        if (start === undefined) return
+
         const replayJourney = async (): Promise<void> => {
             const echoes: MemoryEcho[] = []
             let spawnedEchoCount = 0
@@ -77,9 +80,8 @@ export const MemoryReplayScene = defineScene({
                 }
 
                 if (spawnedEchoCount < MEMORY_ECHO_OPACITIES.length) {
-                    const start = JOURNEY[0]
                     const opacity = MEMORY_ECHO_OPACITIES[spawnedEchoCount]
-                    if (start !== undefined && opacity !== undefined) {
+                    if (opacity !== undefined) {
                         const id = `memory-echo-${spawnedEchoCount}`
                         runtime.addCube({
                             id,
@@ -117,7 +119,7 @@ export const MemoryReplayScene = defineScene({
             })
 
             await replayJourney()
-            await runtime.moveCubeTo(MAIN_CUBE_ID, JOURNEY[0], {
+            await runtime.moveCubeTo(MAIN_CUBE_ID, start, {
                 duration: 0.9,
                 easing: 'easeInOutCubic',
             })

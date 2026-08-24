@@ -214,7 +214,7 @@ export const defineScene = <Props extends CubeSceneProps = CubeSceneProps, State
             },
             // `restartKey` is the explicit escape hatch for custom scene props. Face labels
             // are applied in place by the renderer and deliberately do not restart a scene.
-            // eslint-disable-next-line react-hooks/exhaustive-deps
+            // eslint-disable-next-line react-hooks/exhaustive-deps, @eslint-react/exhaustive-deps
             [props.seed, restartKey]
         )
 

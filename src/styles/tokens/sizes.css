@@ -1,35 +1,35 @@
 :root {
-    --cube-illustrations-full-size: 100%;
-    --cube-illustrations-zero: 0;
+    --cube_illustrations_full_size: 100%;
+    --cube_illustrations_zero: 0;
 
     /* Scene group switcher */
-    --cube-illustrations-scene-switcher-gap: 8px;
-    --cube-illustrations-scene-switcher-item-padding: 8px 12px;
-    --cube-illustrations-scene-switcher-focus-outline-width: 1px;
-    --cube-illustrations-scene-switcher-focus-outline-offset: 2px;
+    --cube_illustrations_scene_switcher_gap: 8px;
+    --cube_illustrations_scene_switcher_item_padding: 8px 12px;
+    --cube_illustrations_scene_switcher_focus_outline_width: 1px;
+    --cube_illustrations_scene_switcher_focus_outline_offset: 2px;
 
     /* Scene */
-    --cube-illustrations-scene-min-size: 240px;
-    --cube-illustrations-scene-size: 280px;
-    --cube-illustrations-scene-aspect-ratio: 1 / 1;
-    --cube-illustrations-scene-fallback-padding: 16px;
-    --cube-illustrations-scene-fade-duration: 0.4s;
-    --cube-illustrations-scene-fade-easing: ease-out;
-    --cube-illustrations-scene-fade-hidden-opacity: 0;
-    --cube-illustrations-scene-fade-visible-opacity: 1;
+    --cube_illustrations_scene_min_size: 240px;
+    --cube_illustrations_scene_size: 280px;
+    --cube_illustrations_scene_aspect_ratio: 1 / 1;
+    --cube_illustrations_scene_fallback_padding: 16px;
+    --cube_illustrations_scene_fade_duration: 0.4s;
+    --cube_illustrations_scene_fade_easing: ease-out;
+    --cube_illustrations_scene_fade_hidden_opacity: 0;
+    --cube_illustrations_scene_fade_visible_opacity: 1;
 
     /* Page */
-    --cube-illustrations-page-padding: 24px;
-    --cube-illustrations-page-min-height: 100dvh;
-    --cube-illustrations-page-phone-columns: 2;
-    --cube-illustrations-page-phone-padding: 12px;
-    --cube-illustrations-page-phone-gap: 16px 8px;
-    --cube-illustrations-grid-flexible-track: 1fr;
-    --cube-illustrations-no-shrink: 0;
-    --cube-illustrations-gap: 0;
-    --cube-illustrations-border: 0;
+    --cube_illustrations_page_padding: 24px;
+    --cube_illustrations_page_min_height: 100dvh;
+    --cube_illustrations_page_phone_columns: 2;
+    --cube_illustrations_page_phone_padding: 12px;
+    --cube_illustrations_page_phone_gap: 16px 8px;
+    --cube_illustrations_grid_flexible_track: 1fr;
+    --cube_illustrations_no_shrink: 0;
+    --cube_illustrations_gap: 0;
+    --cube_illustrations_border: 0;
 
     /* Layers */
-    --cube-illustrations-render-host-layer: 1;
-    --cube-illustrations-label-layer: 2;
+    --cube_illustrations_render_host_layer: 1;
+    --cube_illustrations_label_layer: 2;
 }

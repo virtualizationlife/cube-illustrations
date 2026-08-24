@@ -100,8 +100,7 @@ describe('face label reconciliation', () => {
         if (labelObject === undefined) throw new Error('Label assets were not created')
         const labelMesh = labelObject.children[0]
         if (!(labelMesh instanceof THREE.Mesh)) throw new Error('Label mesh is missing')
-        const material = labelMesh.material
-        if (Array.isArray(material)) throw new Error('Unexpected material array')
+        const material = labelMesh.material as InstanceType<typeof THREE.MeshBasicMaterial>
         expect(material.opacity).toBeCloseTo(0.4)
     })
 

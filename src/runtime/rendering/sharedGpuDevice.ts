@@ -10,9 +10,11 @@
 let devicePromise: Promise<GPUDevice | null> | null = null
 
 const requestSharedDevice = async (): Promise<GPUDevice | null> => {
-    if (typeof navigator === 'undefined' || navigator.gpu === undefined) return null
+    if (typeof navigator === 'undefined') return null
+    const browserNavigator = navigator as { gpu?: GPU }
+    if (browserNavigator.gpu === undefined) return null
     try {
-        const adapter = await navigator.gpu.requestAdapter()
+        const adapter = await browserNavigator.gpu.requestAdapter()
         if (adapter === null) return null
         return await adapter.requestDevice()
     } catch {

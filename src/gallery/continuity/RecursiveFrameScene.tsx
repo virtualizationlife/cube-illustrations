@@ -65,7 +65,9 @@ export const RecursiveFrameScene = defineScene<CubeSceneProps, RecursiveFrameSta
     },
     presentation: BASE_PRESENTATION,
     setup: ({ runtime, props }) => {
-        runtime.setCubePosition(MAIN_CUBE_ID, PROCESS_ROUTE[0])
+        const start = PROCESS_ROUTE[0]
+        if (start === undefined) throw new Error('Recursive Frame scene requires a route')
+        runtime.setCubePosition(MAIN_CUBE_ID, start)
         const radii = [INNER_RADIUS, MIDDLE_RADIUS, OUTER_RADIUS] as const
 
         FRAME_IDS.forEach((ids, frameIndex) => {

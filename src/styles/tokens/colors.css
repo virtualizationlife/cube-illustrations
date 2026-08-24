@@ -1,13 +1,13 @@
 :root {
     /* Surface */
-    --cube-illustrations-background: #ffffff;
+    --cube_illustrations_background: #ffffff;
 
     /* Text */
-    --cube-illustrations-label-color: #8b919a;
-    --cube-illustrations-tag-color: #a0a5ad;
-    --cube-illustrations-muted-color: #6b7280;
+    --cube_illustrations_label_color: #8b919a;
+    --cube_illustrations_tag_color: #a0a5ad;
+    --cube_illustrations_muted_color: #6b7280;
 
     /* Scene group switcher */
-    --cube-illustrations-scene-switcher-color: var(--cube-illustrations-muted-color);
-    --cube-illustrations-scene-switcher-active-color: var(--cube-illustrations-label-color);
+    --cube_illustrations_scene_switcher_color: var(--cube_illustrations_muted_color);
+    --cube_illustrations_scene_switcher_active_color: var(--cube_illustrations_label_color);
 }

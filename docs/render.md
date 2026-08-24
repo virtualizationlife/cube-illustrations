@@ -320,7 +320,7 @@ removed, not the per-frame raycast.
 ### 10. The backbuffer follows the real CSS box
 
 `ILLUSTRATION_VIEWPORT` was a hard-coded 300 logical pixels passed to `setSize`, while the
-slot is sized by `--cube-illustrations-scene-size`, defaulting to 260px. On a 2× display
+slot is sized by `--cube_illustrations_scene_size`, defaulting to 260px. On a 2× display
 that produced a 600×600 backbuffer for a box needing 520×520 — about 33% more fragments, and
 33% more 4× MSAA samples, thrown away by the browser's downscale.
 
