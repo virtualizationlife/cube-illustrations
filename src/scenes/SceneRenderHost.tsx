@@ -9,7 +9,6 @@ import {
     type JSX,
     type ReactNode,
 } from 'react'
-
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 import { getSharedGpuDevice } from './sharedGpuDevice'
@@ -20,7 +19,7 @@ type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCam
 
 export type CubeRendererStatus = 'loading' | 'ready' | 'unsupported'
 
-export interface SceneRenderSlot {
+export type SceneRenderSlot = {
     /** The DOM element occupied by this scene. */
     readonly element: HTMLElement
     readonly scene: Scene
@@ -32,13 +31,13 @@ export interface SceneRenderSlot {
     readonly onStatusChange: (status: CubeRendererStatus) => void
 }
 
-export interface SceneRenderHostHandle {
+export type SceneRenderHostHandle = {
     readonly register: (slot: SceneRenderSlot) => () => void
     readonly wake: () => void
     readonly status: CubeRendererStatus
 }
 
-export interface SceneRenderRect {
+export type SceneRenderRect = {
     readonly viewport: {
         readonly x: number
         readonly y: number
@@ -93,7 +92,7 @@ const SceneRenderHostContext = createContext<SceneRenderHostHandle | null>(null)
 export const useSceneRenderHost = (): SceneRenderHostHandle | null =>
     useContext(SceneRenderHostContext)
 
-export interface SceneRenderHostProps {
+export type SceneRenderHostProps = {
     readonly children: ReactNode
 }
 
@@ -201,7 +200,9 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
             resize()
             const resizeObserver = new ResizeObserver(resize)
             resizeObserver.observe(canvas)
-            disconnectResize = () => resizeObserver.disconnect()
+            disconnectResize = () => {
+                resizeObserver.disconnect()
+            }
 
             const timer = new THREE.Timer()
             let loopRunning = false
@@ -237,10 +238,7 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
                     slot.camera.aspect = rect.width / rect.height
                     slot.camera.updateProjectionMatrix()
                     slot.update(delta)
-                    if (
-                        renderRect.scissor.width <= 0 ||
-                        renderRect.scissor.height <= 0
-                    ) continue
+                    if (renderRect.scissor.width <= 0 || renderRect.scissor.height <= 0) continue
                     renderer.setViewport(
                         renderRect.viewport.x,
                         renderRect.viewport.y,
@@ -282,8 +280,9 @@ export const SceneRenderHost = ({ children }: SceneRenderHostProps): JSX.Element
                 wakeLoop()
             }
             document.addEventListener('visibilitychange', syncLoopState)
-            disconnectTimer = () =>
+            disconnectTimer = () => {
                 document.removeEventListener('visibilitychange', syncLoopState)
+            }
             syncLoopState()
             updateStatus('ready')
         }

@@ -1,9 +1,8 @@
 import { useCallback, useRef, type JSX } from 'react'
-
 import type { Object3D, Vector3 } from 'three'
 
-import { CubeSceneViewport } from './CubeSceneViewport'
 import type { GridCubeFaceLabelInput } from './cubeFaceLabels'
+import { CubeSceneViewport } from './CubeSceneViewport'
 import {
     useSimpleCubeScene,
     type SimpleCubeFrameContext,
@@ -14,7 +13,7 @@ const DRAG_SENSITIVITY = 0.005
 const VELOCITY_DAMPING = 0.992
 const INITIAL_SPIN_Y = 0.55
 
-export interface InertiaCubeSceneProps {
+export type InertiaCubeSceneProps = {
     readonly cubeSize: number
     /** Cube corner radius in world units. Defaults to 3% of cubeSize. */
     readonly cubeCornerRadius?: number

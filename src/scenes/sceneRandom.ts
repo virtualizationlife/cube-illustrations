@@ -1,7 +1,7 @@
 export type SceneRandomSource = () => number
 export type SceneRandomSeed = number | string
 
-export interface SceneRandom {
+export type SceneRandom = {
     readonly next: SceneRandomSource
     readonly index: (length: number) => number
     /** An index other than `excludedIndex`, so a repeated choice never repeats itself. */
@@ -11,7 +11,7 @@ export interface SceneRandom {
 }
 
 /** Returns a shuffled copy without mutating the source collection. */
-export const shuffle = <Item,>(
+export const shuffle = <Item>(
     items: readonly Item[],
     random: () => number = Math.random
 ): Item[] => {
@@ -25,10 +25,8 @@ export const shuffle = <Item,>(
     return shuffled
 }
 
-export const getRandomIndex = (
-    itemCount: number,
-    random: () => number = Math.random
-): number => (itemCount <= 0 ? -1 : Math.floor(random() * itemCount))
+export const getRandomIndex = (itemCount: number, random: () => number = Math.random): number =>
+    itemCount <= 0 ? -1 : Math.floor(random() * itemCount)
 
 export const getDifferentRandomIndex = (
     itemCount: number,
@@ -45,7 +43,7 @@ export const getDifferentRandomIndex = (
     return compactIndex >= excludedIndex ? compactIndex + 1 : compactIndex
 }
 
-export const getRandomItem = <Item,>(
+export const getRandomItem = <Item>(
     items: readonly Item[],
     random: () => number = Math.random
 ): Item | undefined => items[getRandomIndex(items.length, random)]

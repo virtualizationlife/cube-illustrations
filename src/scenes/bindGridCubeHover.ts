@@ -1,20 +1,17 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
-import type {
-    GridSceneCubeEntry,
-    GridSceneRuntime,
-} from './gridSceneRuntime'
+import type { GridSceneCubeEntry, GridSceneRuntime } from './gridSceneRuntime'
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCamera>
-type Intersection = ThreeWebGpuNamespace.Intersection<Object3D>
+type Intersection = ThreeWebGpuNamespace.Intersection
 
-export interface GridCubeHoverController {
+export type GridCubeHoverController = {
     readonly update: () => void
     readonly dispose: () => void
 }
 
-export interface BindGridCubeHoverOptions {
+export type BindGridCubeHoverOptions = {
     readonly runtime: GridSceneRuntime
     readonly camera: PerspectiveCamera
     readonly canvas: HTMLElement

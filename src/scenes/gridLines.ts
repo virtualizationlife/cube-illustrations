@@ -2,7 +2,7 @@ import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 
-export interface GridLines {
+export type GridLines = {
     readonly object: Object3D
     /** Slides the repeating grid; both the transform and the fade follow this offset. */
     readonly setOffset: (columnOffset: number, rowOffset: number) => void
@@ -12,7 +12,7 @@ export interface GridLines {
     readonly dispose: () => void
 }
 
-export interface CreateGridLinesOptions {
+export type CreateGridLinesOptions = {
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly gridCellSize: number
     readonly gridCellCount: number

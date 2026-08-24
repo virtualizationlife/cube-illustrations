@@ -4,20 +4,16 @@ import type { GridSceneRuntime } from './gridSceneRuntime'
 
 type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCamera>
 
-export interface ScenePresentationValues {
+export type ScenePresentationValues = {
     readonly zoom: number
     readonly gridOpacity: number
     readonly gridFadeInnerRadiusCells: number
     readonly gridFadeOuterRadiusCells: number
 }
 
-export interface ScenePresentationController {
+export type ScenePresentationController = {
     readonly setTarget: (values: Partial<ScenePresentationValues>) => void
-    readonly update: (
-        delta: number,
-        camera: PerspectiveCamera,
-        runtime: GridSceneRuntime
-    ) => void
+    readonly update: (delta: number, camera: PerspectiveCamera, runtime: GridSceneRuntime) => void
 }
 
 const smoothTowards = (

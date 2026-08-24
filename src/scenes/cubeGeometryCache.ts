@@ -1,6 +1,6 @@
-import type * as ThreeWebGpuNamespace from 'three/webgpu'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
+import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 /**
  * `three/webgpu` defaults `BufferGeometry` to the attribute union that also permits
@@ -8,9 +8,7 @@ import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
  * geometries built here never hold a `GLBufferAttribute`, so they are narrowed on the way
  * out rather than forcing every consumer to widen.
  */
-type CubeBufferGeometry = ThreeWebGpuNamespace.BufferGeometry<
-    ThreeWebGpuNamespace.NormalBufferAttributes
->
+type CubeBufferGeometry = ThreeWebGpuNamespace.BufferGeometry
 
 const narrowGeometry = (
     geometry: ThreeWebGpuNamespace.BufferGeometry<ThreeWebGpuNamespace.NormalOrGLBufferAttributes>
@@ -20,12 +18,12 @@ const ROUNDED_BODY_SEGMENTS = 3
 const ROUNDED_EDGE_SEGMENTS = 1
 const ROUNDED_EDGE_THRESHOLD_DEG = 30
 
-export interface CubeGeometrySet {
+export type CubeGeometrySet = {
     readonly body: CubeBufferGeometry
     readonly edges: CubeBufferGeometry
 }
 
-export interface CubeGeometryCache {
+export type CubeGeometryCache = {
     /** Returns shared geometry for the given cube shape, adding one reference to it. */
     readonly acquire: (size: number, cornerRadius: number) => CubeGeometrySet
     /** Drops one reference; the geometry is disposed once nothing holds it. */
@@ -33,9 +31,9 @@ export interface CubeGeometryCache {
     readonly dispose: () => void
 }
 
-interface CacheEntry extends CubeGeometrySet {
+type CacheEntry = {
     references: number
-}
+} & CubeGeometrySet
 
 const getCacheKey = (size: number, cornerRadius: number): string => `${size}:${cornerRadius}`
 
@@ -46,9 +44,7 @@ const getCacheKey = (size: number, cornerRadius: number): string => `${size}:${c
  * expensive part of adding a cube — scenes that spawn cubes mid-animation paid it on the
  * frame the cube appeared. The cache is per-runtime so `dispose()` stays a full teardown.
  */
-export const createCubeGeometryCache = (
-    THREE: typeof ThreeWebGpuNamespace
-): CubeGeometryCache => {
+export const createCubeGeometryCache = (THREE: typeof ThreeWebGpuNamespace): CubeGeometryCache => {
     const entries = new Map<string, CacheEntry>()
 
     const createGeometrySet = (size: number, cornerRadius: number): CubeGeometrySet => {
@@ -73,13 +69,7 @@ export const createCubeGeometryCache = (
             cornerRadius === 0
                 ? body
                 : narrowGeometry(
-                      new RoundedBoxGeometry(
-                          size,
-                          size,
-                          size,
-                          ROUNDED_EDGE_SEGMENTS,
-                          cornerRadius
-                      )
+                      new RoundedBoxGeometry(size, size, size, ROUNDED_EDGE_SEGMENTS, cornerRadius)
                   )
         const edges = new THREE.EdgesGeometry(
             edgeSource,

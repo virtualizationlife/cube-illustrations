@@ -1,4 +1,4 @@
-export interface DisposerStack {
+export type DisposerStack = {
     /**
      * Registers a resource release. Registering after `dispose()` releases immediately,
      * which is what asynchronous setup needs: a resource may be acquired after teardown

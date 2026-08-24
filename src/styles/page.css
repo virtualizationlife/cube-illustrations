@@ -1,7 +1,5 @@
 .cube_illustrations__page {
     box-sizing: border-box;
-    min-height: 100dvh;
-    padding: var(--cube-illustrations-page-padding);
     display: grid;
     grid-template-columns: repeat(
         auto-fit,
@@ -10,17 +8,19 @@
             var(--cube-illustrations-scene-size)
         )
     );
-    align-content: center;
-    justify-content: center;
+    place-content: center center;
+    min-height: 100dvh;
+    padding: var(--cube-illustrations-page-padding);
     gap: var(--cube-illustrations-gap);
     background: var(--cube-illustrations-background);
 }
 
 /* Phones: two equal columns that never overflow a narrow viewport. */
-@media (max-width: 520px) {
+@media (width <= 520px) {
     .cube_illustrations__page {
         --cube-illustrations-page-padding: 12px;
         --cube-illustrations-gap: 16px 8px;
+
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

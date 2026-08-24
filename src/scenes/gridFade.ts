@@ -1,4 +1,4 @@
-export interface GridFadeRadii {
+export type GridFadeRadii = {
     readonly innerRadiusCells: number
     readonly outerRadiusCells: number
 }
@@ -14,8 +14,7 @@ export const getWideGridFadeRadii = (
 ): GridFadeRadii => {
     const outerRadiusCells = getMaximumGridFadeRadiusCells(gridCellCount)
     return {
-        innerRadiusCells:
-            outerRadiusCells * Math.min(1, Math.max(0, opaqueRadiusRatio)),
+        innerRadiusCells: outerRadiusCells * Math.min(1, Math.max(0, opaqueRadiusRatio)),
         outerRadiusCells,
     }
 }

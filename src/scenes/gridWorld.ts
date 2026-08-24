@@ -9,19 +9,19 @@ export type { GridCoordinate } from './gridPathfinding'
 
 export type GridSceneEasing = 'linear' | 'easeInOutCubic' | 'easeOutCubic'
 
-export interface GridSceneTransitionOptions {
+export type GridSceneTransitionOptions = {
     /** Animation duration in seconds. */
     readonly duration: number
     readonly easing?: GridSceneEasing
 }
 
-export interface GridWorldCubeDefinition {
+export type GridWorldCubeDefinition = {
     readonly id: string
     readonly position?: GridCoordinate
     readonly occupiesCell?: boolean
 }
 
-export interface GridWorld {
+export type GridWorld = {
     readonly addCube: (definition: GridWorldCubeDefinition) => void
     readonly removeCube: (id: string) => void
     readonly hasCube: (id: string) => boolean
@@ -49,12 +49,12 @@ export interface GridWorld {
     readonly dispose: () => void
 }
 
-interface MutableGridCoordinate {
+type MutableGridCoordinate = {
     column: number
     row: number
 }
 
-interface CoordinateTransition {
+type CoordinateTransition = {
     elapsed: number
     readonly duration: number
     readonly easing: GridSceneEasing
@@ -63,7 +63,7 @@ interface CoordinateTransition {
     readonly resolve: () => void
 }
 
-interface CubeMovement {
+type CubeMovement = {
     readonly path: readonly GridCoordinate[]
     readonly segmentDuration: number
     readonly easing: GridSceneEasing
@@ -73,13 +73,13 @@ interface CubeMovement {
     transition: CoordinateTransition
 }
 
-interface GridWorldCubeRecord {
+type GridWorldCubeRecord = {
     readonly position: MutableGridCoordinate
     occupiesCell: boolean
     movement: CubeMovement | null
 }
 
-interface TrackedTravel {
+type TrackedTravel = {
     readonly cubeId: string
     readonly token: symbol
 }

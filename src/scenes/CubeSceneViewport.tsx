@@ -2,16 +2,13 @@ import type { JSX, RefObject } from 'react'
 
 import { useSceneRenderHost, type CubeRendererStatus } from './SceneRenderHost'
 
-export interface CubeSceneViewportProps {
+export type CubeSceneViewportProps = {
     readonly canvasRef: RefObject<HTMLCanvasElement | HTMLDivElement | null>
     readonly status: CubeRendererStatus
 }
 
 /** Shared canvas shell for cube scenes, including the WebGPU fallback state. */
-export const CubeSceneViewport = ({
-    canvasRef,
-    status,
-}: CubeSceneViewportProps): JSX.Element => {
+export const CubeSceneViewport = ({ canvasRef, status }: CubeSceneViewportProps): JSX.Element => {
     const host = useSceneRenderHost()
 
     return (

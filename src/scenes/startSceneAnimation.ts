@@ -1,7 +1,4 @@
-export type SceneAnimationErrorHandler = (
-    error: unknown,
-    animationName: string
-) => void
+export type SceneAnimationErrorHandler = (error: unknown, animationName: string) => void
 
 const reportAnimationError: SceneAnimationErrorHandler = (error, animationName) => {
     console.error(`[cube-illustrations] ${animationName} animation stopped`, error)

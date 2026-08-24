@@ -1,10 +1,7 @@
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
 import type { GridCubeFaceLabelInput } from './cubeFaceLabels'
-import {
-    createGridSceneRuntime,
-    type GridSceneRuntime,
-} from './gridSceneRuntime'
+import { createGridSceneRuntime, type GridSceneRuntime } from './gridSceneRuntime'
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 type Scene = InstanceType<typeof ThreeWebGpuNamespace.Scene>
@@ -14,7 +11,7 @@ type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCam
 const CAMERA_DISTANCE = 1.05
 export const DEFAULT_CAMERA_ELEVATION_DEG = 35
 
-export interface CreateSceneWorldOptions {
+export type CreateSceneWorldOptions = {
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly cubeSize: number
     readonly cubeCornerRadius?: number
@@ -30,7 +27,7 @@ export interface CreateSceneWorldOptions {
     readonly mainCubeFaceLabels?: GridCubeFaceLabelInput
 }
 
-export interface SceneWorld {
+export type SceneWorld = {
     readonly scene: Scene
     readonly camera: PerspectiveCamera
     readonly runtime: GridSceneRuntime
@@ -89,6 +86,8 @@ export const createSceneWorld = ({
         camera,
         runtime,
         mesh: runtime.mainCube,
-        dispose: () => runtime.dispose(),
+        dispose: () => {
+            runtime.dispose()
+        },
     }
 }

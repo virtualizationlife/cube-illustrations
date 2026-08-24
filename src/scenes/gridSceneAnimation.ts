@@ -5,8 +5,8 @@ import {
     type GridSceneCubeDefinition,
     type GridSceneRuntime,
 } from './gridSceneRuntime'
-import { getRandomItem } from './sceneRandom'
 import { runSceneScript, type SceneScriptContext } from './runSceneScript'
+import { getRandomItem } from './sceneRandom'
 
 const CARDINAL_DIRECTIONS: readonly GridCoordinate[] = [
     { column: 1, row: 0 },
@@ -15,7 +15,7 @@ const CARDINAL_DIRECTIONS: readonly GridCoordinate[] = [
     { column: 0, row: -1 },
 ]
 
-export interface GridProximityOpacityConfig {
+export type GridProximityOpacityConfig = {
     readonly sourceCubeId?: string
     readonly targetCubeIds: readonly string[]
     readonly baseOpacity: number
@@ -27,14 +27,14 @@ export interface GridProximityOpacityConfig {
     readonly smoothingDuration?: number
 }
 
-export interface GridEncounterPauseConfig {
+export type GridEncounterPauseConfig = {
     readonly sourceCubeId?: string
     readonly targetCubeIds: readonly string[]
     readonly distance: number
     readonly duration: number
 }
 
-export interface GridRandomWalkConfig {
+export type GridRandomWalkConfig = {
     readonly stepLengths: readonly number[]
     readonly encounterChance: number
     readonly maxEncounterCubes: number
@@ -53,12 +53,12 @@ export interface GridRandomWalkConfig {
 
 export type GridSceneMovementMode = 'move-grid' | 'move-cube'
 
-export interface GridSceneAnimationController {
+export type GridSceneAnimationController = {
     readonly update: (delta: number) => void
     readonly dispose: () => void
 }
 
-export interface CreateGridSceneAnimationOptions {
+export type CreateGridSceneAnimationOptions = {
     readonly runtime: GridSceneRuntime
     readonly movementMode: GridSceneMovementMode
     readonly route: readonly GridCoordinate[]
@@ -151,10 +151,7 @@ export const createGridSceneAnimation = ({
     const initialCubes = [...additionalCubes, ...(additionalCubesFactory?.() ?? [])]
     for (const cube of initialCubes) runtime.addCube(cube)
 
-    const getNearbyCubeIds = (
-        targetCubeIds: Iterable<string>,
-        distance: number
-    ): string[] => {
+    const getNearbyCubeIds = (targetCubeIds: Iterable<string>, distance: number): string[] => {
         const sourcePosition = runtime.getCubePosition(MAIN_CUBE_ID)
         if (sourcePosition === undefined) return []
         return [...targetCubeIds].filter((targetCubeId) => {
@@ -333,10 +330,7 @@ export const createGridSceneAnimation = ({
                 }
             }
 
-            const nearbyCubeIds = getNearbyCubeIds(
-                randomEncounterIds,
-                randomWalk.encounterDistance
-            )
+            const nearbyCubeIds = getNearbyCubeIds(randomEncounterIds, randomWalk.encounterDistance)
             const hasEncounter = nearbyCubeIds.length > 0
             if (hasEncounter) pursuedEncounterId = null
             const companionChance = randomWalk.companionChance ?? 0

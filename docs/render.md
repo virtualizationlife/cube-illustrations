@@ -3,9 +3,9 @@
 How the WebGPU rendering in this package spends its time, what has been changed, and what
 is designed but not yet built.
 
-* **Part I — the optimisation pass** records work that is done: ten changes to how scenes
+- **Part I — the optimisation pass** records work that is done: ten changes to how scenes
   render, each with what it cost, what replaced it, and what risk it carried to the image.
-* **Part II — one renderer and a scene SDK** is a design document for the two structural
+- **Part II — one renderer and a scene SDK** is a design document for the two structural
   steps that follow from it.
 
 ---
@@ -25,19 +25,19 @@ Measured against `three@0.185.1` and the 25 scenes in
 
 ### Status
 
-| # | Change | Impact | Status | Pixel risk |
-|---|--------|--------|--------|------------|
-| 1 | One `GPUDevice` shared by every scene | Very high | Done | None |
-| 2 | Off-screen and hidden scenes stop rendering | Very high | Done | None |
-| 3 | Grid merged into one object, fade moved into the shader | Very high | Done | Verified |
-| 4 | Two unused lights removed | Free | Done | None |
-| 5 | Cube geometry cached and indexed | Startup + memory | Done | None |
-| 6 | Empty face labels skipped, identical labels share a texture | Medium | Done | None |
-| 7 | Opaque cubes leave the transparent pass | Medium | Done | Verified |
-| 8 | Per-frame transform pass is dirty-flagged | Medium | Done | None |
-| 9 | Hover raycasting stops rebuilding its world each frame | Low | Done | None |
-| 10 | Backbuffer follows the real CSS box | Medium | Done | Verified |
-| 1b | One renderer for the whole page | Highest | **Not done** | — |
+| #   | Change                                                      | Impact           | Status       | Pixel risk |
+| --- | ----------------------------------------------------------- | ---------------- | ------------ | ---------- |
+| 1   | One `GPUDevice` shared by every scene                       | Very high        | Done         | None       |
+| 2   | Off-screen and hidden scenes stop rendering                 | Very high        | Done         | None       |
+| 3   | Grid merged into one object, fade moved into the shader     | Very high        | Done         | Verified   |
+| 4   | Two unused lights removed                                   | Free             | Done         | None       |
+| 5   | Cube geometry cached and indexed                            | Startup + memory | Done         | None       |
+| 6   | Empty face labels skipped, identical labels share a texture | Medium           | Done         | None       |
+| 7   | Opaque cubes leave the transparent pass                     | Medium           | Done         | Verified   |
+| 8   | Per-frame transform pass is dirty-flagged                   | Medium           | Done         | None       |
+| 9   | Hover raycasting stops rebuilding its world each frame      | Low              | Done         | None       |
+| 10  | Backbuffer follows the real CSS box                         | Medium           | Done         | Verified   |
+| 1b  | One renderer for the whole page                             | Highest          | **Not done** | —          |
 
 Verified end state: `tsc` clean, 18/18 tests passing, `vite build` succeeds, and a
 rendered A/B comparison (see [Verification](#verification)) shows the image unchanged.
@@ -70,8 +70,8 @@ device when the backend created it itself:
 
 ```js
 // node_modules/three/src/renderers/webgpu/WebGPUBackend.js:2903
-if ( this.parameters.device === undefined && this.device !== null ) {
-    this.device.destroy();
+if (this.parameters.device === undefined && this.device !== null) {
+    this.device.destroy()
 }
 ```
 
@@ -90,7 +90,7 @@ state behind each device.
 
 #### 1b. Not done: one renderer for the whole page
 
-Sharing a device does not share the *pipeline cache*; each `WebGPURenderer` still compiles
+Sharing a device does not share the _pipeline cache_; each `WebGPURenderer` still compiles
 its own copy of every shader and submits its own command buffer. A single renderer drawing
 each scene into a scissored viewport matched to its DOM slot would collapse the page to one
 device, one pipeline cache, one rAF and one submission.
@@ -120,7 +120,7 @@ resume. `elapsed` is now accumulated from the same clamped per-frame delta the r
 scene uses, so a paused scene resumes exactly where it stopped. For a continuously rendering
 scene the two definitions differ only by frame-hitch overage.
 
-Note the scene *logic* is already driven by `runtime.update()` — `moveCubeTo` promises only
+Note the scene _logic_ is already driven by `runtime.update()` — `moveCubeTo` promises only
 settle as the loop advances them — so pausing the loop pauses the whole animation coherently
 rather than letting half of it run on.
 
@@ -142,7 +142,7 @@ flagged the whole colour attribute dirty — a full buffer re-upload, per line, 
 
 **Implemented** in [src/scenes/gridLines.ts](../src/scenes/gridLines.ts).
 
-Baking each line's `basePosition` into its vertices turned out to give *both* line families
+Baking each line's `basePosition` into its vertices turned out to give _both_ line families
 the same offset, `(columnOffset, 0, rowOffset)` — so the whole grid merges into a **single**
 `LineSegments`, not the two the first analysis predicted.
 
@@ -153,8 +153,15 @@ into the material as TSL, driven by uniforms:
 const planePosition = vec2(positionLocal.x, positionLocal.z).add(offsetUniform)
 const edgeFadeX = edgeLimit.sub(planePosition.x.abs()).div(gridCellSize).clamp(0, 1)
 const edgeFadeZ = edgeLimit.sub(planePosition.y.abs()).div(gridCellSize).clamp(0, 1)
-const fadeProgress = planePosition.length().sub(fadeInnerUniform).mul(fadeInvRangeUniform).clamp(0, 1)
-const radialFade = fadeProgress.mul(fadeProgress).mul(float(3).sub(fadeProgress.mul(2))).oneMinus()
+const fadeProgress = planePosition
+    .length()
+    .sub(fadeInnerUniform)
+    .mul(fadeInvRangeUniform)
+    .clamp(0, 1)
+const radialFade = fadeProgress
+    .mul(fadeProgress)
+    .mul(float(3).sub(fadeProgress.mul(2)))
+    .oneMinus()
 material.opacityNode = edgeFadeX.mul(edgeFadeZ).mul(radialFade).mul(opacityUniform)
 ```
 
@@ -171,11 +178,11 @@ it is smoother, not worse; it accounts for the residual diff measured below.
 
 Across the whole page:
 
-| | Before | After |
-|---|---|---|
-| Grid draw calls per frame | 982 | 25 |
-| Grid vertices | 228,720 | 1,964 |
-| Colour bytes uploaded per frame | 3.49 MB | 0 |
+|                                 | Before  | After |
+| ------------------------------- | ------- | ----- |
+| Grid draw calls per frame       | 982     | 25    |
+| Grid vertices                   | 228,720 | 1,964 |
+| Colour bytes uploaded per frame | 3.49 MB | 0     |
 
 Per-frame CPU work for the grid is now two uniform writes per scene.
 
@@ -258,7 +265,7 @@ changes on a real change (it rebuilds the pipeline). Label materials stay transp
 always — they carry glyph alpha.
 
 **Why the reordering is safe here.** This moves the body from the transparent pass to the
-opaque pass, which runs first, so the grid is now drawn *after* the cubes instead of before.
+opaque pass, which runs first, so the grid is now drawn _after_ the cubes instead of before.
 The only way that could change the image is a grid line nearer to the camera than a cube
 fragment covering the same pixel: previously the cube would paint over it, now the depth
 test would let it through.
@@ -266,7 +273,7 @@ test would let it through.
 That configuration cannot occur in these scenes. The grid lies on the floor plane, every
 cube sits on or above it (`hoverCells` is 0 or 1, and the body is lifted a further
 `0.02` cell so its edges do not z-fight), and the camera looks down from a positive
-elevation. Under those conditions floor points nearer to the camera project strictly *lower*
+elevation. Under those conditions floor points nearer to the camera project strictly _lower_
 on screen than a cube's base, and a cube's footprint lies entirely above its own base — so a
 cube's pixels only ever overlap floor lines that are farther away, which the depth test
 occludes identically in both orderings. The rendered A/B below confirms it empirically.
@@ -305,7 +312,7 @@ across frames via `intersectObjects`' optional target, and each body mesh carrie
 
 **One idea from the first draft was dropped:** gating the raycast on pointer movement. Cubes
 move under a stationary pointer, so hover state has to be re-evaluated every frame — the
-gate would have introduced a real behavioural bug. The per-frame *allocations* are what got
+gate would have introduced a real behavioural bug. The per-frame _allocations_ are what got
 removed, not the per-frame raycast.
 
 ---
@@ -339,7 +346,7 @@ enabled, at `--force-device-scale-factor=1`, against a copy of this tree with th
 modified source files restored from `HEAD` and the three new ones removed.
 
 **Whole-page comparison: inconclusive, as expected.** With `Math.random` seeded identically
-in both builds the page still diverges, because the visibility gating changes *when* each
+in both builds the page still diverges, because the visibility gating changes _when_ each
 scene's loop starts by a frame or two and every subsequent animation step inherits the
 shift. The diff shows cubes at different grid positions — animation phase, not rendering.
 A meaningful page-level diff needs the deterministic clock harness described below.
@@ -446,7 +453,7 @@ so the package's public shape does not change.
 ```
 
 **With a host present**, `useSimpleCubeScene` does not construct a renderer. Instead it
-registers a *slot* with the host:
+registers a _slot_ with the host:
 
 ```ts
 interface SceneSlot {
@@ -461,7 +468,7 @@ interface SceneSlot {
 }
 
 interface SceneRenderHostHandle {
-    readonly register: (slot: SceneSlot) => () => void   // returns unregister
+    readonly register: (slot: SceneSlot) => () => void // returns unregister
 }
 ```
 
@@ -528,7 +535,7 @@ instead of starting/stopping a private loop it flips the slot's `isActive` flag.
 skips inactive slots — no `update`, no draw. `document.hidden` pauses the host's whole
 loop, replacing 33 `visibilitychange` listeners with one.
 
-The per-scene *clock* semantics from part I item 2 are preserved: each slot keeps its
+The per-scene _clock_ semantics from part I item 2 are preserved: each slot keeps its
 own accumulated `elapsed` built from clamped deltas, so a scene paused off-screen still
 resumes where it stopped. The host passes `delta`; the slot accumulates.
 
@@ -536,11 +543,11 @@ resumes where it stopped. The host passes `delta`; the slot accumulates.
 
 Three things currently assume the scene owns a canvas:
 
-| Concern | Today | Under the host |
-|---|---|---|
-| `data-ready` fade | attribute on the per-scene canvas | attribute on the slot element; CSS selector changes from `canvas[data-ready]` to `[data-scene-ready]` |
-| `unsupported` fallback | replaces the canvas | rendered inside the slot element; the host simply never draws that slot |
-| `bindGridCubeHover` | pointer events + rect from the canvas | pointer events + rect from the slot element |
+| Concern                | Today                                 | Under the host                                                                                        |
+| ---------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `data-ready` fade      | attribute on the per-scene canvas     | attribute on the slot element; CSS selector changes from `canvas[data-ready]` to `[data-scene-ready]` |
+| `unsupported` fallback | replaces the canvas                   | rendered inside the slot element; the host simply never draws that slot                               |
+| `bindGridCubeHover`    | pointer events + rect from the canvas | pointer events + rect from the slot element                                                           |
 
 `bindGridCubeHover` already works in element-relative NDC — it reads
 `getBoundingClientRect()` and normalises the pointer into ±1 before raycasting — so
@@ -586,7 +593,7 @@ init/fallback exactly as now.
 - **One scene's cost bleeds into all.** A pathological scene previously janked only its
   own canvas; now it janks the shared frame. Acceptable on this page (scenes are small),
   worth a note in the host's docs.
-- **Stacking contexts.** A fixed canvas must sit visually *behind* any page chrome that
+- **Stacking contexts.** A fixed canvas must sit visually _behind_ any page chrome that
   overlaps the scene area. The demo page has none; consumers get a documented
   `z-index` knob on the host.
 
@@ -611,7 +618,7 @@ tests that assert full teardown, via an injectable cache in
 #### Label texture cache
 
 [cubeFaceLabels.ts](../src/scenes/cubeFaceLabels.ts) already shares one texture between
-faces with identical text *within one cube*. A page-level map `text → texture`
+faces with identical text _within one cube_. A page-level map `text → texture`
 (refcounted, same pattern) extends that across cubes and scenes — the common case of the
 whole page rendered with `faceLabels='ABC'` collapses from one texture per cube to one
 texture total.
@@ -643,7 +650,7 @@ let cancelled = false
 const delay = createCancellableDelay()
 // ...
 await runtime.fadeCubeTo(cubeId, 0.28, { duration: 0.12, easing: 'easeOutCubic' })
-if (cancelled) return              // ← after every single await
+if (cancelled) return // ← after every single await
 await runtime.fadeCubeTo(cubeId, 1, { duration: 0.16, easing: 'easeOutCubic' })
 if (cancelled) return
 await delay.wait(0.025)
@@ -651,7 +658,7 @@ await delay.wait(0.025)
 
 `SignalRelayScene` alone carries seven of these checks. A forgotten check is a silent
 bug with a known shape: the scene keeps issuing `moveCubeTo`/`addCube` against a
-runtime that is being torn down. The flag-and-check pattern makes the *author*
+runtime that is being torn down. The flag-and-check pattern makes the _author_
 responsible for correctness at every await point.
 
 **The fix: cancellation as an exception, not a flag.**
@@ -660,9 +667,9 @@ responsible for correctness at every await point.
 export class SceneCancelledError extends Error {}
 
 export interface SceneScriptContext {
-    readonly runtime: GridSceneRuntime      // cancellation-aware proxy, see below
+    readonly runtime: GridSceneRuntime // cancellation-aware proxy, see below
     readonly delay: (seconds: number) => Promise<void>
-    readonly signal: AbortSignal            // escape hatch for custom awaits
+    readonly signal: AbortSignal // escape hatch for custom awaits
 }
 
 export interface SceneScriptHandle {
@@ -673,13 +680,15 @@ export const runSceneScript = (
     name: string,
     runtime: GridSceneRuntime,
     script: (ctx: SceneScriptContext) => Promise<void>
-): SceneScriptHandle => { /* ... */ }
+): SceneScriptHandle => {
+    /* ... */
+}
 ```
 
 - `ctx.delay(s)` rejects with `SceneCancelledError` when the script is disposed.
 - `ctx.runtime` wraps the real runtime: the async methods (`moveCubeTo`, `fadeCubeTo`,
   `moveGridFocusTo`, `travelWithCube`) race their promise against the abort signal and
-  reject on cancel; the sync methods check `signal.aborted` and throw. So *any* await
+  reject on cancel; the sync methods check `signal.aborted` and throw. So _any_ await
   inside the script becomes a cancellation point automatically.
 - The runner catches `SceneCancelledError` silently and routes every other rejection
   through the existing `startSceneAnimation` error report.
@@ -703,7 +712,7 @@ roughly 150–200 lines deleted, and more importantly a whole bug class closed.
 
 **One semantic note.** Rejecting an in-flight `moveCubeTo` on cancel must still release
 its cell reservations. `runtime.dispose()` already does this via `finishCubeMovement`;
-the proxy's rejection is *observational* (the scene stops awaiting), while the actual
+the proxy's rejection is _observational_ (the scene stops awaiting), while the actual
 cleanup remains the runtime teardown's job, unchanged.
 
 #### III.2 `defineScene`: the declarative component factory
@@ -727,7 +736,9 @@ export const SignalRelayScene = defineScene({
     setup: ({ runtime, faceLabels }) => {
         /* place cubes; return nothing — teardown is the runner's job */
     },
-    script: async (ctx) => { /* choreography */ },
+    script: async (ctx) => {
+        /* choreography */
+    },
 })
 ```
 
@@ -736,7 +747,7 @@ export const SignalRelayScene = defineScene({
 right order. Scenes that need per-frame logic (hover scale, presentation) declare an
 optional `onFrame(ctx)` alongside `script`.
 
-Benefits beyond deleted boilerplate: the `view` block is *data*, which gives the
+Benefits beyond deleted boilerplate: the `view` block is _data_, which gives the
 deterministic harness (III.5) and any future gallery/preview tooling a serialisable
 description of every scene; and when Part I lands, `defineScene` is the single place
 that chooses host-slot vs standalone rendering — scene authors never see the
@@ -771,7 +782,7 @@ Recurring figures currently reimplemented per scene, worth one shared module eac
 - **Group moves in spatial order.** StructureMorph, PhaseChange and BecomingSign each
   implement "move a set of cubes into a formation, one at a time, ordered by distance
   from a seed". → `ctx.moveGroup(ids, formation, { order: 'from-seed' | 'random',
-  seed, segmentDuration })`, built on the existing collision-safe `moveCubeTo`.
+seed, segmentDuration })`, built on the existing collision-safe `moveCubeTo`.
 - **The shape library.** StructureMorph's form set and BecomingSign's twelve symbols
   are reusable assets locked inside components. → `src/scenes/formations.ts` exporting
   named coordinate sets plus `rotateFormation` / `pickDifferent` utilities.

@@ -1,8 +1,5 @@
 import type { GridSceneRuntime } from './gridSceneRuntime'
-import {
-    startSceneAnimation,
-    type SceneAnimationErrorHandler,
-} from './startSceneAnimation'
+import { startSceneAnimation, type SceneAnimationErrorHandler } from './startSceneAnimation'
 import { scaleSceneDuration } from './timeScale'
 
 const ASYNC_RUNTIME_METHODS = new Set<PropertyKey>([
@@ -19,7 +16,7 @@ export class SceneCancelledError extends Error {
     }
 }
 
-export interface SceneScriptContext {
+export type SceneScriptContext = {
     /** A cancellation-aware view of the scene runtime. */
     readonly runtime: GridSceneRuntime
     /** Waits for scene time in seconds and rejects immediately when disposed. */
@@ -28,7 +25,7 @@ export interface SceneScriptContext {
     readonly signal: AbortSignal
 }
 
-export interface SceneScriptHandle {
+export type SceneScriptHandle = {
     readonly signal: AbortSignal
     /** Settles after the script exits, is cancelled, or reports an error. */
     readonly completion: Promise<void>
@@ -64,9 +61,8 @@ const raceWithCancellation = <Value>(
     })
 }
 
-const createAbortableDelay = (
-    signal: AbortSignal
-): ((durationSeconds: number) => Promise<void>) =>
+const createAbortableDelay =
+    (signal: AbortSignal): ((durationSeconds: number) => Promise<void>) =>
     (durationSeconds) => {
         throwIfCancelled(signal)
 
@@ -79,10 +75,7 @@ const createAbortableDelay = (
                 globalThis.clearTimeout(timer)
                 reject(new SceneCancelledError())
             }
-            const timer = globalThis.setTimeout(
-                finish,
-                scaleSceneDuration(durationSeconds) * 1000
-            )
+            const timer = globalThis.setTimeout(finish, scaleSceneDuration(durationSeconds) * 1000)
             signal.addEventListener('abort', handleAbort, { once: true })
         })
     }
@@ -149,6 +142,8 @@ export const runSceneScript = (
     return {
         signal,
         completion,
-        dispose: () => controller.abort(),
+        dispose: () => {
+            controller.abort()
+        },
     }
 }

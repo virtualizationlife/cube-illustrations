@@ -11,14 +11,14 @@ export type GridCubeFace = (typeof GRID_CUBE_FACES)[number]
 export type GridCubeFaceLabels = Partial<Record<GridCubeFace, string>>
 export type GridCubeFaceLabelInput = string | GridCubeFaceLabels
 
-export interface CubeFaceLabelsProps {
+export type CubeFaceLabelsProps = {
     /** One label for every face, or individual labels. Each label is limited to 3 symbols. */
     readonly faceLabels?: GridCubeFaceLabelInput
     /** Cube corner radius in world units. Defaults to 3% of the cube edge. */
     readonly cubeCornerRadius?: number
 }
 
-export interface CubeFaceLabelAssets {
+export type CubeFaceLabelAssets = {
     readonly object: Object3D
     /** Live view of the materials currently in use; one per distinct label text. */
     readonly materials: readonly MeshBasicMaterial[]
@@ -27,7 +27,7 @@ export interface CubeFaceLabelAssets {
     readonly dispose: () => void
 }
 
-interface CreateCubeFaceLabelsOptions {
+type CreateCubeFaceLabelsOptions = {
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly size: number
     readonly labels: GridCubeFaceLabelInput
@@ -60,9 +60,7 @@ export const resolveCubeFaceLabels = (
  * A value key for face labels. Two label inputs that paint the same cube produce the same
  * key, which lets callers compare labels by value instead of by object identity.
  */
-export const getCubeFaceLabelsKey = (
-    labels: GridCubeFaceLabelInput | undefined
-): string => {
+export const getCubeFaceLabelsKey = (labels: GridCubeFaceLabelInput | undefined): string => {
     if (labels === undefined) return ''
     const resolved = resolveCubeFaceLabels(labels)
     return GRID_CUBE_FACES.map((face) => resolved[face]).join('\u0000')
@@ -80,7 +78,7 @@ const drawLabel = (canvas: HTMLCanvasElement, text: string): void => {
     context.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.82)
 }
 
-interface LabelSurface {
+type LabelSurface = {
     readonly canvas: HTMLCanvasElement
     readonly texture: Texture
     readonly material: MeshBasicMaterial

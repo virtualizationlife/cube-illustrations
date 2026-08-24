@@ -4,85 +4,198 @@ export const SIGN_DIRECTIONS = ['right', 'left', 'up', 'down'] as const
 
 export type SignDirection = (typeof SIGN_DIRECTIONS)[number]
 
-export interface SignSymbolTemplate {
+export type SignSymbolTemplate = {
     readonly name: string
     readonly positions: readonly GridCoordinate[]
 }
 
 export const SIGN_SYMBOLS: readonly SignSymbolTemplate[] = [
-    { name: 'arrow', positions: [
-        { column: -2, row: 0 }, { column: -1, row: 0 }, { column: 0, row: 0 },
-        { column: 1, row: 0 }, { column: 2, row: 0 }, { column: 1, row: -2 },
-        { column: 2, row: -1 }, { column: 2, row: 1 }, { column: 1, row: 2 },
-    ] },
-    { name: 'chevron', positions: [
-        { column: -2, row: -3 }, { column: -1, row: -2 }, { column: 0, row: -1 },
-        { column: 1, row: 0 }, { column: 0, row: 1 }, { column: -1, row: 2 },
-        { column: -2, row: 3 }, { column: -1, row: -1 }, { column: -1, row: 1 },
-    ] },
-    { name: 'plus', positions: [
-        { column: -2, row: 0 }, { column: -1, row: 0 }, { column: 0, row: 0 },
-        { column: 1, row: 0 }, { column: 2, row: 0 }, { column: 0, row: -2 },
-        { column: 0, row: -1 }, { column: 0, row: 1 }, { column: 0, row: 2 },
-    ] },
-    { name: 'cross', positions: [
-        { column: -2, row: -2 }, { column: -1, row: -1 }, { column: 0, row: 0 },
-        { column: 1, row: 1 }, { column: 2, row: 2 }, { column: -2, row: 2 },
-        { column: -1, row: 1 }, { column: 1, row: -1 }, { column: 2, row: -2 },
-    ] },
-    { name: 'diamond', positions: [
-        { column: 0, row: -2 }, { column: 1, row: -1 }, { column: 2, row: 0 },
-        { column: 1, row: 1 }, { column: 0, row: 2 }, { column: -1, row: 1 },
-        { column: -2, row: 0 }, { column: -1, row: -1 }, { column: 0, row: 0 },
-    ] },
-    { name: 'frame', positions: [
-        { column: -1, row: -1 }, { column: 0, row: -1 }, { column: 1, row: -1 },
-        { column: -1, row: 0 }, { column: 1, row: 0 }, { column: -1, row: 1 },
-        { column: 0, row: 1 }, { column: 1, row: 1 }, { column: 0, row: 0 },
-    ] },
-    { name: 'exclamation', positions: [
-        { column: -1, row: -2 }, { column: 0, row: -2 }, { column: 1, row: -2 },
-        { column: -1, row: -1 }, { column: 0, row: -1 }, { column: 1, row: -1 },
-        { column: 0, row: 0 }, { column: 0, row: 1 }, { column: 0, row: 3 },
-    ] },
-    { name: 'lightning', positions: [
-        { column: -1, row: -3 }, { column: 0, row: -2 }, { column: 1, row: -1 },
-        { column: 0, row: 0 }, { column: -1, row: 1 }, { column: 0, row: 2 },
-        { column: 1, row: 3 }, { column: -1, row: -1 }, { column: 1, row: 1 },
-    ] },
-    { name: 'fork', positions: [
-        { column: -2, row: -2 }, { column: -1, row: -1 }, { column: 0, row: 0 },
-        { column: 1, row: -1 }, { column: 2, row: -2 }, { column: 0, row: 1 },
-        { column: 0, row: 2 }, { column: 0, row: 3 }, { column: 1, row: 1 },
-    ] },
-    { name: 'spiral', positions: [
-        { column: -2, row: -2 }, { column: -1, row: -2 }, { column: 0, row: -2 },
-        { column: 1, row: -2 }, { column: 2, row: -2 }, { column: 2, row: -1 },
-        { column: 2, row: 0 }, { column: 1, row: 0 }, { column: 0, row: 0 },
-    ] },
-    { name: 'gate', positions: [
-        { column: -2, row: -2 }, { column: -1, row: -2 }, { column: 0, row: -2 },
-        { column: 1, row: -2 }, { column: 2, row: -2 }, { column: -2, row: -1 },
-        { column: -2, row: 0 }, { column: 2, row: -1 }, { column: 2, row: 0 },
-    ] },
-    { name: 'pause', positions: [
-        { column: -1, row: -2 }, { column: -1, row: -1 }, { column: -1, row: 0 },
-        { column: -1, row: 1 }, { column: 1, row: -1 }, { column: 1, row: 0 },
-        { column: 1, row: 1 }, { column: 1, row: 2 }, { column: 0, row: 0 },
-    ] },
+    {
+        name: 'arrow',
+        positions: [
+            { column: -2, row: 0 },
+            { column: -1, row: 0 },
+            { column: 0, row: 0 },
+            { column: 1, row: 0 },
+            { column: 2, row: 0 },
+            { column: 1, row: -2 },
+            { column: 2, row: -1 },
+            { column: 2, row: 1 },
+            { column: 1, row: 2 },
+        ],
+    },
+    {
+        name: 'chevron',
+        positions: [
+            { column: -2, row: -3 },
+            { column: -1, row: -2 },
+            { column: 0, row: -1 },
+            { column: 1, row: 0 },
+            { column: 0, row: 1 },
+            { column: -1, row: 2 },
+            { column: -2, row: 3 },
+            { column: -1, row: -1 },
+            { column: -1, row: 1 },
+        ],
+    },
+    {
+        name: 'plus',
+        positions: [
+            { column: -2, row: 0 },
+            { column: -1, row: 0 },
+            { column: 0, row: 0 },
+            { column: 1, row: 0 },
+            { column: 2, row: 0 },
+            { column: 0, row: -2 },
+            { column: 0, row: -1 },
+            { column: 0, row: 1 },
+            { column: 0, row: 2 },
+        ],
+    },
+    {
+        name: 'cross',
+        positions: [
+            { column: -2, row: -2 },
+            { column: -1, row: -1 },
+            { column: 0, row: 0 },
+            { column: 1, row: 1 },
+            { column: 2, row: 2 },
+            { column: -2, row: 2 },
+            { column: -1, row: 1 },
+            { column: 1, row: -1 },
+            { column: 2, row: -2 },
+        ],
+    },
+    {
+        name: 'diamond',
+        positions: [
+            { column: 0, row: -2 },
+            { column: 1, row: -1 },
+            { column: 2, row: 0 },
+            { column: 1, row: 1 },
+            { column: 0, row: 2 },
+            { column: -1, row: 1 },
+            { column: -2, row: 0 },
+            { column: -1, row: -1 },
+            { column: 0, row: 0 },
+        ],
+    },
+    {
+        name: 'frame',
+        positions: [
+            { column: -1, row: -1 },
+            { column: 0, row: -1 },
+            { column: 1, row: -1 },
+            { column: -1, row: 0 },
+            { column: 1, row: 0 },
+            { column: -1, row: 1 },
+            { column: 0, row: 1 },
+            { column: 1, row: 1 },
+            { column: 0, row: 0 },
+        ],
+    },
+    {
+        name: 'exclamation',
+        positions: [
+            { column: -1, row: -2 },
+            { column: 0, row: -2 },
+            { column: 1, row: -2 },
+            { column: -1, row: -1 },
+            { column: 0, row: -1 },
+            { column: 1, row: -1 },
+            { column: 0, row: 0 },
+            { column: 0, row: 1 },
+            { column: 0, row: 3 },
+        ],
+    },
+    {
+        name: 'lightning',
+        positions: [
+            { column: -1, row: -3 },
+            { column: 0, row: -2 },
+            { column: 1, row: -1 },
+            { column: 0, row: 0 },
+            { column: -1, row: 1 },
+            { column: 0, row: 2 },
+            { column: 1, row: 3 },
+            { column: -1, row: -1 },
+            { column: 1, row: 1 },
+        ],
+    },
+    {
+        name: 'fork',
+        positions: [
+            { column: -2, row: -2 },
+            { column: -1, row: -1 },
+            { column: 0, row: 0 },
+            { column: 1, row: -1 },
+            { column: 2, row: -2 },
+            { column: 0, row: 1 },
+            { column: 0, row: 2 },
+            { column: 0, row: 3 },
+            { column: 1, row: 1 },
+        ],
+    },
+    {
+        name: 'spiral',
+        positions: [
+            { column: -2, row: -2 },
+            { column: -1, row: -2 },
+            { column: 0, row: -2 },
+            { column: 1, row: -2 },
+            { column: 2, row: -2 },
+            { column: 2, row: -1 },
+            { column: 2, row: 0 },
+            { column: 1, row: 0 },
+            { column: 0, row: 0 },
+        ],
+    },
+    {
+        name: 'gate',
+        positions: [
+            { column: -2, row: -2 },
+            { column: -1, row: -2 },
+            { column: 0, row: -2 },
+            { column: 1, row: -2 },
+            { column: 2, row: -2 },
+            { column: -2, row: -1 },
+            { column: -2, row: 0 },
+            { column: 2, row: -1 },
+            { column: 2, row: 0 },
+        ],
+    },
+    {
+        name: 'pause',
+        positions: [
+            { column: -1, row: -2 },
+            { column: -1, row: -1 },
+            { column: -1, row: 0 },
+            { column: -1, row: 1 },
+            { column: 1, row: -1 },
+            { column: 1, row: 0 },
+            { column: 1, row: 1 },
+            { column: 1, row: 2 },
+            { column: 0, row: 0 },
+        ],
+    },
 ]
 
 export const rotateSignSymbol = (
     positions: readonly GridCoordinate[],
     direction: SignDirection
-): readonly GridCoordinate[] => positions.map(({ column, row }) => {
-    switch (direction) {
-        case 'right': return { column, row }
-        case 'left': return { column: -column, row: -row }
-        case 'up': return { column: -row, row: column }
-        case 'down': return { column: row, row: -column }
-    }
-})
+): readonly GridCoordinate[] =>
+    positions.map(({ column, row }) => {
+        switch (direction) {
+            case 'right':
+                return { column, row }
+            case 'left':
+                return { column: -column, row: -row }
+            case 'up':
+                return { column: -row, row: column }
+            case 'down':
+                return { column: row, row: -column }
+        }
+    })
 
 export const getSignSymbolValidationErrors = (
     symbols: readonly SignSymbolTemplate[] = SIGN_SYMBOLS

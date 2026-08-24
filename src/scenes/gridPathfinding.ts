@@ -1,4 +1,4 @@
-export interface GridCoordinate {
+export type GridCoordinate = {
     readonly column: number
     readonly row: number
 }

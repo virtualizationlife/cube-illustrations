@@ -8,13 +8,13 @@ type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCam
 /** Fallback drawing-buffer size, used only while the canvas has no laid-out box yet. */
 export const ILLUSTRATION_VIEWPORT = 300
 
-export interface CreateStandaloneRendererOptions {
+export type CreateStandaloneRendererOptions = {
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly canvas: HTMLCanvasElement
     readonly camera: PerspectiveCamera
 }
 
-export interface StandaloneRenderer {
+export type StandaloneRenderer = {
     readonly renderer: WebGpuRenderer
     readonly dispose: () => void
 }

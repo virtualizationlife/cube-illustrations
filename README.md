@@ -264,10 +264,7 @@ export const GreetingScene = defineScene({
     },
     script: async ({ cubes, timeline }) => {
         await timeline.wait(0.5)
-        await cubes.main.moveTo(
-            { column: 2, row: 0 },
-            { duration: 0.8, easing: 'easeInOutCubic' }
-        )
+        await cubes.main.moveTo({ column: 2, row: 0 }, { duration: 0.8, easing: 'easeInOutCubic' })
         await cubes.get('partner').pulse()
     },
 })

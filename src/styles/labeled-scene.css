@@ -1,7 +1,7 @@
 .cube_illustrations__labeled_scene {
     box-sizing: border-box;
-    min-width: 0;
     width: 100%;
+    min-width: 0;
 }
 
 .cube_illustrations__labeled_scene > .cube_illustrations__slot {
@@ -10,12 +10,12 @@
 
 .cube_illustrations__scene_label,
 .cube_illustrations__scene_tags {
-    position: relative;
     z-index: 2;
+    position: relative;
     margin: 0;
     padding: 0;
-    font-family: var(--cube-illustrations-font-family);
     font-weight: var(--cube-illustrations-font-weight);
+    font-family: var(--cube-illustrations-font-family);
     text-align: center;
     text-transform: lowercase;
     overflow-wrap: break-word;
@@ -24,18 +24,18 @@
 .cube_illustrations__scene_label {
     color: var(--cube-illustrations-label-color);
     font-size: var(--cube-illustrations-label-font-size);
-    letter-spacing: var(--cube-illustrations-label-letter-spacing);
     line-height: 1;
+    letter-spacing: var(--cube-illustrations-label-letter-spacing);
 }
 
 .cube_illustrations__scene_tags {
     color: var(--cube-illustrations-tag-color);
     font-size: var(--cube-illustrations-tag-font-size);
-    letter-spacing: var(--cube-illustrations-tag-letter-spacing);
     line-height: 1.2;
+    letter-spacing: var(--cube-illustrations-tag-letter-spacing);
 }
 
-@media (max-width: 520px) {
+@media (width <= 520px) {
     .cube_illustrations__scene_label {
         line-height: 1.2;
     }

@@ -6,7 +6,7 @@ type WebGpuRenderer = InstanceType<typeof ThreeWebGpuNamespace.WebGPURenderer>
 type Scene = InstanceType<typeof ThreeWebGpuNamespace.Scene>
 type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCamera>
 
-export interface CreateSceneLoopControllerOptions {
+export type CreateSceneLoopControllerOptions = {
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly element: HTMLElement
     readonly scene: Scene
@@ -15,14 +15,12 @@ export interface CreateSceneLoopControllerOptions {
     readonly update: (delta: number) => void
     /** Present when the scene draws itself; absent when a host draws it. */
     readonly renderer: WebGpuRenderer | null
-    readonly registerWithHost:
-        | ((slot: SceneRenderSlot) => () => void)
-        | undefined
+    readonly registerWithHost: ((slot: SceneRenderSlot) => () => void) | undefined
     readonly wakeHost: (() => void) | undefined
     readonly onStatusChange: (status: CubeRendererStatus) => void
 }
 
-export interface SceneLoopController {
+export type SceneLoopController = {
     readonly dispose: () => void
 }
 

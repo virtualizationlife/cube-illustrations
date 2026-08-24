@@ -14,11 +14,7 @@ import {
     type GridSceneTransitionOptions,
 } from './gridWorld'
 
-export type {
-    GridCoordinate,
-    GridSceneEasing,
-    GridSceneTransitionOptions,
-} from './gridWorld'
+export type { GridCoordinate, GridSceneEasing, GridSceneTransitionOptions } from './gridWorld'
 
 type Object3D = InstanceType<typeof ThreeWebGpuNamespace.Object3D>
 type Scene = InstanceType<typeof ThreeWebGpuNamespace.Scene>
@@ -36,7 +32,7 @@ export const DEFAULT_CUBE_CORNER_RADIUS_RATIO = 0.02
 
 export const MAIN_CUBE_ID = 'main'
 
-export interface GridSceneCubeDefinition {
+export type GridSceneCubeDefinition = {
     readonly id: string
     readonly position?: GridCoordinate
     /** Cube edge in world units. Defaults to the main cube edge. */
@@ -56,12 +52,12 @@ export interface GridSceneCubeDefinition {
     readonly faceLabels?: GridCubeFaceLabelInput
 }
 
-export interface GridSceneCubeEntry {
+export type GridSceneCubeEntry = {
     readonly id: string
     readonly object: Object3D
 }
 
-export interface GridSceneRuntime {
+export type GridSceneRuntime = {
     /** The repeating grid visual. Moving focus makes the grid slide under the cubes. */
     readonly grid: Object3D
     readonly mainCube: Object3D
@@ -74,10 +70,7 @@ export interface GridSceneRuntime {
     readonly getCubePosition: (id: string) => GridCoordinate | undefined
     readonly getCubeOpacity: (id: string) => number | undefined
     /** Passing `undefined` removes the labels; passing labels adds them if absent. */
-    readonly setCubeFaceLabels: (
-        id: string,
-        labels: GridCubeFaceLabelInput | undefined
-    ) => void
+    readonly setCubeFaceLabels: (id: string, labels: GridCubeFaceLabelInput | undefined) => void
     readonly setCubePosition: (id: string, position: GridCoordinate) => void
     readonly setCubeOccupiesCell: (id: string, occupiesCell: boolean) => void
     readonly moveCubeTo: (
@@ -108,7 +101,7 @@ export interface GridSceneRuntime {
     readonly dispose: () => void
 }
 
-interface NumberTransition {
+type NumberTransition = {
     elapsed: number
     readonly duration: number
     readonly easing: GridSceneEasing
@@ -117,7 +110,7 @@ interface NumberTransition {
     readonly resolve: () => void
 }
 
-interface CubeRecord {
+type CubeRecord = {
     readonly id: string
     readonly object: Object3D
     readonly bodyMaterial: MeshBasicMaterial
@@ -130,7 +123,7 @@ interface CubeRecord {
     opacityTransition: NumberTransition | null
 }
 
-export interface CreateGridSceneRuntimeOptions {
+export type CreateGridSceneRuntimeOptions = {
     readonly scene: Scene
     readonly THREE: typeof ThreeWebGpuNamespace
     readonly gridCellSize: number
@@ -289,9 +282,7 @@ export const createGridSceneRuntime = ({
 
         const size = definition.size ?? mainCubeSize
         const requestedCornerRadius =
-            definition.cornerRadius ??
-            cubeCornerRadius ??
-            size * DEFAULT_CUBE_CORNER_RADIUS_RATIO
+            definition.cornerRadius ?? cubeCornerRadius ?? size * DEFAULT_CUBE_CORNER_RADIUS_RATIO
         const cornerRadius = Math.min(size / 2, Math.max(0, requestedCornerRadius))
         const geometrySet = geometryCache.acquire(size, cornerRadius)
 

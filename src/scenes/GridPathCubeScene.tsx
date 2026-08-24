@@ -9,10 +9,7 @@ import {
     type GridSceneAnimationController,
     type GridSceneMovementMode,
 } from './gridSceneAnimation'
-import type {
-    GridCoordinate,
-    GridSceneCubeDefinition,
-} from './gridSceneRuntime'
+import type { GridCoordinate, GridSceneCubeDefinition } from './gridSceneRuntime'
 import {
     useSimpleCubeScene,
     type IllustrationSceneSizeProps,
@@ -24,7 +21,7 @@ const DEFAULT_INITIAL_DELAY_S = 0.8
 const DEFAULT_MOVE_DURATION_S = 1.2
 const DEFAULT_STEP_PAUSE_S = 0.35
 
-export interface GridPathCubeSceneProps extends IllustrationSceneSizeProps {
+export type GridPathCubeSceneProps = {
     readonly movementMode: GridSceneMovementMode
     readonly route?: readonly GridCoordinate[]
     readonly randomWalk?: GridRandomWalkConfig
@@ -35,7 +32,7 @@ export interface GridPathCubeSceneProps extends IllustrationSceneSizeProps {
     readonly initialDelay?: number
     readonly moveDuration?: number
     readonly stepPause?: number
-}
+} & IllustrationSceneSizeProps
 
 export const GridPathCubeScene = ({
     cubeSize,

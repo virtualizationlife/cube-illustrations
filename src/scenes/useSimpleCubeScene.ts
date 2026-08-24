@@ -1,31 +1,16 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
-
 import type * as ThreeWebGpuNamespace from 'three/webgpu'
 
-import {
-    getCubeFaceLabelsKey,
-    type GridCubeFaceLabelInput,
-} from './cubeFaceLabels'
+import { bindGridCubeHover, type GridCubeHoverController } from './bindGridCubeHover'
 import { createDisposerStack } from './createDisposerStack'
-import {
-    createSceneLoopController,
-} from './createSceneLoopController'
-import {
-    createSceneWorld,
-    DEFAULT_CAMERA_ELEVATION_DEG,
-} from './createSceneWorld'
+import { createSceneLoopController } from './createSceneLoopController'
+import { createSceneWorld, DEFAULT_CAMERA_ELEVATION_DEG } from './createSceneWorld'
 import { createStandaloneRenderer } from './createStandaloneRenderer'
+import { getCubeFaceLabelsKey, type GridCubeFaceLabelInput } from './cubeFaceLabels'
 import { getWideGridFadeRadii } from './gridFade'
-import { getSceneTimeScale } from './timeScale'
-import {
-    bindGridCubeHover,
-    type GridCubeHoverController,
-} from './bindGridCubeHover'
 import type { GridSceneCubeEntry, GridSceneRuntime } from './gridSceneRuntime'
-import {
-    useSceneRenderHost,
-    type CubeRendererStatus,
-} from './SceneRenderHost'
+import { useSceneRenderHost, type CubeRendererStatus } from './SceneRenderHost'
+import { getSceneTimeScale } from './timeScale'
 
 export type { CubeRendererStatus } from './SceneRenderHost'
 export { ILLUSTRATION_VIEWPORT } from './createStandaloneRenderer'
@@ -37,7 +22,7 @@ type PerspectiveCamera = InstanceType<typeof ThreeWebGpuNamespace.PerspectiveCam
 /** Frames longer than this are clamped, so a stalled tab cannot jump the animation. */
 const MAX_FRAME_DELTA_S = 0.05
 
-export interface SimpleCubeFrameContext {
+export type SimpleCubeFrameContext = {
     readonly mesh: Object3D
     readonly runtime: GridSceneRuntime
     readonly camera: PerspectiveCamera
@@ -48,7 +33,7 @@ export interface SimpleCubeFrameContext {
     readonly THREE: typeof ThreeWebGpuNamespace
 }
 
-export interface SimpleCubeSetupContext {
+export type SimpleCubeSetupContext = {
     readonly mesh: Object3D
     readonly runtime: GridSceneRuntime
     readonly scene: Scene
@@ -58,7 +43,7 @@ export interface SimpleCubeSetupContext {
     readonly THREE: typeof ThreeWebGpuNamespace
 }
 
-export interface IllustrationSceneSizeProps {
+export type IllustrationSceneSizeProps = {
     readonly cubeSize: number
     /** Cube corner radius in world units. Defaults to 3% of cubeSize. */
     readonly cubeCornerRadius?: number
@@ -86,7 +71,7 @@ export interface IllustrationSceneSizeProps {
     readonly mainCubeFaceLabels?: GridCubeFaceLabelInput
 }
 
-export interface UseSimpleCubeSceneOptions extends IllustrationSceneSizeProps {
+export type UseSimpleCubeSceneOptions = {
     /**
      * Changing this value tears the scene down and builds it again. `onSetup` is held in a
      * ref, so a new callback identity alone never restarts anything — callers that need a
@@ -97,9 +82,9 @@ export interface UseSimpleCubeSceneOptions extends IllustrationSceneSizeProps {
     readonly onCubeHoverChange?: (cube: GridSceneCubeEntry | null) => void
     readonly onSetup?: (context: SimpleCubeSetupContext) => (() => void) | undefined
     readonly onFrame: (context: SimpleCubeFrameContext) => void
-}
+} & IllustrationSceneSizeProps
 
-export interface SimpleCubeSceneHandle {
+export type SimpleCubeSceneHandle = {
     /** Points to the standalone canvas, or to the host slot element under SceneRenderHost. */
     readonly canvasRef: RefObject<HTMLCanvasElement | HTMLDivElement | null>
     readonly status: CubeRendererStatus
@@ -254,8 +239,7 @@ export const useSimpleCubeScene = ({
                 update: (rawDelta) => {
                     // The clamp guards against a stalled tab; the scale is what makes the
                     // whole scene — transitions, physics and elapsed alike — run faster.
-                    const delta =
-                        Math.min(rawDelta, MAX_FRAME_DELTA_S) * getSceneTimeScale()
+                    const delta = Math.min(rawDelta, MAX_FRAME_DELTA_S) * getSceneTimeScale()
                     elapsed += delta
                     runtime.update(delta)
                     hoverController?.update()
@@ -284,7 +268,9 @@ export const useSimpleCubeScene = ({
             console.error('[cube-illustrations] scene setup failed', error)
         })
 
-        return () => disposers.dispose()
+        return () => {
+            disposers.dispose()
+        }
     }, [
         cubeSize,
         cubeCornerRadius,
