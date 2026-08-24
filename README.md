@@ -4,13 +4,7 @@ Standalone React/WebGPU package containing the animated cube illustrations page 
 
 Repository: [github.com/virtualizationlife/cube-illustrations](https://github.com/virtualizationlife/cube-illustrations)
 
-<table>
-    <tr>
-        <td><img src="docs/assets/nested-cube.png" alt="Nested Cube" width="240" /></td>
-        <td><img src="docs/assets/three-cubes.png" alt="Three Cubes" width="240" /></td>
-        <td><img src="docs/assets/collective-current.png" alt="Collective Current" width="240" /></td>
-    </tr>
-</table>
+<p align="center"><img src="docs/assets/nested-cube.png" alt="Nested Cube" width="240" /> <img src="docs/assets/three-cubes.png" alt="Three Cubes" width="240" /> <img src="docs/assets/collective-current.png" alt="Collective Current" width="240" /></p>
 
 ## Installation
 
