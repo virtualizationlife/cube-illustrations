@@ -4,12 +4,12 @@
     grid-template-columns: repeat(
         auto-fit,
         minmax(
-            min(var(--cube-illustrations-scene-min-size), 100%),
+            min(var(--cube-illustrations-scene-min-size), var(--cube-illustrations-full-size)),
             var(--cube-illustrations-scene-size)
         )
     );
     place-content: center center;
-    min-height: 100dvh;
+    min-height: var(--cube-illustrations-page-min-height);
     padding: var(--cube-illustrations-page-padding);
     gap: var(--cube-illustrations-gap);
     background: var(--cube-illustrations-background);
@@ -18,9 +18,11 @@
 /* Phones: two equal columns that never overflow a narrow viewport. */
 @media (width <= 520px) {
     .cube_illustrations__page {
-        --cube-illustrations-page-padding: 12px;
-        --cube-illustrations-gap: 16px 8px;
-
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(
+            var(--cube-illustrations-page-phone-columns),
+            minmax(var(--cube-illustrations-zero), var(--cube-illustrations-grid-flexible-track))
+        );
+        padding: var(--cube-illustrations-page-phone-padding);
+        gap: var(--cube-illustrations-page-phone-gap);
     }
 }
