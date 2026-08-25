@@ -11,6 +11,13 @@ type IllustrationsRoute =
 
 const SCENE_NOT_FOUND_MESSAGE = 'Scene not found'
 
+const stripBasePath = (pathname: string): string => {
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+    if (base !== '' && pathname.startsWith(base)) return pathname.slice(base.length) || '/'
+
+    return pathname
+}
+
 const isSingleScenePath = (pathname: string): boolean => pathname.startsWith('/scene/')
 
 const findSingleScene = (pathname: string): SceneCatalogEntry | null => {
@@ -27,7 +34,8 @@ const findSingleScene = (pathname: string): SceneCatalogEntry | null => {
     return SCENE_CATALOG.find((entry) => entry.id === sceneId) ?? null
 }
 
-export const resolveIllustrationsRoute = (pathname: string): IllustrationsRoute => {
+export const resolveIllustrationsRoute = (rawPathname: string): IllustrationsRoute => {
+    const pathname = stripBasePath(rawPathname)
     if (!isSingleScenePath(pathname)) return { type: 'gallery' }
 
     const scene = findSingleScene(pathname)
