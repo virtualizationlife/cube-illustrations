@@ -25,6 +25,7 @@
     },
     "scripts": {
         "demo": "vite --config config/vite.demo.config.ts",
+        "build:demo": "vite build --config config/vite.demo.config.ts && cp dist-demo/index.html dist-demo/404.html",
         "build": "vite build --config config/vite.config.ts && tsc -p config/tsconfig.build.json",
         "prepare": "npm run build",
         "check": "npm run check:types && npm run test && npm run build",
